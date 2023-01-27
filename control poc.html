@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+	<script>
+	if (String.prototype.padLeft === undefined) {
+		String.prototype.padLeft = function(targetLength, padChar) {
+			if (this.length >= targetLength) {
+				return this;
+			}
+			return (padChar[0]).repeat(targetLength - this.length) + this;
+		}
+	}
+	if (Number.prototype.hex === undefined) {
+		Number.prototype.hex = function() {
+			return this.toString(16).padLeft(2, '0').toUpperCase();
+		}
+	}
+	let globalVtxOutput = null;
+	window.navigator.requestMIDIAccess({
+		sysex: true
+	}).then(access => {
+		const vtxInput = Array.from(access.inputs.values()).find(input => input.name == "Valvetronix X");
+		const vtxOutput = Array.from(access.outputs.values()).find(input => input.name == "Valvetronix X");
+		if (!vtxInput) {
+			throw new Error("no input");
+		}
+		if (!vtxOutput) {
+		    throw new Error("no output");
+		}
+		
+		return {vtxInput, vtxOutput};
+	}).then(({vtxInput, vtxOutput}) => {
+		vtxInput.onmidimessage = (message) => {
+			if (message.data[0] != 0xf0 || message.data[message.data.length - 1] != 0xf7) {
+				console.log("received non-SysEx message %o", message);
+				return;
+			}
+			
+			if (message.data[1] != 0x42) {
+				console.log("received SysEx message with unexpected manufacturer %o", message);
+				return;
+			}
+			
+			if (message.data.length == 8 && message.data[2] == 0x30 && message.data[3] == 0x00
+			 && message.data[4] == 0x01 && message.data[5] == 0x34 && message.data[6] == 0x23) {
+				console.log("received SysEx ACK");
+				return;
+			}
+			
+			if (message.data.length == 12 && message.data[2] == 0x30 && message.data[3] == 0x00
+			 && message.data[4] == 0x01 && message.data[5] == 0x34 && message.data[6] == 0x41 
+			 && message.data[7] == 0x04) {
+				const dialNumber = message.data[8];
+				const value = message.data[10] << 8 | message.data[9];
+				console.log("received SysEx dial message: dial %o is at %o", dialNumber.hex(), value.hex());
+				return;
+			}
+		
+			
+			const messageHex = Array.from(message.data)
+				.slice(2, message.data.length - 1)
+				.map(n => n.hex())
+				.join(' ');
+			console.log("received SysEx message " + messageHex);
+		};
+		console.log("subscribe to messages on %o", vtxInput);
+		
+		globalVtxOutput = vtxOutput;
+	});
+	
+	function applyGain() {
+		const value = parseInt(document.getElementById("gain").value);
+		console.log("sending gain = %o to %o", value, globalVtxOutput);
+		globalVtxOutput.send([
+			// sysex header
+			0xf0,
+			// manufacturer ID
+			0x42,
+			// command
+			0x30, 0x00, 0x01, 0x34, 0x41, 0x04,
+			// gain dial
+			0x00,
+			// value
+			value, 0x00,
+			// sysex end delimiter	
+			0xf7,
+		]);
+	}
+	
+	function requestCurrentProgram() {
+		console.log("requesting current program");
+		globalVtxOutput.send([
+			// sysex header
+			0xf0,
+			// manufacturer ID
+			0x42,
+			// command
+			0x30, 0x00, 0x01, 0x34, 0x10,
+			// sysex end delimiter
+			0xf7,
+		]);
+	}
+	</script>
+	<body>
+		<label for="gain">Gain</label>
+		<input type="number" min="0" max="100" id="gain" value="20">
+		<button onclick="applyGain()">Apply</button>
+		
+		<br><br>
+		
+		<button onclick="requestCurrentProgram()">request current program</button>
+	</body>
+</html>
