@@ -10,7 +10,7 @@ The file starts with this prelude:
 ```
 
 VTXPROG files always contain 0xB programs; ToneRoom won't
-allow you to add more, and it will always save 11, regardless
+allow you to add more, and it will always save 0xB, regardless
 of how many are actually customized.
 
 Every program is 0x3E bytes long. After the prelude,
