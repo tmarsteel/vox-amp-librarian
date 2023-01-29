@@ -1,6 +1,7 @@
 plugins {
     kotlin("js") version "1.7.10"
     kotlin("plugin.serialization") version "1.7.10"
+    id("io.kotest.multiplatform") version "5.5.4"
 }
 
 group = "com.github.tmarsteel"
@@ -30,11 +31,9 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.3")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
-}
 
-// Heroku Deployment (chapter 9)
-tasks.register("stage") {
-    dependsOn("build")
+    testImplementation("io.kotest:kotest-framework-engine:5.5.4")
+    testImplementation("io.kotest:kotest-assertions-core:5.5.4")
 }
 
 rootProject.extensions.configure<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension> {

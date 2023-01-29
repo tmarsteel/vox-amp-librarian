@@ -1,12 +1,10 @@
 package com.github.tmarsteel.voxamplibrarian.protocol
 
-interface MidiProtocolMessage {
-    fun writeTo(out: BinaryOutput)
-
+interface MidiProtocolMessage : ProtocolSerializable {
     interface Factory<T : MidiProtocolMessage> {
         /**
          * @throws MessageParseException
          */
-        fun parse(fullMessage: ByteArray): T
+        fun parse(fullMessage: BinaryInput): T
     }
 }

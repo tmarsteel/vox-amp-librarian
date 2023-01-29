@@ -4,5 +4,5 @@ import kotlin.reflect.KClass
 
 sealed class MessageParseException(message: String? = null, cause: Throwable? = null) : RuntimeException(message, cause) {
     class PrefixNotRecognized(val targetType: KClass<out MidiProtocolMessage>) : MessageParseException("The message doesn't start with the right prefix for a ${targetType.simpleName}")
-    class InvalidMessageException(message: String, cause: Throwable? = null) : MessageParseException(message, cause)
+    class InvalidMessage(message: String, cause: Throwable? = null) : MessageParseException(message, cause)
 }

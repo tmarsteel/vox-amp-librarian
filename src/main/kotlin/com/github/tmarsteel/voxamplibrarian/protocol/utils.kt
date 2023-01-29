@@ -1,6 +1,8 @@
 package com.github.tmarsteel.voxamplibrarian.protocol
 
-internal infix fun ByteArray.startsWith(prefix: ByteArray): Boolean {
+import kotlin.reflect.KClass
+
+private fun ByteArray.startsWith(prefix: ByteArray): Boolean {
     if (prefix.size > this.size) {
         return false
     }
@@ -14,8 +16,16 @@ internal infix fun ByteArray.startsWith(prefix: ByteArray): Boolean {
     return true
 }
 
-internal fun checkMessageSize(message: ByteArray, expectedSize: Int) {
-    if (message.size != expectedSize) {
-        throw MessageParseException.InvalidMessageException("The message must be exactly $expectedSize bytes long, but got ${message.size} bytes.")
+internal fun requirePrefix(data: BinaryInput, prefix: ByteArray, targetType: KClass<out MidiProtocolMessage>) {
+    if (data.bytesRemaining < prefix.size) {
+        throw MessageParseException.PrefixNotRecognized(targetType)
+    }
+
+    for (prefixByte in prefix) {
+        if (data.nextByte() != prefixByte) {
+            throw MessageParseException.PrefixNotRecognized(targetType)
+        }
     }
 }
+
+internal fun Byte.hex(): String = "0x" + toString(16).padStart(2, '0')
