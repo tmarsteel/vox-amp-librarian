@@ -86,8 +86,8 @@
 		]);
 	}
 	
-	function requestCurrentProgram() {
-		console.log("requesting current program");
+	function requestCurrentState() {
+		console.log("requesting current state");
 		globalVtxOutput.send([
 			// sysex header
 			0xf0,
@@ -107,6 +107,6 @@
 		
 		<br><br>
 		
-		<button onclick="requestCurrentProgram()">request current program</button>
+		<button onclick="requestCurrentState()">request current state</button>
 	</body>
 </html>
