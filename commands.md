@@ -1,17 +1,30 @@
-MIDI
-Sysex Commands
+# USB Protocol between ToneRoom and the amp
 
-_All numbers hex unless stated otherwise_
+## About this document
+
+_All numbers hex unless stated otherwise, e.g. as 256<sub>10</sub>._
+
+I gathered all of this information using my own VT20X and this software:
+
+* [Wireshark](https://www.wireshark.org/) with [USBPcap](https://desowin.org/usbpcap/)
+  * you can filter for the relevant messages with `sysex.manufacturer_id == 0x42`
+* [HxD](https://mh-nexus.de/de/hxd/)
+
+# General
+
+The Amp registers as a Midi device with manufacturer `42` (KORG Inc.) and name `Valvetronix`.
+All communication is done through MIDI SysEx messages. In other words, MIDI SysEx messages are the
+transport layer of this protocol.
 
 * the `Power Level` dial is not digitally connected
 * the effect knobs are not transmitted AMP->Host when the effect is not selected on the AMP
-* VTXPROG files seem to use the same datastructures. But none of this is verified to align with the VTXPROG files yet.
+* the `VTXPROG` files used by ToneRoom use [a different format](vtxprog format.md).
 
 # Common Values / Enums
 
-## Program identifier
+## Program Slot/Channel Identifier
 
-Programs (Bank+Channel) are identified with a single byte:
+The eight Channels (Banks A + B, Channels 1-4) are identified with a single byte:
 
 | Bank    | Channel | Number in sysex message |
 |---------|---------|-------------------------|
@@ -26,8 +39,8 @@ Programs (Bank+Channel) are identified with a single byte:
 
 ## Amp models
 
-AMP models are identified with a single byte. The models also differ in whether they support the `BRIGHT CAP` switch in ToneRoom
-and whether the second dial from the right in ToneRoom is called "TONE" or "PRESENCE".
+AMP models are identified with a single byte. The models also differ in whether they support the `BRIGHT CAP`
+switch in ToneRoom and whether the second dial from the right in ToneRoom is called "TONE" or "PRESENCE".
 
 | Model name on AMP | Model Name in ToneRoom | Actual Name                              | Number in sysex message | Brigth Cap | Precense/Tone Dial |
 |-------------------|------------------------|------------------------------------------|-------------------------|------------|--------------------|
@@ -52,9 +65,7 @@ and whether the second dial from the right in ToneRoom is called "TONE" or "PRES
 | BRIT OR MKII      | BRIT OR MKII           | Orange Super Crush 100                   | `12`                    | YES        | PRESENCE           |
 | _n/a_             | ORIGINAL CL            | VOX VTX                                  | `13`                    | YES        | PRESENCE           |
 
-## Pedals Identifiers
-
-!! only taken from outgoing data, verify with incoming!!
+## Pedal Identifiers
 
 | Slot    | Name on Amp | Name in ToneRoom | Pedal number in sysex message |
 |---------|-------------|------------------|-------------------------------|
@@ -80,31 +91,29 @@ and whether the second dial from the right in ToneRoom is called "TONE" or "PRES
 |         | HALL        | HALL             | `02`                          |
 |         | PLATE       | PLATE            | `03`                          |
 
-
 ## Encoding for Frequency (Hz) and Time (s) values
 
-Frequencies and time for effects are semantically Hz or seconds, respectively.
-
-The values in the protocol are one thousand times what is encoded, so 0.100<sub>10</sub>Hz = 100<sub>16</sub> in protocol.
+Frequencies and time for effects are semantically mHz (millihertz) and milliseconds, respectively.
 
 However, the encoding has a quirky artifact. After 127<sub>10</sub> steps, the encoded value jumps by 129<sub>10</sub>. So if you look at e.g. the
 values sent through the protocol for the `SPEED` dial of the `CHORUS` effect:
 
-|protocol        |reported in ToneRoom UI| |
-|----------------|-----------------------|-|
-|120<sub>10</sub>|0.120<sub>10</sub>Hz   | |
-|121<sub>10</sub>|0.121<sub>10</sub>Hz   | |
-|122<sub>10</sub>|0.122<sub>10</sub>Hz   | |
-|123<sub>10</sub>|0.123<sub>10</sub>Hz   | |
-|124<sub>10</sub>|0.124<sub>10</sub>Hz   | |
-|125<sub>10</sub>|0.125<sub>10</sub>Hz   | |
-|126<sub>10</sub>|0.126<sub>10</sub>Hz   | |
-|127<sub>10</sub>|0.127<sub>10</sub>Hz   | |
-|256<sub>10</sub>|0.128<sub>10</sub>Hz   |*here it jumps*|
-|257<sub>10</sub>|0.129<sub>10</sub>Hz   | |
-|258<sub>10</sub>|0.130<sub>10</sub>Hz   | |
-|259<sub>10</sub>|0.131<sub>10</sub>Hz   | |
-|260<sub>10</sub>|0.132<sub>10</sub>Hz   | |
+| protocol         | reported in ToneRoom UI | Note            |
+|------------------|-------------------------|-----------------|
+| 120<sub>10</sub> | 0.120<sub>10</sub>Hz    |                 |
+| 121<sub>10</sub> | 0.121<sub>10</sub>Hz    |                 |
+| 122<sub>10</sub> | 0.122<sub>10</sub>Hz    |                 |
+| 123<sub>10</sub> | 0.123<sub>10</sub>Hz    |                 |
+| 124<sub>10</sub> | 0.124<sub>10</sub>Hz    |                 |
+| 125<sub>10</sub> | 0.125<sub>10</sub>Hz    |                 |
+| 126<sub>10</sub> | 0.126<sub>10</sub>Hz    |                 |
+| 127<sub>10</sub> | 0.127<sub>10</sub>Hz    |                 |
+| 256<sub>10</sub> | 0.128<sub>10</sub>Hz    | *here it jumps* |
+| 257<sub>10</sub> | 0.129<sub>10</sub>Hz    |                 |
+| 258<sub>10</sub> | 0.130<sub>10</sub>Hz    |                 |
+| 259<sub>10</sub> | 0.131<sub>10</sub>Hz    |                 |
+| 260<sub>10</sub> | 0.132<sub>10</sub>Hz    |                 |
+
 
 _(and same for milliseconds for the delay times)_
 
@@ -120,6 +129,58 @@ And the other way around, from Herz or seconds to protocol values:
 temp = herzOrSeconds * 0x3E8
 protocolValue = temp + floor(temp / 0x80) * 0x80
 ```
+
+## Program Format
+
+Both host program and the amp can send a full program to each other. It always uses this format:
+
+| Offset | Length | Description                                                                             |
+|--------|--------|-----------------------------------------------------------------------------------------|
+| 00     | 07     | Bytes 00-06 of the program name                                                         |
+| 07     | 1      | ? (00, 8th byte)                                                                        |
+| 08     | 07     | Bytes 07-0D of the program name                                                         |
+| 0F     | 1      | ? (00, 8th byte)                                                                        |
+| 10     | 2      | Bytes 0E-0F of the program name                                                         |
+| 12     | 1      | Noise reduction sensitivity                                                             |
+| 13     | 1      | ? (seems to be always 16)                                                               |
+| 14     | 1      | Amp Model (see table above)                                                             |
+| 15     | 1      | Gain                                                                                    |
+| 16     | 1      | Treble                                                                                  |
+| 17     | 1      | ? (00, 8th byte)                                                                        |
+| 18     | 1      | Middle                                                                                  |
+| 19     | 1      | Bass                                                                                    |
+| 1A     | 1      | Volume                                                                                  |
+| 1B     | 1      | Presence                                                                                |
+| 1C     | 1      | Resonance                                                                               |
+| 1D     | 1      | Bright Cap                                                                              |
+| 1E     | 1      | Low Cut                                                                                 |
+| 1F     | 1      | ? (00, 8th byte)                                                                        |
+| 20     | 1      | Mid Boost                                                                               |
+| 21     | 1      | Tube Bias Shift                                                                         |
+| 22     | 1      | Amp Class                                                                               |
+| 23     | 1      | ? (09 Anubis clean, 01 Anubis lead)                                                     |
+| 24     | 2      | Pedal 1 Dial 1, little endian byte order<br>**!! Hz value, see above for the encoding** |
+| 26     | 1      | Pedal 1 Dial 2                                                                          |
+| 27     | 1      | ? (seems to be always 20)                                                               |
+| 28     | 1      | Pedal 1 Dial 3                                                                          |
+| 29     | 1      | Pedal 1 Dial 4                                                                          |
+| 2A     | 1      | Pedal 1 Dial 5                                                                          |
+| 2B     | 1      | Pedal 1 Dial 6                                                                          |
+| 2C     | 1      | ? (05 Anubis clean, 02 Anubis Lead)                                                     |
+| 2D     | 2      | Pedal 2 Dial 1, little endian byte order<br>**!! Hz value, see above for the encoding** |
+| 2F     | 1      | ? (00, 8th byte)                                                                        |
+| 30     | 1      | Pedal 2 Dial 2                                                                          |
+| 31     | 1      | Pedal 2 Dial 3                                                                          |
+| 32     | 1      | Pedal 2 Dial 4                                                                          |
+| 33     | 1      | Pedal 2 Dial 5                                                                          |
+| 34     | 1      | Pedal 2 Dial 6                                                                          |
+| 35     | B      | ? (seem to be always 0)                                                                 |
+| 40     | 1      | Pedal 3 Dial 1                                                                          |
+| 41     | 1      | Pedal 3 Dial 2                                                                          |
+| 42     | 1      | Pedal 3 Dial 3                                                                          |
+| 43     | 1      | Pedal 3 Dial 4                                                                          |
+| 44     | 1      | Pedal 3 Dial 5                                                                          |
+| 45     | 1      | ? (probably always 0)                                                                   |
 
 # Bidirectional Commands
 
@@ -209,7 +270,8 @@ amp, the amp will ACK them with `30 00 01 34 23` (unless stated otherwise for a 
 
 `30 00 01 34 4e 00 XX`
 
-Where `XX` is the program identifier.
+Where `XX` is the program identifier. This also signals when the amp switches back from manual mode
+into the program slot mode.
 
 ## Simulated Amp model changed
 
@@ -260,30 +322,11 @@ where `XX` is the program identifier.
 
 Where `XX` is the program identifier
 
-Amp responds with the full program (including the typical prefix), for example:
+Amp responds with **one** message starting with `30 00 01 34 4c 00 XX 00`,
+where `XX` is the program identifier (identical as requested).
 
-```
-0000   30 00 01 34 4c 00 XX 00 4e 6f 76 65 6d 62 65 00
-0010   72 73 20 20 20 20 20 00 20 20 41 12 10 33 49 00
-0020   42 3a 4c 28 55 00 00 00 00 01 01 05 4d 00 47 20
-0030   50 3d 3a 33 06 6d 02 00 32 38 1e 06 3a 00 00 00
-0040   00 00 00 00 00 00 00 00 1e 36 00 2e 19 00
-```
-
-* the program name is always 16 bytes and padded with spaces if shorter
-
-| Offset | Length | Description                                               |
-|--------|--------|-----------------------------------------------------------|
-| `0000` | `05`   | prelude `30 00 01 34 4c`                                  |
-| `0005` | `01`   | ?? (only 00 seen)                                         |
-| `0006` | `01`   | the slot the preset is stored in (see program identifier) |
-| `0007` | `01`   | ?? (only 00 seen)                                         |
-| `0008` | `07`   | bytes 00-06 of the program name                           |
-| `000F` | `01`   | ?? (only 00 seen)                                         |
-| `0010` | `07`   | bytes 07-0D of the program name                           |
-| `0017` | `01`   | ?? (only 00 seen)                                         |
-| `0018` | `02`   | bytes 0E-0F of the program name                           |
-| `001A` | ...    | ??                                                        |
+The rest of the message is the program; the structure is identical to that
+of "Write User Program".
 
 ## Request the currently selected program
 
@@ -291,44 +334,11 @@ Sent by ToneRoom after it has received all user programs
 
 `30 00 01 34 10`
 
-Amp responds with the full program, but in a different format than when the program is requested directly.
+Amp responds with **one** message. starting with `30 00 01 34 40 00``. The rest of 
+the message is the current program (same format as "Write User Program")
 
-For example:
-
-```
-0000   30 00 01 34 40 00 41 6E 75 62 69 73 20 00 43 6C
-0010   65 61 6E 20 20 00 20 20 18 16 01 49 38 00 47 2F
-0020   46 00 1E 01 01 00 00 01 01 09 17 00 36 20 3B 32
-0030   32 32 05 00 01 00 32 32 02 00 25 00 00 00 00 00
-0040   00 00 00 00 02 00 44 34 32 0F 11 00
-```
-
-* the program name is always 16 bytes and padded with spaces if shorter
-* the data reported by this can be inaccurate:
-  * the tube bias and amp class report the value it had **before** it was last changed.
-    Saving the program to the slot **with the AMP buttons** fixes this.
-
-| Offset | Length | Description                     |
-|--------|--------|---------------------------------|
-| `0000` | `05`   | `30 00 01 34 40`                |
-| `0005` | `01`   | ?? (only 00 seen)               |
-| `0006` | `07`   | bytes 00-06 of the program name |
-| `000D` | `01`   | ?? (only 00 seen)               |
-| `000E` | `07`   | bytes 07-0D of the program name |
-| `0015` | `01`   | ?? (only 00 seen)               |
-| `0016` | `02`   | bytes 0E-0F of the program name |
-| `0018` | `03`   | ??                              |
-| `001B` | `01`   | Gain dial value                 |
-| `001C` | `01`   | Treble dial value               |
-| `001D` | `01`   | ??                              |
-| `001E` | `01`   | Middle dial value               |
-| `001F` | `01`   | Bass dial value                 |
-| `0020` | `01`   | Volume dial value               |
-| `0021` | `06`   | ??                              |
-| `0027` | `01`   | Tube Bias value                 | 
-| `0028` | `01`   | Amp class value                 |
- 
-
+The data reported by this command can be inaccurate: the tube bias and amp class report the value it had
+**before** it was last changed. Saving the program to the slot **with the AMP buttons** fixes this.
 
 ## Request User Amp presets
 
@@ -342,6 +352,9 @@ Where `XX` is the preset identifier
 | 01     | User B                      |
 | 02     | User C                      |
 | 03     | ??? (used by ToneRoom)      |
+
+The amp responds with `30 00 01 34 65 00`, and in the same message,
+with the data for the amp preset. This format hasn't been documented yet.
 
 ## Set Effect Pedal Type
 
@@ -362,59 +375,16 @@ The amp responds with an effect dial value (see "Effect Dial Turned")
 
 `30 00 01 34 4c 00 XX 00 ...`
 
-TODO: ToneRoom follows this up with another very short message. Figure out!
+Where `XX` is the preset identifier. This is followed by the program.
 
-Where `XX` is the preset identifier. This is followed by the program:
-
-| Offset | Length | Description                                                                             |
-|--------|--------|-----------------------------------------------------------------------------------------|
-| 00     | 07     | Bytes 00-06 of the program name                                                         |
-| 07     | 1      | ? (00, 8th byte)                                                                        |
-| 08     | 07     | Bytes 07-0D of the program name                                                         |
-| 0F     | 1      | ? (00, 8th byte)                                                                        |
-| 10     | 2      | Bytes 0E-0F of the program name                                                         |
-| 12     | 1      | Noise reduction sensitivity                                                             |
-| 13     | 1      | ? (seems to be always 16)                                                               |
-| 14     | 1      | Amp Model (see table above)                                                             |
-| 15     | 1      | Gain                                                                                    |
-| 16     | 1      | Treble                                                                                  |
-| 17     | 1      | ? (00, 8th byte)                                                                        |
-| 18     | 1      | Middle                                                                                  |
-| 19     | 1      | Bass                                                                                    |
-| 1A     | 1      | Volume                                                                                  |
-| 1B     | 1      | Presence                                                                                |
-| 1C     | 1      | Resonance                                                                               |
-| 1D     | 1      | Bright Cap                                                                              |
-| 1E     | 1      | Low Cut                                                                                 |
-| 1F     | 1      | ? (00, 8th byte)                                                                        |
-| 20     | 1      | Mid Boost                                                                               |
-| 21     | 1      | Tube Bias Shift                                                                         |
-| 22     | 1      | Amp Class                                                                               |
-| 23     | 1      | ? (09 Anubis clean, 01 Anubis lead)                                                     |
-| 24     | 2      | Pedal 1 Dial 1, little endian byte order<br>**!! Hz value, see above for the encoding** |
-| 26     | 1      | Pedal 1 Dial 2                                                                          |
-| 27     | 1      | ? (seems to be always 20)                                                               |
-| 28     | 1      | Pedal 1 Dial 3                                                                          |
-| 29     | 1      | Pedal 1 Dial 4                                                                          |
-| 2A     | 1      | Pedal 1 Dial 5                                                                          |
-| 2B     | 1      | Pedal 1 Dial 6                                                                          |
-| 2C     | 1      | ? (05 Anubis clean, 02 Anubis Lead)                                                     |
-| 2D     | 2      | Pedal 2 Dial 1, little endian byte order<br>**!! Hz value, see above for the encoding** |
-| 2F     | 1      | ? (00, 8th byte)                                                                        |
-| 30     | 1      | Pedal 2 Dial 2                                                                          |
-| 31     | 1      | Pedal 2 Dial 3                                                                          |
-| 32     | 1      | Pedal 2 Dial 4                                                                          |
-| 33     | 1      | Pedal 2 Dial 5                                                                          |
-| 34     | 1      | Pedal 2 Dial 6                                                                          |
-| 35     | B      | ? (seem to be always 0)                                                                 |
-| 40     | 1      | Pedal 3 Dial 1                                                                          |
-| 41     | 1      | Pedal 3 Dial 2                                                                          |
-| 42     | 1      | Pedal 3 Dial 3                                                                          |
-| 43     | 1      | Pedal 3 Dial 4                                                                          |
-| 44     | 1      | Pedal 3 Dial 5                                                                          |
-| 45     | 1      | ? (probably always 0)                                                                   |
+ToneRoom follows this up with another message: `30 00 01 34 4e 00 XX`,
+where `XX` is the program identifier. !! is this for saving/persisting?
 
 # AMP to Host
+
+## Simulated Amp model changed
+
+`30 00 01 34 41 04 01 34 00`
 
 ## Effect Pedal Type Changed
 
@@ -430,7 +400,10 @@ the number and the preset.
 
 ## Switch to manual mode
 
-(?) Amp sends a program with name "MANUAL"
+The amp sends `30 00 01 34 4e 02 00`.
+
+ToneRoom reacts to this by sending a "Request the currently selected program"
+message. The amp, in turn, responds with a program called `MANUAL          `.
 
 ## Manual Mode; Amp model switched
 
