@@ -1,4 +1,8 @@
 # IntelliJ
 .idea
 *.iml
-out
+
+# Gradle
+/.gradle/
+/build/
+/build/js/packages/confexplorer/kotlin/
