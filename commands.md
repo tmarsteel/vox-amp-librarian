@@ -13,72 +13,72 @@ _All numbers hex unless stated otherwise_
 
 Programs (Bank+Channel) are identified with a single byte:
 
-|Bank    |Channel|Number in sysex message|
-|--------|-------|-----------------------|
-|A/Green |1      |`00`                   |
-|        |2      |`01`                   |
-|        |3      |`02`                   |
-|        |4      |`03`                   |
-|B/Red   |1      |`04`                   |
-|        |2      |`05`                   |
-|        |3      |`06`                   |
-|        |4      |`07`                   |
+| Bank    | Channel | Number in sysex message |
+|---------|---------|-------------------------|
+| A/Green | 1       | `00`                    |
+|         | 2       | `01`                    |
+|         | 3       | `02`                    |
+|         | 4       | `03`                    |
+| B/Red   | 1       | `04`                    |
+|         | 2       | `05`                    |
+|         | 3       | `06`                    |
+|         | 4       | `07`                    |
 
 ## Amp models
 
 AMP models are identified with a single byte. The models also differ in whether they support the `BRIGHT CAP` switch in ToneRoom
 and whether the second dial from the right in ToneRoom is called "TONE" or "PRESENCE".
 
-|Model name on AMP |Model Name in ToneRoom|Actual Name                             |Number in sysex message|Brigth Cap    |Precense/Tone Dial |
-|------------------|----------------------|----------------------------------------|-----------------------|--------------|-------------------|
-|DELUXE CL         |DELUXE CL VIBRATO     |Fender '65 Deluxe Reverb Vibrato Channel|`00`                   |YES           |PRESENCE           |
-|_n/a_             |DELUXE CL NORMAL      |Fender '65 Deluxe Reverb Normal Channel |`01`                   |NO            |PRESENCE           |
-|TWEED 4x10        |TWEED 4x10 BRIGHT     |Fender Bassman 4x10 Bright Channel      |`02`                   |YES           |PRESENCE           |
-|_n/a_             |TWEED 4x10 NORMAL     |Fender Bassman 4x10 Normal Channel      |`03`                   |NO            |PRESENCE           |
-|_n/a_             |BOUTIQUE CL           |Overdrive Special Clean Channel         |`04`                   |YES           |PRESENCE           |
-|BTQ OD            |BOUTIQUE OD           |Overdrive Special Overdrive Channel     |`05`                   |YES           |PRESENCE           |
-|_n/a_             |VOX AC30              |VOX AC30                                |`06`                   |YES           |TONE               |
-|VOX AC30TB        |VOX AC30TB            |VOX AC30TB                              |`07`                   |YES           |TONE               |
-|_n/a_             |BRIT 1959 TREBLE      |Marshall JTM                            |`08`                   |YES           |PRESENCE           |
-|_n/a_             |BRIT 1959 NORMAL      |Marshall JTM                            |`09`                   |NO            |PRESENCE           |
-|BRIT 800          |BRIT 800              |Marshal JCM800                          |`0A`                   |YES           |PRESENCE           |
-|_n/a_             |BRIT VM               |Marshal JVM410                          |`0B`                   |YES           |PRESENCE           |
-|_n/a_             |SL-OD                 |Soldano SLO-100                         |`0C`                   |YES           |PRESENCE           |
-|DOUBLE REC        |DOUBLE REC            |Mesa Boogie Dual Rectifier              |`0D`                   |YES           |PRESENCE           |
-|_n/a_             |CALI ELATION          |?                                       |`0E`                   |YES           |PRESENCE           |
-|_n/a_             |ERUPT III CH2         |EVH 5150 III Channel 2                  |`0F`                   |NO            |PRESENCE           |
-|_n/a_             |ERUPT III CH3         |EVH 5150 III Channel 3                  |`10`                   |YES           |PRESENCE           |
-|_n/a_             |BOUTIQUE METAL        |Diezel VH4                              |`11`                   |NO            |PRESENCE           |
-|BRIT OR MKII      |BRIT OR MKII          |Orange Super Crush 100                  |`12`                   |YES           |PRESENCE           |
-|_n/a_             |ORIGINAL CL           |VOX VTX                                 |`13`                   |YES           |PRESENCE           |
+| Model name on AMP | Model Name in ToneRoom | Actual Name                              | Number in sysex message | Brigth Cap | Precense/Tone Dial |
+|-------------------|------------------------|------------------------------------------|-------------------------|------------|--------------------|
+| DELUXE CL         | DELUXE CL VIBRATO      | Fender '65 Deluxe Reverb Vibrato Channel | `00`                    | YES        | PRESENCE           |
+| _n/a_             | DELUXE CL NORMAL       | Fender '65 Deluxe Reverb Normal Channel  | `01`                    | NO         | PRESENCE           |
+| TWEED 4x10        | TWEED 4x10 BRIGHT      | Fender Bassman 4x10 Bright Channel       | `02`                    | YES        | PRESENCE           |
+| _n/a_             | TWEED 4x10 NORMAL      | Fender Bassman 4x10 Normal Channel       | `03`                    | NO         | PRESENCE           |
+| _n/a_             | BOUTIQUE CL            | Overdrive Special Clean Channel          | `04`                    | YES        | PRESENCE           |
+| BTQ OD            | BOUTIQUE OD            | Overdrive Special Overdrive Channel      | `05`                    | YES        | PRESENCE           |
+| _n/a_             | VOX AC30               | VOX AC30                                 | `06`                    | YES        | TONE               |
+| VOX AC30TB        | VOX AC30TB             | VOX AC30TB                               | `07`                    | YES        | TONE               |
+| _n/a_             | BRIT 1959 TREBLE       | Marshall JTM                             | `08`                    | YES        | PRESENCE           |
+| _n/a_             | BRIT 1959 NORMAL       | Marshall JTM                             | `09`                    | NO         | PRESENCE           |
+| BRIT 800          | BRIT 800               | Marshal JCM800                           | `0A`                    | YES        | PRESENCE           |
+| _n/a_             | BRIT VM                | Marshal JVM410                           | `0B`                    | YES        | PRESENCE           |
+| _n/a_             | SL-OD                  | Soldano SLO-100                          | `0C`                    | YES        | PRESENCE           |
+| DOUBLE REC        | DOUBLE REC             | Mesa Boogie Dual Rectifier               | `0D`                    | YES        | PRESENCE           |
+| _n/a_             | CALI ELATION           | ?                                        | `0E`                    | YES        | PRESENCE           |
+| _n/a_             | ERUPT III CH2          | EVH 5150 III Channel 2                   | `0F`                    | NO         | PRESENCE           |
+| _n/a_             | ERUPT III CH3          | EVH 5150 III Channel 3                   | `10`                    | YES        | PRESENCE           |
+| _n/a_             | BOUTIQUE METAL         | Diezel VH4                               | `11`                    | NO         | PRESENCE           |
+| BRIT OR MKII      | BRIT OR MKII           | Orange Super Crush 100                   | `12`                    | YES        | PRESENCE           |
+| _n/a_             | ORIGINAL CL            | VOX VTX                                  | `13`                    | YES        | PRESENCE           |
 
 ## Pedals Identifiers
 
 !! only taken from outgoing data, verify with incoming!!
 
-|Slot   |Name on Amp       |Name in ToneRoom      |Pedal number in sysex message|
-|-------|------------------|----------------------|-----------------------------|
-|PEDAL 1|COMP              |COMP                  |`00`                         |
-|       |CHORUS            |CHORUS                |`01`                         |
-|       |OVERDRIVE         |TUBE OD               |`02`                         |
-|       |_n/a_             |GOLD DRIVE            |`03`                         |
-|       |_n/a_             |TREBLE BOOST          |`04`                         |
-|       |_n/a_             |RC TURBO              |`05`                         |
-|       |DISTORTION        |ORANGE DIST           |`06`                         |
-|       |_n/a_             |FAT DIST              |`07`                         |
-|       |_n/a_             |BRIT LEAD             |`08`                         |
-|       |_n/a_             |FUZZ                  |`09`                         |
-|PEDAL 2|FLANGER           |FLANGER               |`00`                         |
-|       |_n/a_             |BLK PHASER            |`01`                         |
-|       |PHASER            |ORG PHASER 1          |`02`                         |
-|       |_n/a_             |ORG PHASER 2          |`03`                         |
-|       |TREMOLO           |TREMOLO               |`04`                         |
-|       |DELAY             |TAPE ECHO             |`05`                         |
-|       |_n/a_             |ANALOG DELAY          |`06`                         |
-|REVERB |ROOM              |ROOM                  |`00`                         |
-|       |SPRING            |SPRING                |`01`                         |
-|       |HALL              |HALL                  |`02`                         |
-|       |PLATE             |PLATE                 |`03`                         |
+| Slot    | Name on Amp | Name in ToneRoom | Pedal number in sysex message |
+|---------|-------------|------------------|-------------------------------|
+| PEDAL 1 | COMP        | COMP             | `00`                          |
+|         | CHORUS      | CHORUS           | `01`                          |
+|         | OVERDRIVE   | TUBE OD          | `02`                          |
+|         | _n/a_       | GOLD DRIVE       | `03`                          |
+|         | _n/a_       | TREBLE BOOST     | `04`                          |
+|         | _n/a_       | RC TURBO         | `05`                          |
+|         | DISTORTION  | ORANGE DIST      | `06`                          |
+|         | _n/a_       | FAT DIST         | `07`                          |
+|         | _n/a_       | BRIT LEAD        | `08`                          |
+|         | _n/a_       | FUZZ             | `09`                          |
+| PEDAL 2 | FLANGER     | FLANGER          | `00`                          |
+|         | _n/a_       | BLK PHASER       | `01`                          |
+|         | PHASER      | ORG PHASER 1     | `02`                          |
+|         | _n/a_       | ORG PHASER 2     | `03`                          |
+|         | TREMOLO     | TREMOLO          | `04`                          |
+|         | DELAY       | TAPE ECHO        | `05`                          |
+|         | _n/a_       | ANALOG DELAY     | `06`                          |
+| REVERB  | ROOM        | ROOM             | `00`                          |
+|         | SPRING      | SPRING           | `01`                          |
+|         | HALL        | HALL             | `02`                          |
+|         | PLATE       | PLATE            | `03`                          |
 
 
 ## Encoding for Frequency (Hz) and Time (s) values
@@ -135,20 +135,20 @@ amp, the amp will ACK them with `30 00 01 34 23` (unless stated otherwise for a 
 * `XX` is the dial identifier
 * `YY` is the value, in little-endian byte order
 
-|Dial         |number in the sysex message|Min Value  |Max Value|Notes |
-|-------------|---------------------------|-----------|---------|------|
-|Gain         |`00`                       |`00`       |`64`     |      |
-|Treble       |`01`                       |`00`       |`64`     |      |
-|Middle       |`02`                       |`00`       |`64`     |      |
-|Bass         |`03`                       |`00`       |`64`     |      |
-|Volume       |`04`                       |`00`       |`64`     |      |
-|Presence/Tone|`05`                       |`00`       |`64`     |      |
-|Resonance    |`06`                       |`00`       |`64`     |      |
-|Bright Cap   |`07`                       |`00`       |`01`     |00 off, 01 on|
-|Low Cut      |`08`                       |`00`       |`01`     |00 off, 01 on|
-|Mid Boost    |`09`                       |`00`       |`01`     |00 off, 01 on|
-|Tube Bias    |`0A`                       |`00`       |`02`     |00 off, 01 cold, 02 hot|
-|Amp Class    |`0B`                       |`00`       |`01`     |00 A, 01 A/B|
+| Dial          | number in the sysex message | Min Value | Max Value | Notes                   |
+|---------------|-----------------------------|-----------|-----------|-------------------------|
+| Gain          | `00`                        | `00`      | `64`      |                         |
+| Treble        | `01`                        | `00`      | `64`      |                         |
+| Middle        | `02`                        | `00`      | `64`      |                         |
+| Bass          | `03`                        | `00`      | `64`      |                         |
+| Volume        | `04`                        | `00`      | `64`      |                         |
+| Presence/Tone | `05`                        | `00`      | `64`      |                         |
+| Resonance     | `06`                        | `00`      | `64`      |                         |
+| Bright Cap    | `07`                        | `00`      | `01`      | 00 off, 01 on           |
+| Low Cut       | `08`                        | `00`      | `01`      | 00 off, 01 on           |
+| Mid Boost     | `09`                        | `00`      | `01`      | 00 off, 01 on           |
+| Tube Bias     | `0A`                        | `00`      | `02`      | 00 off, 01 cold, 02 hot |
+| Amp Class     | `0B`                        | `00`      | `01`      | 00 A, 01 A/B            |
 
 ## Effect Dial Turned
 
@@ -239,11 +239,11 @@ send set-dial messages for all dials from 00 to 0b.
 * `XX` is the slot (see below)
 * `YY` is the status: `00` = disabled, `01` = enabled
 
-|Slot    |`XX` in sysex message|
-|--------|---------------------|
-|PEDAL 1 |`01`                 |
-|PEDAL 2 |`02`                 |
-|REVERB  |`04`                 |
+| Slot    | `XX` in sysex message |
+|---------|-----------------------|
+| PEDAL 1 | `01`                  |
+| PEDAL 2 | `02`                  |
+| REVERB  | `04`                  |
 
 # Host to AMP
 
@@ -272,18 +272,18 @@ Amp responds with the full program (including the typical prefix), for example:
 
 * the program name is always 16 bytes and padded with spaces if shorter
 
-|Offset |Length|Description |
-|-------|------|------------|
-|`0000` |`05`  |prelude `30 00 01 34 4c`|
-|`0005` |`01`  |?? (only 00 seen)|
-|`0006` |`01`  |the slot the preset is stored in (see program identifier)|
-|`0007` |`01`  |?? (only 00 seen)|
-|`0008` |`07`  |bytes 00-06 of the program name|
-|`000F` |`01`  |?? (only 00 seen)|
-|`0010` |`07`  |bytes 07-0D of the program name|
-|`0017` |`01`  |?? (only 00 seen)|
-|`0018` |`02`  |bytes 0E-0F of the program name|
-|`001A` |...   |?? |
+| Offset | Length | Description                                               |
+|--------|--------|-----------------------------------------------------------|
+| `0000` | `05`   | prelude `30 00 01 34 4c`                                  |
+| `0005` | `01`   | ?? (only 00 seen)                                         |
+| `0006` | `01`   | the slot the preset is stored in (see program identifier) |
+| `0007` | `01`   | ?? (only 00 seen)                                         |
+| `0008` | `07`   | bytes 00-06 of the program name                           |
+| `000F` | `01`   | ?? (only 00 seen)                                         |
+| `0010` | `07`   | bytes 07-0D of the program name                           |
+| `0017` | `01`   | ?? (only 00 seen)                                         |
+| `0018` | `02`   | bytes 0E-0F of the program name                           |
+| `001A` | ...    | ??                                                        |
 
 ## Request the currently selected program
 
@@ -304,29 +304,29 @@ For example:
 ```
 
 * the program name is always 16 bytes and padded with spaces if shorter
-* the data reported by this can be inaccurrate:
+* the data reported by this can be inaccurate:
   * the tube bias and amp class report the value it had **before** it was last changed.
     Saving the program to the slot **with the AMP buttons** fixes this.
 
-|Offset |Length|Description |
-|-------|------|------------|
-|`0000` |`05`  |`30 00 01 34 40`|
-|`0005` |`01`  |?? (only 00 seen)|
-|`0006` |`07`  |bytes 00-06 of the program name|
-|`000D` |`01`  |?? (only 00 seen)|
-|`000E` |`07`  |bytes 07-0D of the program name|
-|`0015` |`01`  |?? (only 00 seen)|
-|`0016` |`02`  |bytes 0E-0F of the program name|
-|`0018` |`03`  |?? |
-|`001B` |`01`  |Gain dial value   |
-|`001C` |`01`  |Treble dial value |
-|`001D` |`01`  |??|
-|`001E` |`01`  |Middle dial value |
-|`001F` |`01`  |Bass dial value   |
-|`0020` |`01`  |Volume dial value |
-|`0021` |`06`  |??
-|`0027` |`01`  |Tube Bias value| 
-|`0028` |`01`  |Amp class value|
+| Offset | Length | Description                     |
+|--------|--------|---------------------------------|
+| `0000` | `05`   | `30 00 01 34 40`                |
+| `0005` | `01`   | ?? (only 00 seen)               |
+| `0006` | `07`   | bytes 00-06 of the program name |
+| `000D` | `01`   | ?? (only 00 seen)               |
+| `000E` | `07`   | bytes 07-0D of the program name |
+| `0015` | `01`   | ?? (only 00 seen)               |
+| `0016` | `02`   | bytes 0E-0F of the program name |
+| `0018` | `03`   | ??                              |
+| `001B` | `01`   | Gain dial value                 |
+| `001C` | `01`   | Treble dial value               |
+| `001D` | `01`   | ??                              |
+| `001E` | `01`   | Middle dial value               |
+| `001F` | `01`   | Bass dial value                 |
+| `0020` | `01`   | Volume dial value               |
+| `0021` | `06`   | ??                              |
+| `0027` | `01`   | Tube Bias value                 | 
+| `0028` | `01`   | Amp class value                 |
  
 
 
@@ -336,12 +336,12 @@ For example:
 
 Where `XX` is the preset identifier
 
-|Preset |Number in the sysex message|
-|-------|---------------------------|
-|00     | User A                    |
-|01     | User B                    |
-|02     | User C                    |
-|03     | ??? (used by ToneRoom)    |
+| Preset | Number in the sysex message |
+|--------|-----------------------------|
+| 00     | User A                      |
+| 01     | User B                      |
+| 02     | User C                      |
+| 03     | ??? (used by ToneRoom)      |
 
 ## Set Effect Pedal Type
 
@@ -350,13 +350,69 @@ Where `XX` is the preset identifier
 * `XX` is the slot (see below)
 * `YY` is the pedal  (see table "Pedal Identifiers").
 
-|Slot    |`XX` in sysex message|
-|--------|---------------------|
-|PEDAL 1 |`01`                 |
-|PEDAL 2 |`02`                 |
-|REVERB  |`04`                 |
+| Slot    | `XX` in sysex message |
+|---------|-----------------------|
+| PEDAL 1 | `01`                  |
+| PEDAL 2 | `02`                  |
+| REVERB  | `04`                  |
 
 The amp responds with an effect dial value (see "Effect Dial Turned")
+
+## Write User Program
+
+`30 00 01 34 4c 00 XX 00 ...`
+
+TODO: ToneRoom follows this up with another very short message. Figure out!
+
+Where `XX` is the preset identifier. This is followed by the program:
+
+| Offset | Length | Description                                                                             |
+|--------|--------|-----------------------------------------------------------------------------------------|
+| 00     | 07     | Bytes 00-06 of the program name                                                         |
+| 07     | 1      | ? (00, 8th byte)                                                                        |
+| 08     | 07     | Bytes 07-0D of the program name                                                         |
+| 0F     | 1      | ? (00, 8th byte)                                                                        |
+| 10     | 2      | Bytes 0E-0F of the program name                                                         |
+| 12     | 1      | Noise reduction sensitivity                                                             |
+| 13     | 1      | ? (seems to be always 16)                                                               |
+| 14     | 1      | Amp Model (see table above)                                                             |
+| 15     | 1      | Gain                                                                                    |
+| 16     | 1      | Treble                                                                                  |
+| 17     | 1      | ? (00, 8th byte)                                                                        |
+| 18     | 1      | Middle                                                                                  |
+| 19     | 1      | Bass                                                                                    |
+| 1A     | 1      | Volume                                                                                  |
+| 1B     | 1      | Presence                                                                                |
+| 1C     | 1      | Resonance                                                                               |
+| 1D     | 1      | Bright Cap                                                                              |
+| 1E     | 1      | Low Cut                                                                                 |
+| 1F     | 1      | ? (00, 8th byte)                                                                        |
+| 20     | 1      | Mid Boost                                                                               |
+| 21     | 1      | Tube Bias Shift                                                                         |
+| 22     | 1      | Amp Class                                                                               |
+| 23     | 1      | ? (09 Anubis clean, 01 Anubis lead)                                                     |
+| 24     | 2      | Pedal 1 Dial 1, little endian byte order<br>**!! Hz value, see above for the encoding** |
+| 26     | 1      | Pedal 1 Dial 2                                                                          |
+| 27     | 1      | ? (seems to be always 20)                                                               |
+| 28     | 1      | Pedal 1 Dial 3                                                                          |
+| 29     | 1      | Pedal 1 Dial 4                                                                          |
+| 2A     | 1      | Pedal 1 Dial 5                                                                          |
+| 2B     | 1      | Pedal 1 Dial 6                                                                          |
+| 2C     | 1      | ? (05 Anubis clean, 02 Anubis Lead)                                                     |
+| 2D     | 2      | Pedal 2 Dial 1, little endian byte order<br>**!! Hz value, see above for the encoding** |
+| 2F     | 1      | ? (00, 8th byte)                                                                        |
+| 30     | 1      | Pedal 2 Dial 2                                                                          |
+| 31     | 1      | Pedal 2 Dial 3                                                                          |
+| 32     | 1      | Pedal 2 Dial 4                                                                          |
+| 33     | 1      | Pedal 2 Dial 5                                                                          |
+| 34     | 1      | Pedal 2 Dial 6                                                                          |
+| 35     | B      | ? (seem to be always 0)                                                                 |
+| 40     | 1      | Pedal 3 Dial 1                                                                          |
+| 41     | 1      | Pedal 3 Dial 2                                                                          |
+| 42     | 1      | Pedal 3 Dial 3                                                                          |
+| 43     | 1      | Pedal 3 Dial 4                                                                          |
+| 44     | 1      | Pedal 3 Dial 5                                                                          |
+| 45     | 1      | ? (probably always 0)                                                                   |
 
 # AMP to Host
 
