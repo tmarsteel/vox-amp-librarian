@@ -1,9 +1,16 @@
-package com.github.tmarsteel.voxamplibrarian.protocol
+package com.github.tmarsteel.voxamplibrarian.protocol.message
+
+import com.github.tmarsteel.voxamplibrarian.protocol.BinaryOutput
+import com.github.tmarsteel.voxamplibrarian.protocol.PedalSlot
+import com.github.tmarsteel.voxamplibrarian.protocol.PedalType
+import com.github.tmarsteel.voxamplibrarian.protocol.ReverbPedalType
+import com.github.tmarsteel.voxamplibrarian.protocol.Slot1PedalType
+import com.github.tmarsteel.voxamplibrarian.protocol.Slot2PedalType
 
 class SetEffectPedalTypeMessage(
     val type: PedalType,
 ) : MessageToAmp<EffectDialTurnedMessage> {
-    override val responseFactory = EffectDialTurnedMessage.Companion
+    override val responseFactory = EffectDialTurnedMessage
 
     override fun writeTo(out: BinaryOutput) {
         out.write(byteArrayOf(

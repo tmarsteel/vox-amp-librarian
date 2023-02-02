@@ -1,5 +1,7 @@
 package com.github.tmarsteel.voxamplibrarian.protocol
 
+import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageParseException
+
 class ByteArrayBinaryInput(private val data: ByteArray) : BinaryInput {
     private var offset: Int = 0
 

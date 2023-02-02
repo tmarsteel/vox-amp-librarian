@@ -1,5 +1,6 @@
 package com.github.tmarsteel.voxamplibrarian.protocol
 
+import com.github.tmarsteel.voxamplibrarian.protocol.message.AmpDialTurnedMessage
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 

@@ -1,5 +1,7 @@
 package com.github.tmarsteel.voxamplibrarian.protocol
 
+import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageParseException
+
 interface BinaryInput {
     /**
      * @throws MessageParseException.InvalidMessage

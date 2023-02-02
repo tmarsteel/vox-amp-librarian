@@ -1,9 +1,12 @@
-package com.github.tmarsteel.voxamplibrarian.protocol
+package com.github.tmarsteel.voxamplibrarian.protocol.message
+
+import com.github.tmarsteel.voxamplibrarian.protocol.BinaryOutput
+import com.github.tmarsteel.voxamplibrarian.protocol.ProgramSlot
 
 data class RequestUserProgramMessage(
     val slot: ProgramSlot,
 ) : HostInitiatedExchange<UserProgramResponse> {
-    override val responseFactory = UserProgramResponse.Companion
+    override val responseFactory = UserProgramResponse
 
     override fun writeTo(out: BinaryOutput) {
         out.write(byteArrayOf(

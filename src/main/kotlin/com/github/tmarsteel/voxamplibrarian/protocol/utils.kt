@@ -1,5 +1,7 @@
 package com.github.tmarsteel.voxamplibrarian.protocol
 
+import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageParseException
+import com.github.tmarsteel.voxamplibrarian.protocol.message.MidiProtocolMessage
 import kotlin.reflect.KClass
 
 private fun ByteArray.startsWith(prefix: ByteArray): Boolean {

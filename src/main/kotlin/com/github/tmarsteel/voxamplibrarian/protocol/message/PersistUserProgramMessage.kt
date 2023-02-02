@@ -1,4 +1,7 @@
-package com.github.tmarsteel.voxamplibrarian.protocol
+package com.github.tmarsteel.voxamplibrarian.protocol.message
+
+import com.github.tmarsteel.voxamplibrarian.protocol.BinaryOutput
+import com.github.tmarsteel.voxamplibrarian.protocol.ProgramSlot
 
 /**
  * TODO! it is currently unclear what this message does.

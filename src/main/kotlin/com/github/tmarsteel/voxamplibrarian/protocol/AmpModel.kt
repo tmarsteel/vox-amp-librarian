@@ -1,5 +1,7 @@
 package com.github.tmarsteel.voxamplibrarian.protocol
 
+import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageParseException
+
 enum class AmpModel(val protocolValue: Byte) : ProtocolSerializable {
     DELUXE_CL_VIBRATO(0x00),
     DELUXE_CL_NORMAL(0x01),

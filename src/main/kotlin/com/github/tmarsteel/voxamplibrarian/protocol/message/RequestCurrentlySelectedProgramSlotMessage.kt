@@ -1,4 +1,6 @@
-package com.github.tmarsteel.voxamplibrarian.protocol
+package com.github.tmarsteel.voxamplibrarian.protocol.message
+
+import com.github.tmarsteel.voxamplibrarian.protocol.BinaryOutput
 
 class RequestCurrentlySelectedProgramSlotMessage : MessageToAmp<CurrentlySelectedProgramSlotResponse> {
     override val responseFactory = CurrentlySelectedProgramSlotResponse.Companion

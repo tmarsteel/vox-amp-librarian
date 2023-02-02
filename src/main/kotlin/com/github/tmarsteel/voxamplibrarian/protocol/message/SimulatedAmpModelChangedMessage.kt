@@ -1,4 +1,11 @@
-package com.github.tmarsteel.voxamplibrarian.protocol
+package com.github.tmarsteel.voxamplibrarian.protocol.message
+
+import com.github.tmarsteel.voxamplibrarian.protocol.AmpModel
+import com.github.tmarsteel.voxamplibrarian.protocol.BinaryInput
+import com.github.tmarsteel.voxamplibrarian.protocol.BinaryOutput
+import com.github.tmarsteel.voxamplibrarian.protocol.requireEOF
+import com.github.tmarsteel.voxamplibrarian.protocol.requireNextByteEquals
+import com.github.tmarsteel.voxamplibrarian.protocol.requirePrefix
 
 data class SimulatedAmpModelChangedMessage(
     val model: AmpModel,

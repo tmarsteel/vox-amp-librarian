@@ -1,4 +1,9 @@
-package com.github.tmarsteel.voxamplibrarian.protocol
+package com.github.tmarsteel.voxamplibrarian.protocol.message
+
+import com.github.tmarsteel.voxamplibrarian.protocol.BinaryInput
+import com.github.tmarsteel.voxamplibrarian.protocol.BinaryOutput
+import com.github.tmarsteel.voxamplibrarian.protocol.ProgramSlot
+import com.github.tmarsteel.voxamplibrarian.protocol.requirePrefix
 
 data class ProgramSlotChangedMessage(
     val slot: ProgramSlot,

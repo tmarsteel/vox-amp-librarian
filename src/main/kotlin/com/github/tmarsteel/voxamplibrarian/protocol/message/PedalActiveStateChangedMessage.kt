@@ -1,4 +1,11 @@
-package com.github.tmarsteel.voxamplibrarian.protocol
+package com.github.tmarsteel.voxamplibrarian.protocol.message
+
+import com.github.tmarsteel.voxamplibrarian.protocol.BinaryInput
+import com.github.tmarsteel.voxamplibrarian.protocol.BinaryOutput
+import com.github.tmarsteel.voxamplibrarian.protocol.PedalSlot
+import com.github.tmarsteel.voxamplibrarian.protocol.requireEOF
+import com.github.tmarsteel.voxamplibrarian.protocol.requirePrefix
+import com.github.tmarsteel.voxamplibrarian.protocol.toBoolean
 
 class PedalActiveStateChangedMessage(
     val pedalSlot: PedalSlot,

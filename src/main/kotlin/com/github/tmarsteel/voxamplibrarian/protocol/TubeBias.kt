@@ -1,5 +1,7 @@
 package com.github.tmarsteel.voxamplibrarian.protocol
 
+import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageParseException
+
 enum class TubeBias(val protocolValue: Byte) : ProtocolSerializable {
     OFF(0x00),
     COLD(0x01),

@@ -1,4 +1,6 @@
-package com.github.tmarsteel.voxamplibrarian.protocol
+package com.github.tmarsteel.voxamplibrarian.protocol.message
+
+import com.github.tmarsteel.voxamplibrarian.protocol.BinaryInput
 
 interface MidiProtocolMessage {
     interface Factory<T : MidiProtocolMessage> {

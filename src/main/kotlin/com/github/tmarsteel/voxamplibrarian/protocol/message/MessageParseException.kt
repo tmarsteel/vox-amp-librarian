@@ -1,4 +1,4 @@
-package com.github.tmarsteel.voxamplibrarian.protocol
+package com.github.tmarsteel.voxamplibrarian.protocol.message
 
 import kotlin.reflect.KClass
 

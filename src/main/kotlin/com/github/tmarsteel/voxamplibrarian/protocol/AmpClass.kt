@@ -1,5 +1,7 @@
 package com.github.tmarsteel.voxamplibrarian.protocol
 
+import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageParseException
+
 enum class AmpClass(val protocolValue: Byte) : ProtocolSerializable {
     A(0x00),
     AB(0x01),

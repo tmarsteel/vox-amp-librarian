@@ -1,5 +1,7 @@
 package com.github.tmarsteel.voxamplibrarian.protocol
 
+import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageParseException
+
 enum class ProgramSlot(val protocolValue: Byte) : ProtocolSerializable {
     A1(0x00),
     A2(0x01),
