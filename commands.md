@@ -281,12 +281,6 @@ into the program slot mode.
 
 Where `XX` is the amp model.
 
-## Noise reduction sensitivity changed
-
-`30 00 01 34 41 01 00 XX 00`
-
-Where `XX` is the sensitivity level (from 00 left to 64 right)
-
 ### Host to Amp
 
 The AMP will respond with the setting for the tube bias (`30 00 01 34 41 04 0b XX 00`).
@@ -295,6 +289,12 @@ The AMP will respond with the setting for the tube bias (`30 00 01 34 41 04 0b X
 
 When turning the model Knob on the Amp, it will send this message. It will also
 send set-dial messages for all dials from 00 to 0b.
+
+## Noise reduction sensitivity changed
+
+`30 00 01 34 41 01 00 XX 00`
+
+Where `XX` is the sensitivity level (from 00 left to 64 right)
 
 ## Pedal in slot enabled/disabled
 

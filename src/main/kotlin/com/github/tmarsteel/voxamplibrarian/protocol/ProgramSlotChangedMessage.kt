@@ -2,7 +2,7 @@ package com.github.tmarsteel.voxamplibrarian.protocol
 
 data class ProgramSlotChangedMessage(
     val slot: ProgramSlot,
-) : MessageToAmp, MessageToHost {
+) : CommandWithoutResponse, MessageToHost {
     override fun writeTo(out: BinaryOutput) {
         out.write(PREFIX)
         out.write(slot)

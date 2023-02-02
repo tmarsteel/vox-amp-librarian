@@ -1,6 +1,6 @@
 package com.github.tmarsteel.voxamplibrarian.protocol
 
-class RequestCurrentlySelectedProgramSlotMessage : HostInitiatedExchange<CurrentlySelectedProgramSlotResponse> {
+class RequestCurrentlySelectedProgramSlotMessage : MessageToAmp<CurrentlySelectedProgramSlotResponse> {
     override val responseFactory = CurrentlySelectedProgramSlotResponse.Companion
     override fun writeTo(out: BinaryOutput) {
         out.write(byteArrayOf(

@@ -4,7 +4,7 @@ data class EffectDialTurnedMessage(
     val pedalSlot: PedalSlot,
     val dialIndex: Byte,
     val value: TwoByteDial,
-) : MessageToAmp, MessageToHost {
+) : CommandWithoutResponse, MessageToHost {
     override fun writeTo(out: BinaryOutput) {
         out.write(PREFIX)
         out.write(pedalSlot)

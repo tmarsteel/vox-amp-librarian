@@ -3,7 +3,7 @@ package com.github.tmarsteel.voxamplibrarian.protocol
 class PedalActiveStateChangedMessage(
     val pedalSlot: PedalSlot,
     val enabled: Boolean,
-) : MessageToAmp, MessageToHost {
+) : CommandWithoutResponse, MessageToHost {
     override fun writeTo(out: BinaryOutput) {
         out.write(PREFIX)
         out.write(pedalSlot)

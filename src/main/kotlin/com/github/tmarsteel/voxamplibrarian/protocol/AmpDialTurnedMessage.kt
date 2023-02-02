@@ -3,7 +3,7 @@ package com.github.tmarsteel.voxamplibrarian.protocol
 data class AmpDialTurnedMessage(
     val dial: Byte,
     val value: TwoByteDial,
-) : MessageToAmp, MessageToHost {
+) : CommandWithoutResponse, MessageToHost {
     override fun writeTo(out: BinaryOutput) {
         out.write(PREFIX)
         out.write(dial)
