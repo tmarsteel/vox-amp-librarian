@@ -29,3 +29,9 @@ internal fun requirePrefix(data: BinaryInput, prefix: ByteArray, targetType: KCl
 }
 
 internal fun Byte.hex(): String = "0x" + toString(16).padStart(2, '0')
+
+internal fun Byte.toBoolean(): Boolean = when(this) {
+    0x00.toByte() -> false
+    0x01.toByte() -> true
+    else -> throw MessageParseException.InvalidMessage("Expected boolean (0 or 1), got $this")
+}

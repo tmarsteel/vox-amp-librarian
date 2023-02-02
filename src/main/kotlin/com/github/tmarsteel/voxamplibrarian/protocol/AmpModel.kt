@@ -1,6 +1,6 @@
 package com.github.tmarsteel.voxamplibrarian.protocol
 
-enum class AmpModel(val protocolValue: Byte) {
+enum class AmpModel(val protocolValue: Byte) : ProtocolSerializable {
     DELUXE_CL_VIBRATO(0x00),
     DELUXE_CL_NORMAL(0x01),
     TWEED_410_BRIGHT(0x02),
@@ -21,4 +21,19 @@ enum class AmpModel(val protocolValue: Byte) {
     BOUTIQUE_METAL(0x11),
     BRIT_OR_MKII(0x12),
     ORIGINAL_CL(0x13),
+    ;
+
+    override fun writeTo(out: BinaryOutput) {
+        out.write(protocolValue)
+    }
+
+    companion object {
+        fun readFrom(input: BinaryInput): AmpModel {
+            val value = input.nextByte()
+            return enumValues<AmpModel>().find { it.protocolValue == value }
+                ?: throw MessageParseException.InvalidMessage(
+                    "Unknown amp model ${value.hex()}"
+                )
+        }
+    }
 }

@@ -36,7 +36,16 @@ enum class Slot1PedalType(val protocolValue: Byte) : PedalType {
     FUZZ(0x09),
     ;
 
-   override val slot: PedalSlot = PedalSlot.PEDAL1
+    override val slot: PedalSlot = PedalSlot.PEDAL1
+
+    companion object {
+        fun ofProtocolValue(value: Byte): Slot1PedalType {
+            return enumValues<Slot1PedalType>().find { it.protocolValue == value }
+                ?: throw NoSuchElementException(
+                    "Unknown pedal type for slot 1: $value"
+                )
+        }
+    }
 }
 
 enum class Slot2PedalType(val protocolValue: Byte): PedalType {
@@ -50,6 +59,15 @@ enum class Slot2PedalType(val protocolValue: Byte): PedalType {
     ;
 
     override val slot: PedalSlot = PedalSlot.PEDAL2
+
+    companion object {
+        fun ofProtocolValue(value: Byte): Slot2PedalType {
+            return enumValues<Slot2PedalType>().find { it.protocolValue == value }
+                ?: throw NoSuchElementException(
+                    "Unknown pedal type for slot 2: $value"
+                )
+        }
+    }
 }
 
 enum class ReverbPedalType(val protocolValue: Byte) : PedalType {
@@ -60,5 +78,14 @@ enum class ReverbPedalType(val protocolValue: Byte) : PedalType {
     ;
 
     override val slot: PedalSlot = PedalSlot.REVERB
+
+    companion object {
+        fun ofProtocolValue(value: Byte): ReverbPedalType {
+            return enumValues<ReverbPedalType>().find { it.protocolValue == value }
+                ?: throw NoSuchElementException(
+                    "Unknown pedal type for slot reverb: $value"
+                )
+        }
+    }
 }
 
