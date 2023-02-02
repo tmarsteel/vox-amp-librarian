@@ -1,8 +1,8 @@
 package com.github.tmarsteel.voxamplibrarian.protocol.message
 
-import com.github.tmarsteel.voxamplibrarian.protocol.BinaryInput
-import com.github.tmarsteel.voxamplibrarian.protocol.requireEOF
-import com.github.tmarsteel.voxamplibrarian.protocol.requirePrefix
+import com.github.tmarsteel.voxamplibrarian.BinaryInput
+import com.github.tmarsteel.voxamplibrarian.requireEOF
+import com.github.tmarsteel.voxamplibrarian.requirePrefix
 
 class GenericAcknowledgement : MessageToHost {
     companion object : MidiProtocolMessage.Factory<GenericAcknowledgement> {

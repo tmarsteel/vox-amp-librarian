@@ -1,6 +1,6 @@
 package com.github.tmarsteel.voxamplibrarian.protocol.message
 
-import com.github.tmarsteel.voxamplibrarian.protocol.BinaryOutput
+import com.github.tmarsteel.voxamplibrarian.BinaryOutput
 
 class RequestCurrentProgramMessage : HostInitiatedExchange<CurrentProgramResponse> {
     override val responseFactory = CurrentProgramResponse

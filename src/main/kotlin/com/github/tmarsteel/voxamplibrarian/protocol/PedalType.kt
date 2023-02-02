@@ -1,5 +1,8 @@
 package com.github.tmarsteel.voxamplibrarian.protocol
 
+import com.github.tmarsteel.voxamplibrarian.BinaryInput
+import com.github.tmarsteel.voxamplibrarian.BinaryOutput
+import com.github.tmarsteel.voxamplibrarian.hex
 import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageParseException
 
 enum class PedalSlot(private val protocolIdentifier: Byte) : ProtocolSerializable {

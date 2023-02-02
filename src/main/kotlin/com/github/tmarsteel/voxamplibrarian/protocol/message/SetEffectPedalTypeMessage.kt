@@ -1,6 +1,6 @@
 package com.github.tmarsteel.voxamplibrarian.protocol.message
 
-import com.github.tmarsteel.voxamplibrarian.protocol.BinaryOutput
+import com.github.tmarsteel.voxamplibrarian.BinaryOutput
 import com.github.tmarsteel.voxamplibrarian.protocol.PedalSlot
 import com.github.tmarsteel.voxamplibrarian.protocol.PedalType
 import com.github.tmarsteel.voxamplibrarian.protocol.ReverbPedalType

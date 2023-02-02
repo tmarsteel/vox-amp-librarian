@@ -1,5 +1,8 @@
 package com.github.tmarsteel.voxamplibrarian.protocol
 
+import com.github.tmarsteel.voxamplibrarian.BinaryInput
+import com.github.tmarsteel.voxamplibrarian.BinaryOutput
+
 value class ZeroToTenDial(val value: Byte) : ProtocolSerializable {
     init {
         check(value in 0..100)

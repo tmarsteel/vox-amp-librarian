@@ -1,11 +1,11 @@
 package com.github.tmarsteel.voxamplibrarian.protocol.message
 
-import com.github.tmarsteel.voxamplibrarian.protocol.BinaryInput
-import com.github.tmarsteel.voxamplibrarian.protocol.BinaryOutput
+import com.github.tmarsteel.voxamplibrarian.BinaryInput
+import com.github.tmarsteel.voxamplibrarian.BinaryOutput
 import com.github.tmarsteel.voxamplibrarian.protocol.ZeroToTenDial
-import com.github.tmarsteel.voxamplibrarian.protocol.requireEOF
-import com.github.tmarsteel.voxamplibrarian.protocol.requireNextByteEquals
-import com.github.tmarsteel.voxamplibrarian.protocol.requirePrefix
+import com.github.tmarsteel.voxamplibrarian.requireEOF
+import com.github.tmarsteel.voxamplibrarian.requireNextByteEquals
+import com.github.tmarsteel.voxamplibrarian.requirePrefix
 
 data class NoiseReductionSensitivityChangedMessage(
     val sensitivity: ZeroToTenDial,

@@ -134,55 +134,62 @@ protocolValue = temp + floor(temp / 0x80) * 0x80
 
 Both host program and the amp can send a full program to each other. It always uses this format:
 
-| Offset | Length | Description                                                                             |
-|--------|--------|-----------------------------------------------------------------------------------------|
-| 00     | 07     | Bytes 00-06 of the program name                                                         |
-| 07     | 1      | ? (00, 8th byte)                                                                        |
-| 08     | 07     | Bytes 07-0D of the program name                                                         |
-| 0F     | 1      | ? (00, 8th byte)                                                                        |
-| 10     | 2      | Bytes 0E-0F of the program name                                                         |
-| 12     | 1      | Noise reduction sensitivity                                                             |
-| 13     | 1      | ? (seems to be always 16)                                                               |
-| 14     | 1      | Amp Model (see table above)                                                             |
-| 15     | 1      | Gain                                                                                    |
-| 16     | 1      | Treble                                                                                  |
-| 17     | 1      | ? (00, 8th byte)                                                                        |
-| 18     | 1      | Middle                                                                                  |
-| 19     | 1      | Bass                                                                                    |
-| 1A     | 1      | Volume                                                                                  |
-| 1B     | 1      | Presence                                                                                |
-| 1C     | 1      | Resonance                                                                               |
-| 1D     | 1      | Bright Cap                                                                              |
-| 1E     | 1      | Low Cut                                                                                 |
-| 1F     | 1      | ? (00, 8th byte)                                                                        |
-| 20     | 1      | Mid Boost                                                                               |
-| 21     | 1      | Tube Bias Shift                                                                         |
-| 22     | 1      | Amp Class                                                                               |
-| 23     | 1      | Pedal 1 Type (see pedal identifiers)                                                    |
-| 24     | 2      | Pedal 1 Dial 1, little endian byte order<br>**!! Hz value, see above for the encoding** |
-| 26     | 1      | Pedal 1 Dial 2                                                                          |
-| 27     | 1      | ? (sometimes 00, sometimes 20)                                                          |
-| 28     | 1      | Pedal 1 Dial 3                                                                          |
-| 29     | 1      | Pedal 1 Dial 4                                                                          |
-| 2A     | 1      | Pedal 1 Dial 5                                                                          |
-| 2B     | 1      | Pedal 1 Dial 6                                                                          |
-| 2C     | 1      | Pedal 2 Type (see pedal identifiers)                                                    |
-| 2D     | 2      | Pedal 2 Dial 1, little endian byte order<br>**!! Hz value, see above for the encoding** |
-| 2F     | 1      | ? (00, 8th byte)                                                                        |
-| 30     | 1      | Pedal 2 Dial 2                                                                          |
-| 31     | 1      | Pedal 2 Dial 3                                                                          |
-| 32     | 1      | Pedal 2 Dial 4                                                                          |
-| 33     | 1      | Pedal 2 Dial 5                                                                          |
-| 34     | 1      | Pedal 2 Dial 6                                                                          |
-| 35     | A      | ? (seem to be always 0)                                                                 |
-| 3E     | 1      | Pedal 3 Type (see pedal identifiers)                                                    |
-| 3F     | 1      | ? (00, 8th byte)                                                                        |
-| 40     | 1      | Pedal 3 Dial 1                                                                          |
-| 41     | 1      | Pedal 3 Dial 2                                                                          |
-| 42     | 1      | Pedal 3 Dial 3                                                                          |
-| 43     | 1      | Pedal 3 Dial 4                                                                          |
-| 44     | 1      | Pedal 3 Dial 5                                                                          |
-| 45     | 1      | ? (probably always 0)                                                                   |
+| Offset | Length | Bit #   | Description                                                                             |
+|--------|--------|---------|-----------------------------------------------------------------------------------------|
+| 00     | 07     |         | Bytes 00-06 of the program name                                                         |
+| 07     | 1      |         | ? (00, 8th byte)                                                                        |
+| 08     | 07     |         | Bytes 07-0D of the program name                                                         |
+| 0F     | 1      |         | ? (00, 8th byte)                                                                        |
+| 10     | 2      |         | Bytes 0E-0F of the program name                                                         |
+| 12     | 1      |         | Noise reduction sensitivity                                                             |
+| 13     | 1      | 0 (LSB) | ?                                                                                       | !!TODO VERIFY THIS BITFILED
+|        |        | 1       | Pedal 1 enabled                                                                         |
+|        |        | 2       | Pedal 2 enabled                                                                         |
+|        |        | 3       | ?                                                                                       |
+|        |        | 4       | Reverb pedal enabled                                                                    |
+|        |        | 5       | ?                                                                                       |
+|        |        | 6       | ?                                                                                       |
+|        |        | 7 (MSB) | ?                                                                                       |
+| 14     | 1      |         | Amp Model (see table above)                                                             |
+| 15     | 1      |         | Gain                                                                                    |
+| 16     | 1      |         | Treble                                                                                  |
+| 17     | 1      |         | ? (00, 8th byte)                                                                        |
+| 18     | 1      |         | Middle                                                                                  |
+| 19     | 1      |         | Bass                                                                                    |
+| 1A     | 1      |         | Volume                                                                                  |
+| 1B     | 1      |         | Presence                                                                                |
+| 1C     | 1      |         | Resonance                                                                               |
+| 1D     | 1      |         | Bright Cap                                                                              |
+| 1E     | 1      |         | Low Cut                                                                                 |
+| 1F     | 1      |         | ? (00, 8th byte)                                                                        |
+| 20     | 1      |         | Mid Boost                                                                               |
+| 21     | 1      |         | Tube Bias Shift                                                                         |
+| 22     | 1      |         | Amp Class                                                                               |
+| 23     | 1      |         | Pedal 1 Type (see pedal identifiers)                                                    |
+| 24     | 2      |         | Pedal 1 Dial 1, little endian byte order<br>**!! Hz value, see above for the encoding** |
+| 26     | 1      |         | Pedal 1 Dial 2                                                                          |
+| 27     | 1      |         | ? (sometimes 00, sometimes 20)                                                          |
+| 28     | 1      |         | Pedal 1 Dial 3                                                                          |
+| 29     | 1      |         | Pedal 1 Dial 4                                                                          |
+| 2A     | 1      |         | Pedal 1 Dial 5                                                                          |
+| 2B     | 1      |         | Pedal 1 Dial 6                                                                          |
+| 2C     | 1      |         | Pedal 2 Type (see pedal identifiers)                                                    |
+| 2D     | 2      |         | Pedal 2 Dial 1, little endian byte order<br>**!! Hz value, see above for the encoding** |
+| 2F     | 1      |         | ? (00, 8th byte)                                                                        |
+| 30     | 1      |         | Pedal 2 Dial 2                                                                          |
+| 31     | 1      |         | Pedal 2 Dial 3                                                                          |
+| 32     | 1      |         | Pedal 2 Dial 4                                                                          |
+| 33     | 1      |         | Pedal 2 Dial 5                                                                          |
+| 34     | 1      |         | Pedal 2 Dial 6                                                                          |
+| 35     | A      |         | ? (seem to be always 0)                                                                 |
+| 3E     | 1      |         | Pedal 3 Type (see pedal identifiers)                                                    |
+| 3F     | 1      |         | ? (00, 8th byte)                                                                        |
+| 40     | 1      |         | Pedal 3 Dial 1                                                                          |
+| 41     | 1      |         | Pedal 3 Dial 2                                                                          |
+| 42     | 1      |         | Pedal 3 Dial 3                                                                          |
+| 43     | 1      |         | Pedal 3 Dial 4                                                                          |
+| 44     | 1      |         | Pedal 3 Dial 5                                                                          |
+| 45     | 1      |         | ? (probably always 0)                                                                   |
 
 # Bidirectional Commands
 

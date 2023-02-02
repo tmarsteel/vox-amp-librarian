@@ -1,51 +1,29 @@
-package com.github.tmarsteel.voxamplibrarian.protocol
+package com.github.tmarsteel.voxamplibrarian.vtxprog
 
 import com.github.tmarsteel.voxamplibrarian.BinaryInput
 import com.github.tmarsteel.voxamplibrarian.BinaryOutput
+import com.github.tmarsteel.voxamplibrarian.protocol.AmpClass
+import com.github.tmarsteel.voxamplibrarian.protocol.AmpModel
+import com.github.tmarsteel.voxamplibrarian.protocol.Program
+import com.github.tmarsteel.voxamplibrarian.protocol.ProgramName
+import com.github.tmarsteel.voxamplibrarian.protocol.ReverbPedalType
+import com.github.tmarsteel.voxamplibrarian.protocol.Slot1PedalType
+import com.github.tmarsteel.voxamplibrarian.protocol.Slot2PedalType
+import com.github.tmarsteel.voxamplibrarian.protocol.TubeBias
+import com.github.tmarsteel.voxamplibrarian.protocol.TwoByteDial
+import com.github.tmarsteel.voxamplibrarian.protocol.ZeroToTenDial
 import com.github.tmarsteel.voxamplibrarian.requireNextByteEquals
 import com.github.tmarsteel.voxamplibrarian.toBoolean
 
-data class Program(
-    val programName: ProgramName,
-    val noiseReductionSensitivity: ZeroToTenDial,
-    val ampModel: AmpModel,
-    val gain: ZeroToTenDial,
-    val treble: ZeroToTenDial,
-    val middle: ZeroToTenDial,
-    val bass: ZeroToTenDial,
-    val volume: ZeroToTenDial,
-    val presence: ZeroToTenDial,
-    val resonance: ZeroToTenDial,
-    val brightCap: Boolean,
-    val lowCut: Boolean,
-    val midBoost: Boolean,
-    val tubeBias: TubeBias,
-    val ampClass: AmpClass,
-    val pedal1Enabled: Boolean,
-    val pedal1Type: Slot1PedalType,
-    val pedal1Dial1: TwoByteDial,
-    val pedal1Dial2: Byte,
-    val pedal1Dial3: Byte,
-    val pedal1Dial4: Byte,
-    val pedal1Dial5: Byte,
-    val pedal1Dial6: Byte,
-    val pedal2Enabled: Boolean,
-    val pedal2Type: Slot2PedalType,
-    val pedal2Dial1: TwoByteDial,
-    val pedal2Dial2: Byte,
-    val pedal2Dial3: Byte,
-    val pedal2Dial4: Byte,
-    val pedal2Dial5: Byte,
-    val pedal2Dial6: Byte,
-    val reverbPedalEnabled: Boolean,
-    val reverbPedalType: ReverbPedalType,
-    val reverbPedalDial1: ZeroToTenDial,
-    val reverbPedalDial2: ZeroToTenDial,
-    val reverbPedalDial3: Byte,
-    val reverbPedalDial4: ZeroToTenDial,
-    val reverbPedalDial5: ZeroToTenDial,
-) : ProtocolSerializable {
-    override fun writeTo(out: BinaryOutput) {
+data class VtxProgFile(
+    val programs: List<Program>
+) {
+    fun writeToInVtxProgFormat(output: BinaryOutput) {
+        output.write(PREFIX)
+        programs.forEach { it.writeToInVtxProgFormat(output) }
+    }
+
+    private fun Program.writeToInVtxProgFormat(output: BinaryOutput) {
         var flags = 0x00
         if (pedal1Enabled) {
             flags = flags or FLAG_PEDAL_1_ENABLED
@@ -57,70 +35,84 @@ data class Program(
             flags = flags or FLAG_REVERB_PEDAL_ENABLED
         }
 
-        out.write(programName.encoded, 0x00, 0x7)
-        out.write(0x00)
-        out.write(programName.encoded, 0x07, 0x7)
-        out.write(0x00)
-        out.write(programName.encoded, 0x0E, 0x2)
-        out.write(noiseReductionSensitivity)
-        out.write(flags.toByte())
-        out.write(ampModel)
-        out.write(gain)
-        out.write(treble)
-        out.write(0x00) // 8th byte
-        out.write(middle)
-        out.write(bass)
-        out.write(volume)
-        out.write(presence)
-        out.write(resonance)
-        out.write(brightCap)
-        out.write(lowCut)
-        out.write(0x00) // 8th byte
-        out.write(midBoost)
-        out.write(tubeBias)
-        out.write(ampClass)
-        out.write(pedal1Type.protocolValue)
-        out.write(pedal1Dial1)
-        out.write(pedal1Dial2)
-        out.write(0x00)
-        out.write(pedal1Dial3)
-        out.write(pedal1Dial4)
-        out.write(pedal1Dial5)
-        out.write(pedal1Dial6)
-        out.write(pedal2Type.protocolValue)
-        out.write(pedal2Dial1)
-        out.write(pedal2Dial2)
-        out.write(pedal2Dial3)
-        out.write(pedal2Dial4)
-        out.write(pedal2Dial5)
-        out.write(pedal2Dial6)
-        out.write(
+        output.write(programName.encoded)
+        output.write(noiseReductionSensitivity)
+        output.write(flags.toByte())
+        output.write(ampModel)
+        output.write(gain)
+        output.write(treble)
+        output.write(middle)
+        output.write(bass)
+        output.write(volume)
+        output.write(resonance)
+        output.write(brightCap)
+        output.write(lowCut)
+        output.write(midBoost)
+        output.write(tubeBias)
+        output.write(ampClass)
+        output.write(pedal1Type.protocolValue)
+        output.write(pedal1Dial1.semanticValue)
+        output.write(pedal1Dial2)
+        output.write(pedal1Dial3)
+        output.write(pedal1Dial4)
+        output.write(pedal1Dial5)
+        output.write(pedal1Dial6)
+        output.write(pedal2Type.protocolValue)
+        output.write(pedal2Dial1.semanticValue)
+        output.write(pedal2Dial2)
+        output.write(pedal2Dial3)
+        output.write(pedal2Dial4)
+        output.write(pedal2Dial5)
+        output.write(pedal2Dial6)
+        output.write(byteArrayOf(
             0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00
-        )
-        out.write(reverbPedalType.protocolValue)
-        out.write(0x00)
-        out.write(reverbPedalDial1)
-        out.write(reverbPedalDial2)
-        out.write(reverbPedalDial3)
-        out.write(reverbPedalDial4)
-        out.write(reverbPedalDial5)
-        out.write(0x00)
+        ))
+        output.write(reverbPedalType.protocolValue)
+        output.write(reverbPedalDial1)
+        output.write(reverbPedalDial2)
+        output.write(reverbPedalDial3)
+        output.write(reverbPedalDial4)
+        output.write(reverbPedalDial5)
+        output.write(0x00)
+    }
+
+    private fun BinaryOutput.write(value: UShort) {
+        write((value.toInt() and 0xFF).toByte())
+        write((value.toInt() shr 8).toByte())
     }
 
     companion object {
+        private val PREFIX = byteArrayOf(
+            0x56, 0x54, 0x58, 0x50, 0x52, 0x4F, 0x47, 0x31, 0x30, 0x30, 0x30, 0x20, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        )
         private val FLAG_PEDAL_1_ENABLED = 0x0000_0010
         private val FLAG_PEDAL_2_ENABLED = 0x0000_0100
         private val FLAG_REVERB_PEDAL_ENABLED = 0x0001_0000
 
-        fun readFrom(input: BinaryInput): Program {
-            val encodedProgramName = ByteArray(ProgramName.FIXED_LENGTH)
-            input.nextBytes(encodedProgramName, 0x00, 0x07)
-            require(input.nextByte() == 0x00.toByte())
-            input.nextBytes(encodedProgramName, 0x08, 0x07)
-            require(input.nextByte() == 0x00.toByte())
-            input.nextBytes(encodedProgramName, 0x10, 0x02)
+        fun readFromInVtxProgFormat(input: BinaryInput): VtxProgFile {
+            val prefixFromFile = ByteArray(PREFIX.size)
+            input.nextBytes(prefixFromFile)
+            if (!prefixFromFile.contentEquals(PREFIX)) {
+                throw IllegalArgumentException("Incorrect prefix")
+            }
+
+            var programs = mutableListOf<Program>()
+            while (input.bytesRemaining > 0) {
+                if (input.bytesRemaining < 0x3E) {
+                    throw IllegalArgumentException("The input file has an incorrect length, programs are always 0x3E bytes long")
+                }
+
+                programs.add(readProgramInVtxProgFormat(input))
+            }
+
+            return VtxProgFile(programs)
+        }
+
+        private fun readProgramInVtxProgFormat(input: BinaryInput): Program {
+            val encodedProgramName = ByteArray(0x10)
+            input.nextBytes(encodedProgramName)
             val programName = ProgramName.decode(encodedProgramName)
 
             val nrSens = ZeroToTenDial.readFrom(input)

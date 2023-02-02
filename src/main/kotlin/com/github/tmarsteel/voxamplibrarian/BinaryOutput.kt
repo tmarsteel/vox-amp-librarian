@@ -1,4 +1,6 @@
-package com.github.tmarsteel.voxamplibrarian.protocol
+package com.github.tmarsteel.voxamplibrarian
+
+import com.github.tmarsteel.voxamplibrarian.protocol.ProtocolSerializable
 
 interface BinaryOutput {
     fun write(byte: Byte)

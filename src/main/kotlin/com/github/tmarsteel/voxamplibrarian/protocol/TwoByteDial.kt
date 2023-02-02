@@ -1,5 +1,8 @@
 package com.github.tmarsteel.voxamplibrarian.protocol
 
+import com.github.tmarsteel.voxamplibrarian.BinaryInput
+import com.github.tmarsteel.voxamplibrarian.BinaryOutput
+
 data class TwoByteDial(val semanticValue: UShort) : ProtocolSerializable {
     init {
         require(semanticValue <= 32895u)

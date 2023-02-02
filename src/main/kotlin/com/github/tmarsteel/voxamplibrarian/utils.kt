@@ -1,22 +1,8 @@
-package com.github.tmarsteel.voxamplibrarian.protocol
+package com.github.tmarsteel.voxamplibrarian
 
 import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageParseException
 import com.github.tmarsteel.voxamplibrarian.protocol.message.MidiProtocolMessage
 import kotlin.reflect.KClass
-
-private fun ByteArray.startsWith(prefix: ByteArray): Boolean {
-    if (prefix.size > this.size) {
-        return false
-    }
-
-    for (i in prefix.indices) {
-        if (this[i] != prefix[i]) {
-            return false
-        }
-    }
-
-    return true
-}
 
 internal fun requirePrefix(data: BinaryInput, prefix: ByteArray, targetType: KClass<out MidiProtocolMessage>) {
     if (data.bytesRemaining < prefix.size) {
