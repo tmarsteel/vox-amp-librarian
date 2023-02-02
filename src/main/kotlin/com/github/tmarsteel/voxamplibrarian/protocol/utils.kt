@@ -28,6 +28,23 @@ internal fun requirePrefix(data: BinaryInput, prefix: ByteArray, targetType: KCl
     }
 }
 
+internal fun requireNextByteEquals(data: BinaryInput, expected: Byte) {
+    val actual = data.nextByte()
+    if (actual != expected) {
+        throw MessageParseException.InvalidMessage(
+            "Unexpected ${actual.hex()}, expected ${expected.hex()}"
+        )
+    }
+}
+
+internal fun requireEOF(data: BinaryInput) {
+    if (data.bytesRemaining > 0) {
+        throw MessageParseException.InvalidMessage(
+            "Message is too long, got ${data.bytesRemaining} extra bytes"
+        )
+    }
+}
+
 internal fun Byte.hex(): String = "0x" + toString(16).padStart(2, '0')
 
 internal fun Byte.toBoolean(): Boolean = when(this) {

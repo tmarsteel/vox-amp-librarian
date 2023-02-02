@@ -105,7 +105,7 @@ data class Program(
             val ampModel = AmpModel.readFrom(input)
             val gain = ZeroToTenDial.readFrom(input)
             val treble = ZeroToTenDial.readFrom(input)
-            require(input.nextByte() == 0x00.toByte())
+            requireNextByteEquals(input, 0x00)
             val middle = ZeroToTenDial.readFrom(input)
             val bass = ZeroToTenDial.readFrom(input)
             val volume = ZeroToTenDial.readFrom(input)
@@ -113,7 +113,7 @@ data class Program(
             val resonance = ZeroToTenDial.readFrom(input)
             val brightCap = input.nextByte().toBoolean()
             val lowCut = input.nextByte().toBoolean()
-            require(input.nextByte() == 0x00.toByte())
+            requireNextByteEquals(input, 0x00)
             val midBoost = input.nextByte().toBoolean()
             val tubeBias = TubeBias.readFrom(input)
             val ampClass = AmpClass.readFrom(input)
@@ -127,7 +127,7 @@ data class Program(
             val pedal1Dial6 = input.nextByte()
             val pedal2Type = Slot2PedalType.ofProtocolValue(input.nextByte())
             val pedal2Dial1 = TwoByteDial.readFrom(input)
-            require(input.nextByte() == 0x00.toByte())
+            requireNextByteEquals(input, 0x00)
             val pedal2Dial2 = input.nextByte()
             val pedal2Dial3 = input.nextByte()
             val pedal2Dial4 = input.nextByte()
@@ -142,11 +142,7 @@ data class Program(
             val reverbPedalDial5 = ZeroToTenDial.readFrom(input)
             input.skip(1)
 
-            if (input.bytesRemaining != 0) {
-                throw MessageParseException.InvalidMessage(
-                    "Full program is too large, got ${input.bytesRemaining} extra bytes"
-                )
-            }
+            requireEOF(input)
 
             return Program(
                 programName = programName,
