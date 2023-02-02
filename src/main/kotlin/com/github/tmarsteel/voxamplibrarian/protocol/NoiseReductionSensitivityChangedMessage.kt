@@ -2,7 +2,7 @@ package com.github.tmarsteel.voxamplibrarian.protocol
 
 data class NoiseReductionSensitivityChangedMessage(
     val sensitivity: ZeroToTenDial,
-) : MidiProtocolMessage {
+) : MessageToAmp, MessageToHost {
     override fun writeTo(out: BinaryOutput) {
         out.write(PREFIX)
         out.write(sensitivity)
