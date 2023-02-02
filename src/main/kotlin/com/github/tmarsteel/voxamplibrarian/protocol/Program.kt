@@ -142,8 +142,6 @@ data class Program(
             val reverbPedalDial5 = ZeroToTenDial.readFrom(input)
             input.skip(1)
 
-            requireEOF(input)
-
             return Program(
                 programName = programName,
                 noiseReductionSensitivity = nrSens,
