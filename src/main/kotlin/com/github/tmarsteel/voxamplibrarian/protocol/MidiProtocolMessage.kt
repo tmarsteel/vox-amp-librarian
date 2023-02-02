@@ -1,6 +1,6 @@
 package com.github.tmarsteel.voxamplibrarian.protocol
 
-interface MidiProtocolMessage : ProtocolSerializable {
+interface MidiProtocolMessage {
     interface Factory<T : MidiProtocolMessage> {
         /**
          * @throws MessageParseException
