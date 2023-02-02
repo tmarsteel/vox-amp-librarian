@@ -12,8 +12,13 @@ repositories {
 }
 
 kotlin {
-    js {
+    js(IR) {
         browser {
+            testTask {
+                useKarma {
+                    useChromeHeadless()
+                }
+            }
             commonWebpackConfig {
                 cssSupport.enabled = true
             }
