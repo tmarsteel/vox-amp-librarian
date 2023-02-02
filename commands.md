@@ -386,7 +386,7 @@ where `XX` is the program identifier. !! is this for saving/persisting?
 
 ## Simulated Amp model changed
 
-`30 00 01 34 41 04 01 34 00`
+TODO
 
 ## Effect Pedal Type Changed
 
