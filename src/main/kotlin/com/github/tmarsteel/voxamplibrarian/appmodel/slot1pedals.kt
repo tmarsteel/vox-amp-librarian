@@ -1,10 +1,11 @@
 package com.github.tmarsteel.voxamplibrarian.appmodel
 
-interface Slot1PedalDescriptor
+interface SlotOnePedalDescriptor : DeviceDescriptor
 
-object CompressorPedalDescriptor : Slot1PedalDescriptor, DeviceDescriptor {
+object CompressorPedalDescriptor : SlotOnePedalDescriptor {
     override val name = "Compressor"
     override val parameters = listOf(
+        BooleanParameter(DeviceParameter.Id.PEDAL_ENABLED),
         ContinuousRangeParameter(DeviceParameter.Id.COMP_SENSITIVITY),
         ContinuousRangeParameter(DeviceParameter.Id.PEDAL_LEVEL),
         ContinuousRangeParameter(DeviceParameter.Id.COMP_ATTACK),
@@ -18,9 +19,10 @@ object CompressorPedalDescriptor : Slot1PedalDescriptor, DeviceDescriptor {
     }
 }
 
-object ChorusPedalDescriptor : Slot1PedalDescriptor, DeviceDescriptor {
+object ChorusPedalDescriptor : SlotOnePedalDescriptor {
     override val name = "Chorus"
     override val parameters = listOf(
+        BooleanParameter(DeviceParameter.Id.PEDAL_ENABLED),
         ContinuousRangeParameter(
             id = DeviceParameter.Id.MODULATION_SPEED,
             valueRange = 100..10_000,
@@ -36,8 +38,9 @@ object ChorusPedalDescriptor : Slot1PedalDescriptor, DeviceDescriptor {
 
 abstract class OverdrivePedalDescriptor(
     override val name: String,
-) : Slot1PedalDescriptor, DeviceDescriptor {
+) : SlotOnePedalDescriptor {
     override val parameters = listOf(
+        BooleanParameter(DeviceParameter.Id.PEDAL_ENABLED),
         ContinuousRangeParameter(DeviceParameter.Id.OVERDRIVE_DRIVE),
         ContinuousRangeParameter(DeviceParameter.Id.EQ_TONE),
         ContinuousRangeParameter(DeviceParameter.Id.PEDAL_LEVEL),

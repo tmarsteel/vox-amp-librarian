@@ -1,7 +1,18 @@
 package com.github.tmarsteel.voxamplibrarian.appmodel
 
-sealed interface DeviceParameter {
+import kotlin.reflect.KClass
+
+sealed interface DeviceParameter<Value : Any> {
     val id: Id
+    val valueType: KClass<Value>
+
+    fun rejectInvalidValue(value: Value)
+
+    fun rejectInvalidValue(value: Any) {
+        check(valueType.isInstance(value))
+        @Suppress("UNCHECKED_CAST")
+        rejectInvalidValue(value as Value)
+    }
 
     enum class Id {
         GAIN,
@@ -21,6 +32,7 @@ sealed interface DeviceParameter {
         AMP_MID_BOOST,
         AMP_BRIGHT_CAP,
         AMP_NOISE_REDUCTION_SENSITIVITY,
+        PEDAL_ENABLED,
         PEDAL_LEVEL,
         PEDAL_MIX,
         MODULATION_SPEED,
@@ -45,7 +57,12 @@ class ContinuousRangeParameter(
     override val id: DeviceParameter.Id,
     val valueRange: IntRange = 0..100,
     val semantic: Semantic = Semantic.ZERO_TO_TEN,
-) : DeviceParameter {
+) : DeviceParameter<Int> {
+    override val valueType = Int::class
+    override fun rejectInvalidValue(value: Int) {
+        check(value in valueRange)
+    }
+
     enum class Semantic {
         /** actual value from 0-100, displayed as 0.0 to 10.0 */
         ZERO_TO_TEN,
@@ -60,17 +77,27 @@ class ContinuousRangeParameter(
 
 class DiscreteChoiceParameter<Value : Any>(
     override val id: DeviceParameter.Id,
-    val choices: Array<Value>,
-) : DeviceParameter {
+    override val valueType: KClass<Value>,
+    val choices: Set<Value>,
+) : DeviceParameter<Value> {
+    override fun rejectInvalidValue(value: Value) {
+        check(value in choices)
+    }
+
     companion object {
         inline operator fun <reified V : Enum<V>> invoke(
             id: DeviceParameter.Id,
         ): DiscreteChoiceParameter<V> {
-            return DiscreteChoiceParameter(id, enumValues())
+            return DiscreteChoiceParameter(id, V::class, enumValues<V>().toSet())
         }
     }
 }
 
 class BooleanParameter(
     override val id: DeviceParameter.Id,
-) : DeviceParameter
+) : DeviceParameter<Boolean> {
+    override val valueType = Boolean::class
+    override fun rejectInvalidValue(value: Boolean) {
+
+    }
+}

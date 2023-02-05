@@ -4,6 +4,7 @@ abstract class ReverbPedalDescriptor(
     override val name: String,
 ) : DeviceDescriptor {
     override val parameters = listOf(
+        BooleanParameter(DeviceParameter.Id.PEDAL_ENABLED),
         ContinuousRangeParameter(DeviceParameter.Id.PEDAL_MIX),
         ContinuousRangeParameter(
             id = DeviceParameter.Id.REVERB_TIME,
