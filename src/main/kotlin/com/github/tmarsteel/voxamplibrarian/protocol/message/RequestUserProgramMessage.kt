@@ -5,7 +5,7 @@ import com.github.tmarsteel.voxamplibrarian.protocol.ProgramSlot
 
 data class RequestUserProgramMessage(
     val slot: ProgramSlot,
-) : HostInitiatedExchange<UserProgramResponse> {
+) : MessageToAmp<UserProgramResponse> {
     override val responseFactory = UserProgramResponse
 
     override fun writeTo(out: BinaryOutput) {

@@ -37,6 +37,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.3")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
 
+    implementation(npm("bootstrap", "5.2.3"))
+
     testImplementation("io.kotest:kotest-framework-engine:5.5.4")
     testImplementation("io.kotest:kotest-assertions-core:5.5.4")
 }

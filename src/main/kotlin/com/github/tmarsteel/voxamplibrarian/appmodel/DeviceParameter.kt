@@ -14,6 +14,11 @@ sealed interface DeviceParameter<Value : Any> {
         rejectInvalidValue(value as Value)
     }
 
+    /**
+     * Each of these represents a single way that a user-configurable parameter
+     * affects the final sound. This is under the assumption that no device has
+     * two knobs that do the same thing; these IDs are assumed to unique in one device.
+     */
     enum class Id {
         GAIN,
         EQ_BASS,
@@ -56,7 +61,7 @@ sealed interface DeviceParameter<Value : Any> {
 class ContinuousRangeParameter(
     override val id: DeviceParameter.Id,
     val valueRange: IntRange = 0..100,
-    val semantic: Semantic = Semantic.ZERO_TO_TEN,
+    val semantic: Semantic = Semantic.UNITLESS_SINGLE_DIGIT_PRECISION,
 ) : DeviceParameter<Int> {
     override val valueType = Int::class
     override fun rejectInvalidValue(value: Int) {
@@ -64,8 +69,8 @@ class ContinuousRangeParameter(
     }
 
     enum class Semantic {
-        /** actual value from 0-100, displayed as 0.0 to 10.0 */
-        ZERO_TO_TEN,
+        /** value has no unit. The semantic value is one tenth of the actual value (soo 54 actual = 5.4 semantic) */
+        UNITLESS_SINGLE_DIGIT_PRECISION,
 
         /** actual value in millihertz */
         FREQUENCY,

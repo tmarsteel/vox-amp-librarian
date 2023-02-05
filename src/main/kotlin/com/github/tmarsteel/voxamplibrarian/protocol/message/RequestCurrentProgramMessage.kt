@@ -2,7 +2,7 @@ package com.github.tmarsteel.voxamplibrarian.protocol.message
 
 import com.github.tmarsteel.voxamplibrarian.BinaryOutput
 
-class RequestCurrentProgramMessage : HostInitiatedExchange<CurrentProgramResponse> {
+class RequestCurrentProgramMessage : MessageToAmp<CurrentProgramResponse> {
     override val responseFactory = CurrentProgramResponse
 
     override fun writeTo(out: BinaryOutput) {

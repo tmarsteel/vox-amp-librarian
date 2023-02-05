@@ -17,7 +17,7 @@ abstract class AmplifierDescriptor(
         val BRIGHT_CAP_PARAMETER = BooleanParameter(DeviceParameter.Id.AMP_BRIGHT_CAP)
         val PRESENCE_PAREMTER = ContinuousRangeParameter(DeviceParameter.Id.AMP_PRESENCE)
         val TONE_PARAMETER = ContinuousRangeParameter(DeviceParameter.Id.AMP_TONE)
-        val ALL_AMP_PARAMETERS = listOf<DeviceParameter>(
+        val ALL_AMP_PARAMETERS = listOf(
             ContinuousRangeParameter(DeviceParameter.Id.GAIN),
             ContinuousRangeParameter(DeviceParameter.Id.EQ_BASS),
             ContinuousRangeParameter(DeviceParameter.Id.EQ_MIDDLE),
