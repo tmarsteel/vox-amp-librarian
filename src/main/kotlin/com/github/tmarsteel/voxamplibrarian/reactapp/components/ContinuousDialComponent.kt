@@ -19,7 +19,6 @@ external interface ContinuousDialComponentProps : Props {
     var descriptor: ContinuousRangeParameter
     var value: Int
     var onValueChanged: ((Int) -> Unit)?
-    var label: String?
 }
 
 val ContinuousDialComponent = FC<ContinuousDialComponentProps> { props ->
@@ -47,14 +46,12 @@ val ContinuousDialComponent = FC<ContinuousDialComponentProps> { props ->
             }
             parameterValue(props.descriptor, props.value)
         }
-        if (props.label != null) {
-            span {
-                css {
-                    display = Display.block
-                    textAlign = TextAlign.center
-                }
-                +props.label!!
+        span {
+            css {
+                display = Display.block
+                textAlign = TextAlign.center
             }
+            +props.descriptor.id.name
         }
     }
 }

@@ -30,6 +30,25 @@ abstract class AmplifierDescriptor(
             DiscreteChoiceParameter<TubeBias>(DeviceParameter.Id.AMP_TUBE_BIAS),
             DiscreteChoiceParameter<AmpClass>(DeviceParameter.Id.AMP_CLASS)
         )
+
+        val DEFAULT: DeviceConfiguration<AmplifierDescriptor> = DeviceConfiguration(
+            DeluxeClVibratoAmplifier,
+            mapOf(
+                DeviceParameter.Id.GAIN to 3.0,
+                DeviceParameter.Id.EQ_BASS to 4.0,
+                DeviceParameter.Id.EQ_MIDDLE to 5.0,
+                DeviceParameter.Id.EQ_TREBLE to 5.0,
+                DeviceParameter.Id.AMP_VOLUME to 6.0,
+                DeviceParameter.Id.RESONANCE to 1.0,
+                DeviceParameter.Id.AMP_PRESENCE to 5.0,
+                DeviceParameter.Id.AMP_NOISE_REDUCTION_SENSITIVITY to 2.0,
+                DeviceParameter.Id.AMP_LOW_CUT to false,
+                DeviceParameter.Id.AMP_MID_BOOST to false,
+                DeviceParameter.Id.AMP_BRIGHT_CAP to true,
+                DeviceParameter.Id.AMP_TUBE_BIAS to TubeBias.OFF,
+                DeviceParameter.Id.AMP_CLASS to AmpClass.AB,
+            )
+        )
     }
 }
 
