@@ -8,6 +8,9 @@ sealed interface DeviceParameter {
         EQ_BASS,
         EQ_MIDDLE,
         EQ_TREBLE,
+        EQ_LOW_CUT,
+        EQ_HIGH_CUT,
+        EQ_TONE,
         AMP_VOLUME,
         AMP_PRESENCE,
         AMP_RESONANCE,
@@ -17,6 +20,15 @@ sealed interface DeviceParameter {
         AMP_LOW_CUT,
         AMP_MID_BOOST,
         AMP_BRIGHT_CAP,
+        PEDAL_LEVEL,
+        PEDAL_MIX,
+        COMP_SENSITIVITY,
+        COMP_ATTACK,
+        COMP_VOICE,
+        CHORUS_SPEED,
+        CHORUS_DEPTH,
+        CHORUS_MANUAL,
+        OVERDRIVE_DRIVE,
     }
 }
 
@@ -27,7 +39,10 @@ class ContinuousUnitlessRangeParameter(
 ) : DeviceParameter {
     enum class Semantic {
         /** actual value from 0-100, displayed as 0.0 to 10.0 */
-        ZERO_TO_TEN
+        ZERO_TO_TEN,
+
+        /** actual value in millihertz */
+        FREQUENCY,
     }
 }
 
