@@ -24,6 +24,7 @@ abstract class AmplifierDescriptor(
             ContinuousRangeParameter(DeviceParameter.Id.EQ_TREBLE),
             ContinuousRangeParameter(DeviceParameter.Id.AMP_VOLUME),
             ContinuousRangeParameter(DeviceParameter.Id.RESONANCE),
+            ContinuousRangeParameter(DeviceParameter.Id.AMP_NOISE_REDUCTION_SENSITIVITY),
             BooleanParameter(DeviceParameter.Id.AMP_LOW_CUT),
             BooleanParameter(DeviceParameter.Id.AMP_MID_BOOST),
             DiscreteChoiceParameter<TubeBias>(DeviceParameter.Id.AMP_TUBE_BIAS),

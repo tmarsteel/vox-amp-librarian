@@ -20,6 +20,7 @@ sealed interface DeviceParameter {
         AMP_LOW_CUT,
         AMP_MID_BOOST,
         AMP_BRIGHT_CAP,
+        AMP_NOISE_REDUCTION_SENSITIVITY,
         PEDAL_LEVEL,
         PEDAL_MIX,
         MODULATION_SPEED,
