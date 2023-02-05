@@ -15,7 +15,7 @@ data class UserProgramResponse(
         val PREFIX = byteArrayOf(
             0x30, 0x00, 0x01, 0x34, 0x4c, 0x00
         )
-
+        override val type = UserProgramResponse::class
         override fun parse(fullMessage: BinaryInput): UserProgramResponse {
             requirePrefix(fullMessage, PREFIX, UserProgramResponse::class)
             val slot = ProgramSlot.readFrom(fullMessage)

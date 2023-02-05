@@ -21,6 +21,7 @@ data class EffectDialTurnedMessage(
     companion object : MidiProtocolMessage.Factory<EffectDialTurnedMessage> {
         val PREFIX = byteArrayOf(0x30, 0x00, 0x01, 0x34, 0x41)
 
+        override val type = EffectDialTurnedMessage::class
         override fun parse(fullMessage: BinaryInput): EffectDialTurnedMessage {
             requirePrefix(fullMessage, PREFIX, EffectDialTurnedMessage::class)
             return EffectDialTurnedMessage(

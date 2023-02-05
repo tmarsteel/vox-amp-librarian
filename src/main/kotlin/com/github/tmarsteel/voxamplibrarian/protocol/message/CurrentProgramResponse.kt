@@ -11,6 +11,7 @@ data class CurrentProgramResponse(
     companion object : MidiProtocolMessage.Factory<CurrentProgramResponse> {
         val PREFIX = byteArrayOf(0x30, 0x00, 0x01, 0x34, 0x10)
 
+        override val type = CurrentProgramResponse::class
         override fun parse(fullMessage: BinaryInput): CurrentProgramResponse {
             requirePrefix(fullMessage, PREFIX, CurrentProgramResponse::class)
             val program = Program.readFrom(fullMessage)

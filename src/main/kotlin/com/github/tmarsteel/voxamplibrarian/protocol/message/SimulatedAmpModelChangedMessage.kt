@@ -20,6 +20,7 @@ data class SimulatedAmpModelChangedMessage(
 
     companion object : MidiProtocolMessage.Factory<SimulatedAmpModelChangedMessage> {
         val PREFIX = byteArrayOf(0x30, 0x00, 0x01, 0x34, 0x41, 0x03, 0x00)
+        override val type = SimulatedAmpModelChangedMessage::class
         override fun parse(fullMessage: BinaryInput): SimulatedAmpModelChangedMessage {
             requirePrefix(fullMessage, PREFIX, SimulatedAmpModelChangedMessage::class)
             val model = AmpModel.readFrom(fullMessage)

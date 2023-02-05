@@ -12,6 +12,7 @@ class CurrentlySelectedProgramSlotResponse(
         val PREFIX = byteArrayOf(
             0x30, 0x00, 0x01, 0x34, 0x42, 0x00
         )
+        override val type = CurrentlySelectedProgramSlotResponse::class
         override fun parse(fullMessage: BinaryInput): CurrentlySelectedProgramSlotResponse {
             requirePrefix(fullMessage, PREFIX, CurrentlySelectedProgramSlotResponse::class)
             val slot = ProgramSlot.readFrom(fullMessage)

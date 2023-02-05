@@ -17,6 +17,7 @@ data class AmpDialTurnedMessage(
 
     companion object : MidiProtocolMessage.Factory<AmpDialTurnedMessage> {
         val PREFIX = byteArrayOf(0x30, 0x00, 0x01, 0x34, 0x41, 0x04)
+        override val type = AmpDialTurnedMessage::class
         override fun parse(fullMessage: BinaryInput): AmpDialTurnedMessage {
             requirePrefix(fullMessage, PREFIX, AmpDialTurnedMessage::class)
 
