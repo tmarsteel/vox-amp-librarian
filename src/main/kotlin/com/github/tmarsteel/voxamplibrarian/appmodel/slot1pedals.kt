@@ -5,9 +5,9 @@ interface Slot1PedalDescriptor
 object CompressorPedalDescriptor : Slot1PedalDescriptor, DeviceDescriptor {
     override val name = "Compressor"
     override val parameters = listOf(
-        ContinuousUnitlessRangeParameter(DeviceParameter.Id.COMP_SENSITIVITY),
-        ContinuousUnitlessRangeParameter(DeviceParameter.Id.PEDAL_LEVEL),
-        ContinuousUnitlessRangeParameter(DeviceParameter.Id.COMP_ATTACK),
+        ContinuousRangeParameter(DeviceParameter.Id.COMP_SENSITIVITY),
+        ContinuousRangeParameter(DeviceParameter.Id.PEDAL_LEVEL),
+        ContinuousRangeParameter(DeviceParameter.Id.COMP_ATTACK),
         DiscreteChoiceParameter<Voice>(DeviceParameter.Id.COMP_VOICE),
     )
 
@@ -21,16 +21,16 @@ object CompressorPedalDescriptor : Slot1PedalDescriptor, DeviceDescriptor {
 object ChorusPedalDescriptor : Slot1PedalDescriptor, DeviceDescriptor {
     override val name = "Chorus"
     override val parameters = listOf(
-        ContinuousUnitlessRangeParameter(
-            id = DeviceParameter.Id.CHORUS_SPEED,
-            valueRange = 0x0064..0x4e10,
-            semantic = ContinuousUnitlessRangeParameter.Semantic.FREQUENCY,
+        ContinuousRangeParameter(
+            id = DeviceParameter.Id.MODULATION_SPEED,
+            valueRange = 100..10_000,
+            semantic = ContinuousRangeParameter.Semantic.FREQUENCY,
         ),
-        ContinuousUnitlessRangeParameter(DeviceParameter.Id.CHORUS_DEPTH),
-        ContinuousUnitlessRangeParameter(DeviceParameter.Id.CHORUS_MANUAL),
-        ContinuousUnitlessRangeParameter(DeviceParameter.Id.PEDAL_MIX),
-        ContinuousUnitlessRangeParameter(DeviceParameter.Id.EQ_LOW_CUT),
-        ContinuousUnitlessRangeParameter(DeviceParameter.Id.EQ_HIGH_CUT),
+        ContinuousRangeParameter(DeviceParameter.Id.MODULATION_DEPTH),
+        ContinuousRangeParameter(DeviceParameter.Id.MODULATION_MANUAL),
+        ContinuousRangeParameter(DeviceParameter.Id.PEDAL_MIX),
+        ContinuousRangeParameter(DeviceParameter.Id.EQ_LOW_CUT),
+        ContinuousRangeParameter(DeviceParameter.Id.EQ_HIGH_CUT),
     )
 }
 
@@ -38,12 +38,12 @@ abstract class OverdrivePedalDescriptor(
     override val name: String,
 ) : Slot1PedalDescriptor, DeviceDescriptor {
     override val parameters = listOf(
-        ContinuousUnitlessRangeParameter(DeviceParameter.Id.OVERDRIVE_DRIVE),
-        ContinuousUnitlessRangeParameter(DeviceParameter.Id.EQ_TONE),
-        ContinuousUnitlessRangeParameter(DeviceParameter.Id.PEDAL_LEVEL),
-        ContinuousUnitlessRangeParameter(DeviceParameter.Id.EQ_TREBLE),
-        ContinuousUnitlessRangeParameter(DeviceParameter.Id.EQ_MIDDLE),
-        ContinuousUnitlessRangeParameter(DeviceParameter.Id.EQ_BASS),
+        ContinuousRangeParameter(DeviceParameter.Id.OVERDRIVE_DRIVE),
+        ContinuousRangeParameter(DeviceParameter.Id.EQ_TONE),
+        ContinuousRangeParameter(DeviceParameter.Id.PEDAL_LEVEL),
+        ContinuousRangeParameter(DeviceParameter.Id.EQ_TREBLE),
+        ContinuousRangeParameter(DeviceParameter.Id.EQ_MIDDLE),
+        ContinuousRangeParameter(DeviceParameter.Id.EQ_BASS),
     )
 }
 

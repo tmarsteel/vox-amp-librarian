@@ -13,7 +13,7 @@ sealed interface DeviceParameter {
         EQ_TONE,
         AMP_VOLUME,
         AMP_PRESENCE,
-        AMP_RESONANCE,
+        RESONANCE,
         AMP_TONE,
         AMP_TUBE_BIAS,
         AMP_CLASS,
@@ -22,17 +22,21 @@ sealed interface DeviceParameter {
         AMP_BRIGHT_CAP,
         PEDAL_LEVEL,
         PEDAL_MIX,
+        MODULATION_SPEED,
+        MODULATION_DEPTH,
+        MODULATION_MANUAL,
         COMP_SENSITIVITY,
         COMP_ATTACK,
         COMP_VOICE,
-        CHORUS_SPEED,
-        CHORUS_DEPTH,
-        CHORUS_MANUAL,
         OVERDRIVE_DRIVE,
+        TREMOLO_DUTY,
+        TREMOLO_SHAPE,
+        DELAY_TIME,
+        DELAY_FEEDBACK,
     }
 }
 
-class ContinuousUnitlessRangeParameter(
+class ContinuousRangeParameter(
     override val id: DeviceParameter.Id,
     val valueRange: IntRange = 0..100,
     val semantic: Semantic = Semantic.ZERO_TO_TEN,
@@ -43,6 +47,9 @@ class ContinuousUnitlessRangeParameter(
 
         /** actual value in millihertz */
         FREQUENCY,
+
+        /** actual value in milliseconds */
+        TIME,
     }
 }
 

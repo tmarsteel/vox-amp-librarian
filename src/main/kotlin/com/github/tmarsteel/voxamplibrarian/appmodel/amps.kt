@@ -15,15 +15,15 @@ abstract class AmplifierDescriptor(
 
     companion object {
         val BRIGHT_CAP_PARAMETER = BooleanParameter(DeviceParameter.Id.AMP_BRIGHT_CAP)
-        val PRESENCE_PAREMTER = ContinuousUnitlessRangeParameter(DeviceParameter.Id.AMP_PRESENCE)
-        val TONE_PARAMETER = ContinuousUnitlessRangeParameter(DeviceParameter.Id.AMP_TONE)
+        val PRESENCE_PAREMTER = ContinuousRangeParameter(DeviceParameter.Id.AMP_PRESENCE)
+        val TONE_PARAMETER = ContinuousRangeParameter(DeviceParameter.Id.AMP_TONE)
         val ALL_AMP_PARAMETERS = listOf<DeviceParameter>(
-            ContinuousUnitlessRangeParameter(DeviceParameter.Id.GAIN),
-            ContinuousUnitlessRangeParameter(DeviceParameter.Id.EQ_BASS),
-            ContinuousUnitlessRangeParameter(DeviceParameter.Id.EQ_MIDDLE),
-            ContinuousUnitlessRangeParameter(DeviceParameter.Id.EQ_TREBLE),
-            ContinuousUnitlessRangeParameter(DeviceParameter.Id.AMP_VOLUME),
-            ContinuousUnitlessRangeParameter(DeviceParameter.Id.AMP_RESONANCE),
+            ContinuousRangeParameter(DeviceParameter.Id.GAIN),
+            ContinuousRangeParameter(DeviceParameter.Id.EQ_BASS),
+            ContinuousRangeParameter(DeviceParameter.Id.EQ_MIDDLE),
+            ContinuousRangeParameter(DeviceParameter.Id.EQ_TREBLE),
+            ContinuousRangeParameter(DeviceParameter.Id.AMP_VOLUME),
+            ContinuousRangeParameter(DeviceParameter.Id.RESONANCE),
             BooleanParameter(DeviceParameter.Id.AMP_LOW_CUT),
             BooleanParameter(DeviceParameter.Id.AMP_MID_BOOST),
             DiscreteChoiceParameter<TubeBias>(DeviceParameter.Id.AMP_TUBE_BIAS),
