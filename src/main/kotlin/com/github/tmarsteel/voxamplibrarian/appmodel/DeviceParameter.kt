@@ -33,6 +33,10 @@ sealed interface DeviceParameter {
         TREMOLO_SHAPE,
         DELAY_TIME,
         DELAY_FEEDBACK,
+        REVERB_TIME,
+        REVERB_PRE_DELAY,
+        REVERB_LOW_DAMP,
+        REVERB_HIGH_DAMP,
     }
 }
 
