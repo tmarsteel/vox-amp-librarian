@@ -19,7 +19,7 @@ value class ProgramName(val name: String) {
         fun decode(fromProtocol: ByteArray): ProgramName {
             require(fromProtocol.size == FIXED_LENGTH)
             return fromProtocol
-                .map { it.toChar() }
+                .map { it.toInt().toChar() }
                 .joinToString()
                 .let(String::trim)
                 .let(::ProgramName)

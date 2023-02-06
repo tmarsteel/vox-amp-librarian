@@ -3,6 +3,7 @@ package com.github.tmarsteel.voxamplibrarian.reactapp.components
 import com.github.tmarsteel.voxamplibrarian.appmodel.BooleanParameter
 import com.github.tmarsteel.voxamplibrarian.appmodel.ContinuousRangeParameter
 import com.github.tmarsteel.voxamplibrarian.appmodel.DeviceParameter
+import com.github.tmarsteel.voxamplibrarian.appmodel.DiscreteChoiceParameter
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML.span
@@ -26,6 +27,13 @@ val ParameterComponent = FC<ParameterComponentProps> { props ->
             BooleanParameterComponent {
                 descriptor = parameter
                 value = props.value as Boolean
+                onValueChanged = props.onValueChanged
+            }
+        }
+        is DiscreteChoiceParameter<*> -> {
+            DiscreteChoiceParameterComponent {
+                descriptor = parameter
+                value = props.value
                 onValueChanged = props.onValueChanged
             }
         }
