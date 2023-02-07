@@ -5,6 +5,7 @@ import com.github.tmarsteel.voxamplibrarian.appmodel.DeviceConfiguration
 import com.github.tmarsteel.voxamplibrarian.appmodel.DeviceDescriptor
 import com.github.tmarsteel.voxamplibrarian.appmodel.DeviceParameter
 import com.github.tmarsteel.voxamplibrarian.reactapp.components.DeviceComponent
+import com.github.tmarsteel.voxamplibrarian.reactapp.components.DeviceTypeSelectorComponent
 import csstype.ClassName
 import kotlinx.browser.document
 import react.FC
@@ -19,6 +20,19 @@ val AppComponent = FC<Props> {
     var ampConfig by useState(AmplifierDescriptor.DEFAULT)
     div {
         className = ClassName("container")
+        div {
+            className = ClassName("row")
+            div  {
+                className = ClassName("col-12")
+                DeviceTypeSelectorComponent {
+                    types = AmplifierDescriptor.ALL
+                    value = ampConfig.descriptor
+                    onChanged = { newType ->
+                        ampConfig = DeviceConfiguration(newType as AmplifierDescriptor, newType.defaults)
+                    }
+                }
+            }
+        }
         DeviceComponent {
             configuration = ampConfig
             onValueChanged = { param, newValue ->

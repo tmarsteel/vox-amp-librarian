@@ -55,6 +55,29 @@ abstract class AmplifierDescriptor(
             VoxAc30Amplifier,
             VoxAc30Amplifier.defaults,
         )
+
+        val ALL: List<AmplifierDescriptor> = listOf(
+            DeluxeClNormalAmplifier,
+            DeluxeClVibratoAmplifier,
+            Tweed4X10BrightAmplifier,
+            Tweed4X10NormalAmplifier,
+            BoutiqueClAmplifier,
+            BoutiqueOdAmplifier,
+            VoxAc30Amplifier,
+            VoxAc30TbAmplifier,
+            Brit1959TrebleAmplifier,
+            Brit1959NormalAmplifier,
+            Brit800Amplifier,
+            BritVmAmplifier,
+            SlOdAmplifier,
+            DoubleRecAmplifier,
+            CaliElationAmplifier,
+            EruptThreeChannelTwoAmplifier,
+            EruptThreeChannelThreeAmplifier,
+            BoutiqueMetalAmplifier,
+            BritOrMkTwoAmplifier,
+            OriginalCleanAmplifier,
+        )
     }
 }
 

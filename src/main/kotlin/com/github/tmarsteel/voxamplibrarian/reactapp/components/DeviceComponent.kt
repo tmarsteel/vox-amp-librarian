@@ -16,12 +16,6 @@ external interface DeviceComponentProps : Props {
 val DeviceComponent = FC<DeviceComponentProps> { props ->
     div {
         className = ClassName("row")
-        div {
-            className = ClassName("col-12")
-            span {
-                +props.configuration.descriptor.name
-            }
-        }
         for (parameter in props.configuration.descriptor.parameters) {
             div {
                 className = ClassName("col-2 mt-4")
