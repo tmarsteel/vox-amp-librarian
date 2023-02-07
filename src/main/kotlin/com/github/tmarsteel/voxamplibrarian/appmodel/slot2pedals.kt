@@ -17,6 +17,16 @@ object FlangerPedalDescriptor : SlotTwoPedalDescriptor {
         ContinuousRangeParameter(DeviceParameter.Id.EQ_HIGH_CUT),
         ContinuousRangeParameter(DeviceParameter.Id.RESONANCE),
     )
+
+    override val defaults = mapOf(
+        DeviceParameter.Id.PEDAL_ENABLED to false,
+        DeviceParameter.Id.MODULATION_SPEED to 100,
+        DeviceParameter.Id.MODULATION_DEPTH to 50,
+        DeviceParameter.Id.MODULATION_MANUAL to 77,
+        DeviceParameter.Id.EQ_LOW_CUT to false,
+        DeviceParameter.Id.EQ_HIGH_CUT to false,
+        DeviceParameter.Id.RESONANCE to 35,
+    )
 }
 
 abstract class PhaserPedalDescriptor(
@@ -32,6 +42,14 @@ abstract class PhaserPedalDescriptor(
         ContinuousRangeParameter(DeviceParameter.Id.RESONANCE),
         ContinuousRangeParameter(DeviceParameter.Id.MODULATION_MANUAL),
         ContinuousRangeParameter(DeviceParameter.Id.MODULATION_DEPTH),
+    )
+
+    override val defaults = mapOf(
+        DeviceParameter.Id.PEDAL_ENABLED to false,
+        DeviceParameter.Id.MODULATION_SPEED to 100,
+        DeviceParameter.Id.RESONANCE to 50,
+        DeviceParameter.Id.MODULATION_MANUAL to 77,
+        DeviceParameter.Id.MODULATION_DEPTH to 0,
     )
 }
 
@@ -53,6 +71,15 @@ object TremoloPedalDescriptor : SlotTwoPedalDescriptor {
         ContinuousRangeParameter(DeviceParameter.Id.TREMOLO_SHAPE),
         ContinuousRangeParameter(DeviceParameter.Id.PEDAL_LEVEL),
     )
+
+    override val defaults = mapOf(
+        DeviceParameter.Id.PEDAL_ENABLED to false,
+        DeviceParameter.Id.MODULATION_SPEED to 1650,
+        DeviceParameter.Id.MODULATION_DEPTH to 50,
+        DeviceParameter.Id.TREMOLO_DUTY to 77,
+        DeviceParameter.Id.TREMOLO_SHAPE to 0,
+        DeviceParameter.Id.PEDAL_LEVEL to 1,
+    )
 }
 
 abstract class DelayPedalDescriptor(
@@ -70,6 +97,16 @@ abstract class DelayPedalDescriptor(
         ContinuousRangeParameter(DeviceParameter.Id.EQ_TONE),
         ContinuousRangeParameter(DeviceParameter.Id.MODULATION_SPEED),
         ContinuousRangeParameter(DeviceParameter.Id.MODULATION_DEPTH),
+    )
+
+    override val defaults = mapOf(
+        DeviceParameter.Id.PEDAL_ENABLED to false,
+        DeviceParameter.Id.DELAY_TIME to 30,
+        DeviceParameter.Id.PEDAL_LEVEL to 50,
+        DeviceParameter.Id.DELAY_FEEDBACK to 77,
+        DeviceParameter.Id.EQ_TONE to 50,
+        DeviceParameter.Id.MODULATION_SPEED to 10,
+        DeviceParameter.Id.MODULATION_DEPTH to 0,
     )
 }
 

@@ -19,12 +19,10 @@ val AppComponent = FC<Props> {
     var ampConfig by useState(AmplifierDescriptor.DEFAULT)
     div {
         className = ClassName("container")
-        div {
-            DeviceComponent {
-                configuration = ampConfig
-                onValueChanged = { param, newValue ->
-                    ampConfig = ampConfig.withValue(param as DeviceParameter<Any>, newValue)
-                }
+        DeviceComponent {
+            configuration = ampConfig
+            onValueChanged = { param, newValue ->
+                ampConfig = ampConfig.withValue(param as DeviceParameter<Any>, newValue)
             }
         }
     }

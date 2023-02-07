@@ -12,6 +12,14 @@ object CompressorPedalDescriptor : SlotOnePedalDescriptor {
         DiscreteChoiceParameter<Voice>(DeviceParameter.Id.COMP_VOICE),
     )
 
+    override val defaults = mapOf(
+        DeviceParameter.Id.PEDAL_ENABLED to false,
+        DeviceParameter.Id.COMP_SENSITIVITY to 50,
+        DeviceParameter.Id.PEDAL_LEVEL to 67,
+        DeviceParameter.Id.COMP_ATTACK to 57,
+        DeviceParameter.Id.COMP_VOICE to Voice.TWO,
+    )
+
     enum class Voice {
         ONE,
         TWO,
@@ -31,8 +39,17 @@ object ChorusPedalDescriptor : SlotOnePedalDescriptor {
         ContinuousRangeParameter(DeviceParameter.Id.MODULATION_DEPTH),
         ContinuousRangeParameter(DeviceParameter.Id.MODULATION_MANUAL),
         ContinuousRangeParameter(DeviceParameter.Id.PEDAL_MIX),
-        ContinuousRangeParameter(DeviceParameter.Id.EQ_LOW_CUT),
-        ContinuousRangeParameter(DeviceParameter.Id.EQ_HIGH_CUT),
+        BooleanParameter(DeviceParameter.Id.EQ_LOW_CUT),
+        BooleanParameter(DeviceParameter.Id.EQ_HIGH_CUT),
+    )
+    override val defaults = mapOf(
+        DeviceParameter.Id.PEDAL_ENABLED to false,
+        DeviceParameter.Id.MODULATION_SPEED to 100,
+        DeviceParameter.Id.MODULATION_DEPTH to 67,
+        DeviceParameter.Id.MODULATION_MANUAL to 57,
+        DeviceParameter.Id.PEDAL_MIX to 1,
+        DeviceParameter.Id.EQ_LOW_CUT to false,
+        DeviceParameter.Id.EQ_HIGH_CUT to false,
     )
 }
 
@@ -47,6 +64,16 @@ abstract class OverdrivePedalDescriptor(
         ContinuousRangeParameter(DeviceParameter.Id.EQ_TREBLE),
         ContinuousRangeParameter(DeviceParameter.Id.EQ_MIDDLE),
         ContinuousRangeParameter(DeviceParameter.Id.EQ_BASS),
+    )
+
+    override val defaults = mapOf(
+        DeviceParameter.Id.PEDAL_ENABLED to false,
+        DeviceParameter.Id.OVERDRIVE_DRIVE to 50,
+        DeviceParameter.Id.EQ_TONE to 67,
+        DeviceParameter.Id.PEDAL_LEVEL to 57,
+        DeviceParameter.Id.EQ_TREBLE to 50,
+        DeviceParameter.Id.EQ_MIDDLE to 50,
+        DeviceParameter.Id.EQ_BASS to 50,
     )
 }
 

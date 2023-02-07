@@ -15,6 +15,14 @@ abstract class ReverbPedalDescriptor(
         ContinuousRangeParameter(DeviceParameter.Id.REVERB_LOW_DAMP),
         ContinuousRangeParameter(DeviceParameter.Id.REVERB_HIGH_DAMP),
     )
+
+    override val defaults = mapOf(
+        DeviceParameter.Id.PEDAL_MIX to 75,
+        DeviceParameter.Id.DELAY_TIME to 45,
+        DeviceParameter.Id.REVERB_PRE_DELAY to 0,
+        DeviceParameter.Id.REVERB_LOW_DAMP to 36,
+        DeviceParameter.Id.REVERB_HIGH_DAMP to 25,
+    )
 }
 
 object RoomReverbPedalDescriptor : ReverbPedalDescriptor("Room")
