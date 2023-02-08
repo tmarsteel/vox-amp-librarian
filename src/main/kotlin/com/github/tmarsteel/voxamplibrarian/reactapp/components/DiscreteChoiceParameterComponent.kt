@@ -3,6 +3,7 @@ package com.github.tmarsteel.voxamplibrarian.reactapp.components
 import com.github.tmarsteel.voxamplibrarian.appmodel.DiscreteChoiceParameter
 import csstype.Display
 import csstype.TextAlign
+import csstype.pct
 import emotion.react.css
 import react.FC
 import react.Props
@@ -46,6 +47,8 @@ val DiscreteChoiceParameterComponent = FC<DiscreteChoiceParameterComponentProps>
         css {
             textAlign = TextAlign.center
             display = Display.inlineBlock
+            width = 100.pct
         }
+        +props.descriptor.id.name
     }
 }

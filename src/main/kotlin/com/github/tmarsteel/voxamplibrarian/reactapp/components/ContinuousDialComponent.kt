@@ -26,7 +26,7 @@ val ContinuousDialComponent = FC<ContinuousDialComponentProps> { props ->
         input {
             css {
                 display = Display.inlineBlock
-                width = "calc(100% - 2.5rem)".unsafeCast<Width>()
+                width = "calc(100% - 5rem)".unsafeCast<Width>()
             }
             type = InputType.range
             min = props.descriptor.valueRange.first.toDouble()
@@ -39,9 +39,10 @@ val ContinuousDialComponent = FC<ContinuousDialComponentProps> { props ->
         }
         div {
             css {
-                textAlign = TextAlign.right
+                textAlign = TextAlign.left
                 display = Display.inlineBlock
-                width = 2.5.rem
+                width = 4.5.rem
+                paddingLeft = 0.5.rem
                 verticalAlign = VerticalAlign.top
             }
             parameterValue(props.descriptor, props.value)
