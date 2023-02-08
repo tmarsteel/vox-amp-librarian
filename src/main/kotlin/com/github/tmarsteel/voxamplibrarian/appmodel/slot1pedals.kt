@@ -1,6 +1,27 @@
 package com.github.tmarsteel.voxamplibrarian.appmodel
 
-interface SlotOnePedalDescriptor : DeviceDescriptor
+import com.github.tmarsteel.voxamplibrarian.protocol.Slot1PedalType
+
+interface SlotOnePedalDescriptor : DeviceDescriptor {
+    companion object {
+        val ALL = listOf(
+            CompressorPedalDescriptor,
+            ChorusPedalDescriptor,
+            TubeOdDescriptor,
+            GoldDriveDescriptor,
+            TrebleBoostDescriptor,
+            RcTurboDescriptor,
+            OrangeDistDescriptor,
+            FatDistDescriptor,
+            BritLeadDescriptor,
+            FuzzDescriptor,
+        )
+        val DEFAULT = DeviceConfiguration<SlotOnePedalDescriptor>(
+            CompressorPedalDescriptor,
+            CompressorPedalDescriptor.defaults,
+        )
+    }
+}
 
 object CompressorPedalDescriptor : SlotOnePedalDescriptor {
     override val name = "Compressor"

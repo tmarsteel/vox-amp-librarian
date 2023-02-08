@@ -1,6 +1,22 @@
 package com.github.tmarsteel.voxamplibrarian.appmodel
 
-interface SlotTwoPedalDescriptor : DeviceDescriptor
+interface SlotTwoPedalDescriptor : DeviceDescriptor {
+    companion object {
+        val ALL = listOf(
+            FlangerPedalDescriptor,
+            BlkPhaserDescriptor,
+            OrgPhaserOneDescriptor,
+            OrgPhaserTwoDescriptor,
+            TremoloPedalDescriptor,
+            TapeEchoDescriptor,
+            AnalogDelayDescriptor,
+        )
+        val DEFAULT = DeviceConfiguration<SlotTwoPedalDescriptor>(
+            FlangerPedalDescriptor,
+            FlangerPedalDescriptor.defaults,
+        )
+    }
+}
 
 object FlangerPedalDescriptor : SlotTwoPedalDescriptor {
     override val name = "Flanger"
@@ -13,8 +29,8 @@ object FlangerPedalDescriptor : SlotTwoPedalDescriptor {
         ),
         ContinuousRangeParameter(DeviceParameter.Id.MODULATION_DEPTH),
         ContinuousRangeParameter(DeviceParameter.Id.MODULATION_MANUAL),
-        ContinuousRangeParameter(DeviceParameter.Id.EQ_LOW_CUT),
-        ContinuousRangeParameter(DeviceParameter.Id.EQ_HIGH_CUT),
+        BooleanParameter(DeviceParameter.Id.EQ_LOW_CUT),
+        BooleanParameter(DeviceParameter.Id.EQ_HIGH_CUT),
         ContinuousRangeParameter(DeviceParameter.Id.RESONANCE),
     )
 

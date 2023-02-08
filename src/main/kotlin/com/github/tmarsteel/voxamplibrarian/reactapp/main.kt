@@ -1,11 +1,10 @@
 package com.github.tmarsteel.voxamplibrarian.reactapp
 
-import com.github.tmarsteel.voxamplibrarian.appmodel.AmplifierDescriptor
-import com.github.tmarsteel.voxamplibrarian.appmodel.DeviceConfiguration
-import com.github.tmarsteel.voxamplibrarian.appmodel.DeviceDescriptor
-import com.github.tmarsteel.voxamplibrarian.appmodel.DeviceParameter
+import com.github.tmarsteel.voxamplibrarian.appmodel.*
 import com.github.tmarsteel.voxamplibrarian.reactapp.components.DeviceComponent
+import com.github.tmarsteel.voxamplibrarian.reactapp.components.DeviceSlotComponent
 import com.github.tmarsteel.voxamplibrarian.reactapp.components.DeviceTypeSelectorComponent
+import com.github.tmarsteel.voxamplibrarian.reactapp.components.SimulationConfigurationComponent
 import csstype.ClassName
 import kotlinx.browser.document
 import react.FC
@@ -14,29 +13,19 @@ import react.Props
 import react.create
 import react.dom.client.createRoot
 import react.dom.html.ReactHTML.div
+import react.dom.html.ReactHTML.h2
 import react.useState
 
 val AppComponent = FC<Props> {
-    var ampConfig by useState(AmplifierDescriptor.DEFAULT)
+    var simulationConfig by useState(SimulationConfiguration.DEFAULT)
+
     div {
         className = ClassName("container")
-        div {
-            className = ClassName("row")
-            div  {
-                className = ClassName("col-12")
-                DeviceTypeSelectorComponent {
-                    types = AmplifierDescriptor.ALL
-                    value = ampConfig.descriptor
-                    onChanged = { newType ->
-                        ampConfig = DeviceConfiguration(newType as AmplifierDescriptor, newType.defaults)
-                    }
-                }
-            }
-        }
-        DeviceComponent {
-            configuration = ampConfig
-            onValueChanged = { param, newValue ->
-                ampConfig = ampConfig.withValue(param as DeviceParameter<Any>, newValue)
+
+        SimulationConfigurationComponent {
+            configuration = simulationConfig
+            onConfigurationChanged = { newConfig ->
+                simulationConfig = newConfig
             }
         }
     }
@@ -51,11 +40,3 @@ fun main() {
     })
 }
 
-private fun <D : DeviceDescriptor, T : Any> DeviceConfiguration<D>.withValue(parameter: DeviceParameter<T>, newValue: T): DeviceConfiguration<D> {
-    return copy(
-        values = values.toMutableMap()
-            .also {
-                it[parameter.id] = newValue
-            }
-    )
-}

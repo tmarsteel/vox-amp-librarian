@@ -12,4 +12,13 @@ data class SimulationConfiguration(
         pedalTwo.rejectInvalid()
         reverbPedal.rejectInvalid()
     }
+
+    companion object {
+        val DEFAULT = SimulationConfiguration(
+            AmplifierDescriptor.DEFAULT,
+            SlotOnePedalDescriptor.DEFAULT,
+            SlotTwoPedalDescriptor.DEFAULT,
+            ReverbPedalDescriptor.DEFAULT,
+        )
+    }
 }
