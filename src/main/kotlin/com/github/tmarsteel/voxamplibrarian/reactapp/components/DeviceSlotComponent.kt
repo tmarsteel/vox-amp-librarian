@@ -23,8 +23,7 @@ private val DeviceSlotComponentImpl = FC<DeviceSlotComponentProps<*>> { props ->
                 types = props.deviceTypes
                 value = props.configuration.descriptor
                 onChanged = { newType ->
-                    // TODO: carry as many settings to the new device
-                    props.onConfigurationChanged.unsafeCast<(DeviceConfiguration<*>) -> Unit>()(DeviceConfiguration(newType, newType.defaults))
+                    props.onConfigurationChanged.unsafeCast<(DeviceConfiguration<*>) -> Unit>()(props.configuration.withDescriptor(newType))
                 }
             }
         }

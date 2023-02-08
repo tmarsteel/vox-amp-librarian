@@ -10,4 +10,12 @@ data class DeviceConfiguration<out D : DeviceDescriptor>(
             parameter.rejectInvalidValue(values[parameter.id]!!)
         }
     }
+
+    fun <ND : DeviceDescriptor> withDescriptor(newDescriptor: ND): DeviceConfiguration<ND> {
+        val newValues = newDescriptor.parameters
+            .map { it.id }
+            .associateWith { id -> values[id] ?: newDescriptor.defaults.getValue(id) }
+
+        return DeviceConfiguration(newDescriptor, newValues)
+    }
 }
