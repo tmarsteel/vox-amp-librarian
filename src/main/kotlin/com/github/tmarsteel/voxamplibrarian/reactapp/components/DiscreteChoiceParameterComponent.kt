@@ -20,8 +20,13 @@ external interface DiscreteChoiceParameterComponentProps : Props {
     var onValueChanged: (Any) -> Unit
 }
 
+private object IdGenerator {
+    private var counter: Int = 0
+    fun getUniqueId(): String = "${counter++}"
+}
+
 val DiscreteChoiceParameterComponent = FC<DiscreteChoiceParameterComponentProps> { props ->
-    val radioId by useState("bla-${props.descriptor.id.name}") // TODO: random
+    val radioId by useState(IdGenerator.getUniqueId())
     props.descriptor.choices.forEachIndexed { choiceIndex, choice ->
         div {
             css {
