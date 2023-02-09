@@ -71,6 +71,7 @@ class VoxVtxAmplifierClient(
         val messageType = parsedMessage::class.simpleName!!
         val exchangeContinuation = pendingExchanges[messageType]
         if (exchangeContinuation != null) {
+            pendingExchanges.remove(messageType)
             GlobalScope.launch {
                 scheduleNextExchange(messageType)
             }
