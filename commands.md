@@ -318,12 +318,20 @@ Where `XX` is the sensitivity level (from 00 left to 64 right)
 
 # Host to AMP
 
-## Request Currently Selected User Program Slot
+## Request Current Mode
 
 `30 00 01 34 12`
 
-The amp responds with `30 00 01 34 42 00 XX`,
-where `XX` is the program identifier.
+The amp responds with `30 00 01 34 42 XX YY`, where
+
+* `XX` distinguishes between
+  * user program selected: `00`
+  * preset selected (all three banks): `01`
+  * manual mode: `02`
+* `YY` specifies further:
+  * for user program selected: it is the program identifier
+  * for preset selected: it is the preset identifier
+  * for manual mode: always `00`
 
 ## Request User Program
 
