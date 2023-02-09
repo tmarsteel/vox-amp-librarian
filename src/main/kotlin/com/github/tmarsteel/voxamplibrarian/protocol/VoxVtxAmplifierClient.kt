@@ -2,21 +2,9 @@ package com.github.tmarsteel.voxamplibrarian.protocol
 
 import com.github.tmarsteel.voxamplibrarian.BinaryInput
 import com.github.tmarsteel.voxamplibrarian.computeIfAbsent
-import com.github.tmarsteel.voxamplibrarian.protocol.message.AmpDialTurnedMessage
-import com.github.tmarsteel.voxamplibrarian.protocol.message.EffectDialTurnedMessage
-import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageParseException
-import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageToAmp
-import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageToHost
-import com.github.tmarsteel.voxamplibrarian.protocol.message.MidiProtocolMessage
-import com.github.tmarsteel.voxamplibrarian.protocol.message.NoiseReductionSensitivityChangedMessage
-import com.github.tmarsteel.voxamplibrarian.protocol.message.PedalActiveStateChangedMessage
-import com.github.tmarsteel.voxamplibrarian.protocol.message.ProgramSlotChangedMessage
-import com.github.tmarsteel.voxamplibrarian.protocol.message.SimulatedAmpModelChangedMessage
+import com.github.tmarsteel.voxamplibrarian.protocol.message.*
 import com.github.tmarsteel.voxamplibrarian.putIfAbsent
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -117,7 +105,9 @@ class VoxVtxAmplifierClient(
             }
         }
         send(request)
-        val response = onResponseReceivedSubroutine.await()
+        val response = withTimeout(timeout) {
+            onResponseReceivedSubroutine.await()
+        }
 
         @Suppress("UNCHECKED_CAST")
         return response as Response
