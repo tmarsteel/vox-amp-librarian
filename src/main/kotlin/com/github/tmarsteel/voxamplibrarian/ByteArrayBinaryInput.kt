@@ -2,21 +2,37 @@ package com.github.tmarsteel.voxamplibrarian
 
 import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageParseException
 
-class ByteArrayBinaryInput(private val data: ByteArray) : BinaryInput {
-    private var offset: Int = 0
+class ByteArrayBinaryInput(
+    private val data: ByteArray,
+
+    /**
+     * limits the view into [data], starts at [beginIndex] inclusive
+     */
+    private val beginIndex: Int = 0,
+
+    /**
+     * limits the view into [data], ends at [endIndex] inclusive
+     */
+    private val endIndex: Int = data.lastIndex
+) : BinaryInput {
+    init {
+        require(beginIndex in data.indices)
+        require(endIndex in data.indices)
+    }
+    private var position: Int = beginIndex
 
     override fun nextByte(): Byte {
-        if (offset >= data.size) {
+        if (position > endIndex) {
             throw MessageParseException.InvalidMessage("Message is too small, wanted to read more bytes but none available.")
         }
 
-        return data[offset++]
+        return data[position++]
     }
 
     override val bytesRemaining: Int
-        get() = data.size - offset
+        get() = endIndex - position + 1
 
     override fun seekToStart() {
-        offset = 0
+        position = beginIndex
     }
 }
