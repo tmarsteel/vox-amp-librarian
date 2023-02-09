@@ -118,9 +118,9 @@ data class Program(
             val encodedProgramName = ByteArray(ProgramName.FIXED_LENGTH)
             input.nextBytes(encodedProgramName, 0x00, 0x07)
             require(input.nextByte() == 0x00.toByte())
-            input.nextBytes(encodedProgramName, 0x08, 0x07)
+            input.nextBytes(encodedProgramName, 0x07, 0x07)
             require(input.nextByte() == 0x00.toByte())
-            input.nextBytes(encodedProgramName, 0x10, 0x02)
+            input.nextBytes(encodedProgramName, 0x0E, 0x02)
             val programName = ProgramName.decode(encodedProgramName)
 
             val nrSens = ZeroToTenDial.readFrom(input)

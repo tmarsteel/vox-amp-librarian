@@ -20,7 +20,7 @@ value class ProgramName(val name: String) {
             require(fromProtocol.size == FIXED_LENGTH)
             return fromProtocol
                 .map { it.toInt().toChar() }
-                .joinToString()
+                .joinToString(separator = "")
                 .let(String::trim)
                 .let(::ProgramName)
         }
