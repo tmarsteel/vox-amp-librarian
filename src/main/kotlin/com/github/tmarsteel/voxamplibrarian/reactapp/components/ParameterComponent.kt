@@ -17,6 +17,9 @@ external interface ParameterComponentProps : Props {
 val ParameterComponent = FC<ParameterComponentProps> { props ->
     when(val parameter = props.parameter) {
         is ContinuousRangeParameter -> {
+            if (props.value !is Int) {
+                console.log("uh oh", props.value)
+            }
             ContinuousDialComponent {
                 descriptor = parameter
                 value = props.value as Int

@@ -70,3 +70,9 @@ suspend fun <T> await(promise: Promise<T>): T {
         )
     }
 }
+
+fun String.parseHexStream(): ByteArray = this
+    .replace(Regex("\\s"), "")
+    .windowed(size = 2, step = 2)
+    .map { it.toInt(16).toByte() }
+    .toByteArray()

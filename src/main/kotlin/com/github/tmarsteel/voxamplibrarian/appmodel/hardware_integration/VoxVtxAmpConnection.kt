@@ -84,8 +84,8 @@ private fun Program.toConfiguration(): SimulationConfiguration {
                 DeviceParameter.Id.AMP_BRIGHT_CAP to brightCap,
                 DeviceParameter.Id.AMP_TUBE_BIAS to tubeBias,
                 DeviceParameter.Id.AMP_CLASS to ampClass,
-                DeviceParameter.Id.AMP_TONE to presence,
-                DeviceParameter.Id.AMP_PRESENCE to presence,
+                DeviceParameter.Id.AMP_TONE to presence.value.toInt(),
+                DeviceParameter.Id.AMP_PRESENCE to presence.value.toInt(),
             ),
         ),
         pedalOne = SlotOnePedalDescriptor.DEFAULT, // TODO
