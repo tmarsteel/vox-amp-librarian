@@ -45,6 +45,13 @@
 				console.log("received SysEx ACK");
 				return;
 			}
+
+			const messageHex = Array.from(message.data)
+					.slice(2, message.data.length - 1)
+					.map(n => n.hex())
+					.join(' ');
+
+			console.log("received SysEx message " + messageHex);
 			
 			if (message.data.length == 12 && message.data[2] == 0x30 && message.data[3] == 0x00
 			 && message.data[4] == 0x01 && message.data[5] == 0x34 && message.data[6] == 0x41 
@@ -54,13 +61,6 @@
 				console.log("received SysEx dial message: dial %o is at %o", dialNumber.hex(), value.hex());
 				return;
 			}
-		
-			
-			const messageHex = Array.from(message.data)
-				.slice(2, message.data.length - 1)
-				.map(n => n.hex())
-				.join(' ');
-			console.log("received SysEx message " + messageHex);
 		};
 		console.log("subscribe to messages on %o", vtxInput);
 		

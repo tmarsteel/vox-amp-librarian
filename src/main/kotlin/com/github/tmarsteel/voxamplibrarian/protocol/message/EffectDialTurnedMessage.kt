@@ -24,8 +24,16 @@ data class EffectDialTurnedMessage(
         override val type = EffectDialTurnedMessage::class
         override fun parse(fullMessage: BinaryInput): EffectDialTurnedMessage {
             requirePrefix(fullMessage, PREFIX, EffectDialTurnedMessage::class)
+            val slot = try {
+                PedalSlot.readFrom(fullMessage)
+            }
+            catch (ex: MessageParseException.InvalidMessage) {
+                // other settings have the same prefix (probably means different dial/parameter category)
+                // try those
+                throw MessageParseException.PrefixNotRecognized(EffectDialTurnedMessage::class)
+            }
             return EffectDialTurnedMessage(
-                PedalSlot.readFrom(fullMessage),
+                slot,
                 fullMessage.nextByte(),
                 TwoByteDial.readFrom(fullMessage),
             )
