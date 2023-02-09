@@ -23,7 +23,7 @@ class BufferedBinaryOutput(
         if (remaining < length) {
             buffer = buffer.copyOf((buffer.size * growthFactor).coerceAtLeast(writePosition + length))
         }
-        bytes.copyInto(buffer, writePosition, offset, offset + length - 1)
+        bytes.copyInto(buffer, writePosition, offset, offset + length)
         writePosition += length
     }
 
