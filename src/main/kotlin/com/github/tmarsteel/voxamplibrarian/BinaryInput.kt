@@ -9,8 +9,12 @@ interface BinaryInput {
     fun nextByte(): Byte
 
     fun nextBytes(target: ByteArray, offset: Int = 0, length: Int = target.size) {
-        if (offset !in target.indices || (offset + length - 1) !in target.indices) {
-            throw RuntimeException("Array index out of bounds")
+        if (offset !in target.indices) {
+            throw RuntimeException("Array index out of bounds: the starting offset $offset is not in the bounds of the target (total size ${target.size})")
+        }
+
+        if ((offset + length - 1) !in target.indices) {
+            throw RuntimeException("Array index out of bounds: the target cannot hold $length bytes from offset $offset on (total size only ${target.size})")
         }
 
         if (bytesRemaining < length) {
