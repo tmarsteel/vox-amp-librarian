@@ -13,9 +13,10 @@ import kotlin.time.Duration.Companion.seconds
 
 class VoxVtxAmplifierClient(
     val midiDevice: MidiDevice,
-    listener: ((MessageToHost) -> Unit)? = null,
-    val messageFactories: List<MidiProtocolMessage.Factory<out MessageToHost>> = DEFAULT_MESSAGE_FACTORIES,
+    listener: (suspend (MessageToHost) -> Unit)? = null,
+    messageFactories: List<MidiProtocolMessage.Factory<out MessageToHost>> = DEFAULT_MESSAGE_FACTORIES,
 ) {
+    private val messageFactories: MutableSet<MidiProtocolMessage.Factory<out MessageToHost>> = HashSet(messageFactories)
     /**
      * maps [KClass.simpleName] of the awaited response to the coroutine to handle it
      */
@@ -27,18 +28,22 @@ class VoxVtxAmplifierClient(
      * registering in [pendingExchanges].
      */
     private val queuedExchanges = mutableMapOf<String, ArrayDeque<Continuation<Unit>>>()
-    private val listeners = mutableListOf<(MessageToHost) -> Unit>()
+    private val listeners = mutableListOf<suspend (MessageToHost) -> Unit>()
     init {
         listener?.let(listeners::add)
 
-        midiDevice.incomingSysExMessageHandler = this::onSysExMessageReceived
+        midiDevice.incomingSysExMessageHandler = { manufacturerId, payload ->
+            GlobalScope.launch {
+                this@VoxVtxAmplifierClient.onSysExMessageReceived(manufacturerId, payload)
+            }
+        }
     }
 
     private suspend fun send(message: MessageToAmp<*>) {
         midiDevice.sendSysExMessage(MANUFACTURER_ID, message::writeTo)
     }
 
-    private fun onSysExMessageReceived(manufacturerId: Byte, payload: BinaryInput) {
+    private suspend fun onSysExMessageReceived(manufacturerId: Byte, payload: BinaryInput) {
         if (manufacturerId != MANUFACTURER_ID) {
             return
         }
@@ -88,6 +93,8 @@ class VoxVtxAmplifierClient(
     }
 
     suspend fun <Response : MessageToHost> exchange(request: MessageToAmp<Response>, timeout: Duration = DEFAULT_TIMEOUT): Response {
+        messageFactories.add(request.responseFactory)
+
         val responseType = request.responseFactory.type.simpleName!!
         // assure only one exchange per response type is in-flight at any given time
         if (responseType in pendingExchanges) {

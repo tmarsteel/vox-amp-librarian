@@ -2,6 +2,10 @@ package com.github.tmarsteel.voxamplibrarian
 
 import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageParseException
 import com.github.tmarsteel.voxamplibrarian.protocol.message.MidiProtocolMessage
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.js.Promise
 import kotlin.reflect.KClass
 
 internal fun requirePrefix(data: BinaryInput, prefix: ByteArray, targetType: KClass<out MidiProtocolMessage>) {
@@ -55,5 +59,14 @@ fun BinaryInput.preview(): String {
         "$previewBytesSting ... (${nBytesTotal - nPreviewBytes} more bytes)"
     } else {
         previewBytesSting
+    }
+}
+
+suspend fun <T> await(promise: Promise<T>): T {
+    return suspendCancellableCoroutine<T> { continuation ->
+        promise.then(
+            onFulfilled = { continuation.resume(it) },
+            onRejected = { continuation.resumeWithException(it) }
+        )
     }
 }
