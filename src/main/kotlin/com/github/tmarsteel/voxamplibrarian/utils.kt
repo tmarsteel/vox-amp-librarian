@@ -2,7 +2,6 @@ package com.github.tmarsteel.voxamplibrarian
 
 import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageParseException
 import com.github.tmarsteel.voxamplibrarian.protocol.message.MidiProtocolMessage
-import kotlinx.browser.window
 import kotlin.reflect.KClass
 
 internal fun requirePrefix(data: BinaryInput, prefix: ByteArray, targetType: KClass<out MidiProtocolMessage>) {
@@ -57,8 +56,4 @@ fun BinaryInput.preview(): String {
     } else {
         previewBytesSting
     }
-}
-
-fun defer(action: () -> Unit) {
-    window.setTimeout(action, 0)
 }
