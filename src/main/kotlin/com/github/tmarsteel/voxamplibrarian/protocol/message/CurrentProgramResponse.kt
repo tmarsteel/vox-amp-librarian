@@ -9,7 +9,7 @@ data class CurrentProgramResponse(
     val program: Program
 ) : MessageToHost {
     companion object : MidiProtocolMessage.Factory<CurrentProgramResponse> {
-        val PREFIX = byteArrayOf(0x30, 0x00, 0x01, 0x34, 0x10)
+        val PREFIX = byteArrayOf(0x30, 0x00, 0x01, 0x34, 0x40, 0x00)
 
         override val type = CurrentProgramResponse::class
         override fun parse(fullMessage: BinaryInput): CurrentProgramResponse {
