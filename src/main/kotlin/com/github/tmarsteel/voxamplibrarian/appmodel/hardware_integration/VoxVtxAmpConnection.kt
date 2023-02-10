@@ -70,6 +70,11 @@ class VoxVtxAmpConnection(
                     ))
                 }
             }
+            is NoiseReductionSensitivityChangedMessage -> {
+                return this.withConfiguration(this.configuration.copy(
+                    amplifier = this.configuration.amplifier.plus(diff)
+                ))
+            }
             else -> {
                 console.error("Unimplemented message ${diff::class.simpleName}")
                 return this
@@ -137,6 +142,10 @@ private fun Program.toConfiguration(): SimulationConfiguration {
         pedalTwo = slotTwoPedal,
         reverbPedal = reverbPedal,
     )
+}
+
+private fun SimulationConfiguration.toProgram(): Program {
+    TODO()
 }
 
 private val AmpModel.descriptor: AmplifierDescriptor get() = when(this) {
@@ -361,6 +370,10 @@ private fun <T : SlotOnePedalDescriptor> DeviceConfiguration<T>.plus(diff: Effec
             else -> error("Unknown slot 1 pedal (${descriptor::class.simpleName}) dial ${diff.dialIndex}")
         }
     }
+}
+
+private fun <T : AmplifierDescriptor> DeviceConfiguration<T>.plus(diff: NoiseReductionSensitivityChangedMessage): DeviceConfiguration<T> {
+    return withValue(DeviceParameter.Id.AMP_NOISE_REDUCTION_SENSITIVITY, diff.sensitivity.value.toInt())
 }
 
 private fun <T : SlotTwoPedalDescriptor> DeviceConfiguration<T>.plus(diff: EffectDialTurnedMessage): DeviceConfiguration<T> {
