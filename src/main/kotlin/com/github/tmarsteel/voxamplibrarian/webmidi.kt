@@ -10,10 +10,7 @@ import kotlinx.browser.window
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.consumeAsFlow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.runningFold
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.khronos.webgl.Uint8Array
@@ -63,11 +60,13 @@ private val midiState: Flow<MidiState> = flow {
             stateChangeEvents.send(event)
         }
     }
-    emit(MidiState.Available(midiAccess.inputs.toKotlinMap(), midiAccess.outputs.toKotlinMap()))
+
+    val initialState = MidiState.Available(midiAccess.inputs.toKotlinMap(), midiAccess.outputs.toKotlinMap())
+    emit(initialState)
     stateChangeEvents.consumeAsFlow().collect {
         emit(MidiState.Available(midiAccess.inputs.toKotlinMap(), midiAccess.outputs.toKotlinMap()))
     }
-}
+}.shareIn(GlobalScope, SharingStarted.Lazily, 0)
 
 val VOX_AMP_MIDI_DEVICE: Flow<MidiDevice?> = midiState
     .runningFold<MidiState, WebMidiVoxVtxDevice?>(null) { currentDevice, currentMidiState ->
@@ -100,6 +99,7 @@ private class WebMidiVoxVtxDevice private constructor(val input: MidiInput, val 
         writer(binaryOutput)
         binaryOutput.write(0xf7.toByte())
         val rawData = binaryOutput.contentAsArrayOfUnsignedInts()
+        console.info("> ${rawData.hex()}")
         output.send(rawData)
     }
 
@@ -107,8 +107,9 @@ private class WebMidiVoxVtxDevice private constructor(val input: MidiInput, val 
 
     init {
         input.onmidimessage = onmidimessage@{ messageEvent ->
+            console.info("< ${messageEvent.data.toByteArray().hex()}")
             if (!this::incomingSysExMessageHandler.isInitialized) {
-                console.warn("Dropping incoming message because no hanlder is registered.", messageEvent)
+                console.warn("Dropping incoming message because no handler is registered.", messageEvent)
                 return@onmidimessage
             }
 

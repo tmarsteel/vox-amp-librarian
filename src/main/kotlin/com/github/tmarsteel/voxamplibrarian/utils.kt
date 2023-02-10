@@ -39,6 +39,9 @@ internal fun requireEOF(data: BinaryInput) {
 
 internal fun Byte.hex(): String = "0x" + toString(16).padStart(2, '0')
 
+internal fun Array<Int>.hex(): String = joinToString(separator = " ", transform = { it.toString(16).padStart(2, '0') })
+internal fun ByteArray.hex(): String = joinToString(separator = " ", transform = { it.toUByte().toString(16).padStart(2, '0') })
+
 internal fun Byte.toBoolean(): Boolean = when(this) {
     0x00.toByte() -> false
     0x01.toByte() -> true
