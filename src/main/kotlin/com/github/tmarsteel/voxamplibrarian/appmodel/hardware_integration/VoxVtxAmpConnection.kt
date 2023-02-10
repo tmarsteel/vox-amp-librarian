@@ -75,6 +75,11 @@ class VoxVtxAmpConnection(
                     amplifier = this.configuration.amplifier.plus(diff)
                 ))
             }
+            is SimulatedAmpModelChangedMessage -> {
+                return this.withConfiguration(this.configuration.copy(
+                    amplifier = this.configuration.amplifier.withDescriptor(diff.model.descriptor)
+                ))
+            }
             else -> {
                 console.error("Unimplemented message ${diff::class.simpleName}")
                 return this

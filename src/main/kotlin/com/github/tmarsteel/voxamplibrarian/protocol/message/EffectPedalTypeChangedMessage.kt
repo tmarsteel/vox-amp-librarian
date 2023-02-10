@@ -32,7 +32,11 @@ class EffectPedalTypeChangedMessage(
         override val type = EffectPedalTypeChangedMessage::class
         override fun parse(fullMessage: BinaryInput): EffectPedalTypeChangedMessage {
             requirePrefix(fullMessage, PREFIX, EffectDialTurnedMessage::class)
-            val slot = PedalSlot.readFrom(fullMessage)
+            val slot = try {
+                PedalSlot.readFrom(fullMessage)
+            } catch (ex: MessageParseException.InvalidMessage) {
+                throw MessageParseException.PrefixNotRecognized(EffectPedalTypeChangedMessage::class)
+            }
             val pedalId = fullMessage.nextByte()
             val pedalType = when (slot) {
                 PedalSlot.PEDAL1 -> Slot1PedalType.ofProtocolValue(pedalId)
