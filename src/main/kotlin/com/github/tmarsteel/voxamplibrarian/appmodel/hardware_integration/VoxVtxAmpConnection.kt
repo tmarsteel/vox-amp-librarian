@@ -2,18 +2,11 @@ package com.github.tmarsteel.voxamplibrarian.appmodel.hardware_integration
 
 import com.github.tmarsteel.voxamplibrarian.VOX_AMP_MIDI_DEVICE
 import com.github.tmarsteel.voxamplibrarian.appmodel.*
-import com.github.tmarsteel.voxamplibrarian.protocol.AmpModel
-import com.github.tmarsteel.voxamplibrarian.protocol.MidiDevice
-import com.github.tmarsteel.voxamplibrarian.protocol.Program
-import com.github.tmarsteel.voxamplibrarian.protocol.VoxVtxAmplifierClient
-import com.github.tmarsteel.voxamplibrarian.protocol.message.CurrentModeResponse
-import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageToHost
-import com.github.tmarsteel.voxamplibrarian.protocol.message.RequestCurrentModeMessage
-import com.github.tmarsteel.voxamplibrarian.protocol.message.RequestCurrentProgramMessage
+import com.github.tmarsteel.voxamplibrarian.protocol.*
+import com.github.tmarsteel.voxamplibrarian.protocol.message.*
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.runningFold
+import kotlinx.coroutines.flow.*
 
 class VoxVtxAmpConnection(
     private val midiDevice: MidiDevice,
@@ -22,26 +15,128 @@ class VoxVtxAmpConnection(
 
     private val messagesToHost = Channel<MessageToHost>(Channel.BUFFERED)
     val ampState: Flow<VtxAmpState> = flow {
-        emit(fetchCurrentState())
-    }
+        val state = fetchCurrentState()
+        emit(state)
+        messagesToHost.consumeAsFlow()
+            .runningFold(state) { previousState, message ->
+                previousState.plus(message)
+            }
+            .collect {
+                emit(it)
+            }
+    }.shareIn(GlobalScope, SharingStarted.Lazily, 0)
 
     private suspend fun onMessage(message: MessageToHost) {
         messagesToHost.send(message)
     }
 
     private fun VtxAmpState.plus(diff: MessageToHost): VtxAmpState {
-        TODO()
+        when (diff) {
+            is AmpDialTurnedMessage -> {
+                return when (diff.dial.toInt()) {
+                    0x00 -> {
+                        this.withConfiguration(configuration.copy(amplifier = configuration.amplifier.withValue(
+                            DeviceParameter.Id.GAIN,
+                            diff.value.semanticValue.toInt(),
+                        )))
+                    }
+                    0x01 -> {
+                        this.withConfiguration(configuration.copy(amplifier = configuration.amplifier.withValue(
+                            DeviceParameter.Id.EQ_TREBLE,
+                            diff.value.semanticValue.toInt(),
+                        )))
+                    }
+                    0x02 -> {
+                        this.withConfiguration(configuration.copy(amplifier = configuration.amplifier.withValue(
+                            DeviceParameter.Id.EQ_MIDDLE,
+                            diff.value.semanticValue.toInt(),
+                        )))
+                    }
+                    0x03 -> {
+                        this.withConfiguration(configuration.copy(amplifier = configuration.amplifier.withValue(
+                            DeviceParameter.Id.EQ_BASS,
+                            diff.value.semanticValue.toInt(),
+                        )))
+                    }
+                    0x04 -> {
+                        this.withConfiguration(configuration.copy(amplifier = configuration.amplifier.withValue(
+                            DeviceParameter.Id.AMP_VOLUME,
+                            diff.value.semanticValue.toInt(),
+                        )))
+                    }
+                    0x05 -> {
+                        this.withConfiguration(configuration.copy(amplifier = configuration.amplifier.withValue(
+                            if (configuration.amplifier.descriptor.presenceIsCalledTone) DeviceParameter.Id.AMP_TONE else DeviceParameter.Id.AMP_PRESENCE,
+                            diff.value.semanticValue.toInt(),
+                        )))
+                    }
+                    0x06 -> {
+                        this.withConfiguration(configuration.copy(amplifier = configuration.amplifier.withValue(
+                            DeviceParameter.Id.RESONANCE,
+                            diff.value.semanticValue.toInt(),
+                        )))
+                    }
+                    0x07 -> {
+                        this.withConfiguration(configuration.copy(amplifier = configuration.amplifier.withValue(
+                            DeviceParameter.Id.AMP_BRIGHT_CAP,
+                            diff.value.semanticValue.toInt() == 1
+                        )))
+                    }
+                    0x08 -> {
+                        this.withConfiguration(configuration.copy(amplifier = configuration.amplifier.withValue(
+                            DeviceParameter.Id.AMP_LOW_CUT,
+                            diff.value.semanticValue.toInt() == 1
+                        )))
+                    }
+                    0x09 -> {
+                        this.withConfiguration(configuration.copy(amplifier = configuration.amplifier.withValue(
+                            DeviceParameter.Id.AMP_MID_BOOST,
+                            diff.value.semanticValue.toInt() == 1
+                        )))
+                    }
+                    0x0A -> {
+                        this.withConfiguration(configuration.copy(amplifier = configuration.amplifier.withValue(
+                            DeviceParameter.Id.AMP_TUBE_BIAS,
+                            when (diff.value.semanticValue.toInt()) {
+                                0 -> TubeBias.OFF
+                                1 -> TubeBias.COLD
+                                2 -> TubeBias.HOT
+                                else -> error("Unrecognized value for tube bias: ${diff.value}")
+                            }
+                        )))
+                    }
+                    0x0B -> {
+                        this.withConfiguration(configuration.copy(amplifier = configuration.amplifier.withValue(
+                            DeviceParameter.Id.AMP_CLASS,
+                            when (diff.value.semanticValue.toInt()) {
+                                0 -> AmpClass.A
+                                1 -> AmpClass.AB
+                                else -> error("Unrecognized value for amp class: ${diff.value}")
+                            }
+                        )))
+                    }
+                    else -> {
+                        console.error("Unimplemented amp dial ${diff.dial}")
+                        this
+                    }
+                }
+            }
+            else -> {
+                console.error("Unimplemented message ${diff::class.simpleName}")
+                return this
+            }
+        }
     }
 
     private suspend fun fetchCurrentState(): VtxAmpState {
-        val currentSlotResponse = client.exchange(RequestCurrentModeMessage())
+        val currentModeResponse = client.exchange(RequestCurrentModeMessage())
         val currentConfig = client.exchange(RequestCurrentProgramMessage()).program.toConfiguration()
-        return when(currentSlotResponse.mode) {
+        return when(currentModeResponse.mode) {
             CurrentModeResponse.Mode.PROGRAM_SLOT -> {
-                VtxAmpState.ProgramSlotSelected(currentSlotResponse.slot!!, currentConfig)
+                VtxAmpState.ProgramSlotSelected(currentModeResponse.slot!!, currentConfig)
             }
             CurrentModeResponse.Mode.PRESET -> {
-                VtxAmpState.PresetMode(currentSlotResponse.presetIdentifier!!, currentConfig)
+                VtxAmpState.PresetMode(currentModeResponse.presetIdentifier!!, currentConfig)
             }
             CurrentModeResponse.Mode.MANUAL -> {
                 VtxAmpState.ManualMode(currentConfig)

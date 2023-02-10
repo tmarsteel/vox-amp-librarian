@@ -11,6 +11,12 @@ data class DeviceConfiguration<out D : DeviceDescriptor>(
         }
     }
 
+    fun withValue(param: DeviceParameter.Id, value: Any): DeviceConfiguration<D> {
+        val newValues = values.toMutableMap()
+        newValues[param] = value
+        return DeviceConfiguration(descriptor, newValues)
+    }
+
     fun <ND : DeviceDescriptor> withDescriptor(newDescriptor: ND): DeviceConfiguration<ND> {
         val newValues = newDescriptor.parameters
             .map { it.id }
