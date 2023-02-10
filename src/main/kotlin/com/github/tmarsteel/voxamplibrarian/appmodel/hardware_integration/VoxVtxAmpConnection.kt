@@ -80,6 +80,31 @@ class VoxVtxAmpConnection(
                     amplifier = this.configuration.amplifier.withDescriptor(diff.model.descriptor)
                 ))
             }
+            is PedalActiveStateChangedMessage -> {
+                return when (diff.pedalSlot) {
+                    PedalSlot.PEDAL1 -> this.withConfiguration(this.configuration.copy(
+                        pedalOne = this.configuration.pedalOne.withValue(
+                            DeviceParameter.Id.PEDAL_ENABLED,
+                            diff.enabled,
+                        )
+                    ))
+                    PedalSlot.PEDAL2 -> this.withConfiguration(this.configuration.copy(
+                        pedalTwo = this.configuration.pedalTwo.withValue(
+                            DeviceParameter.Id.PEDAL_ENABLED,
+                            diff.enabled,
+                        )
+                    ))
+                    PedalSlot.REVERB -> this.withConfiguration(this.configuration.copy(
+                        reverbPedal = this.configuration.reverbPedal.withValue(
+                            DeviceParameter.Id.PEDAL_ENABLED,
+                            diff.enabled,
+                        )
+                    ))
+                }
+            }
+            is ProgramSlotChangedMessage -> {
+                TODO()
+            }
             else -> {
                 console.error("Unimplemented message ${diff::class.simpleName}")
                 return this

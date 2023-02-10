@@ -1,11 +1,7 @@
 package com.github.tmarsteel.voxamplibrarian.protocol.message
 
-import com.github.tmarsteel.voxamplibrarian.BinaryInput
-import com.github.tmarsteel.voxamplibrarian.BinaryOutput
+import com.github.tmarsteel.voxamplibrarian.*
 import com.github.tmarsteel.voxamplibrarian.protocol.PedalSlot
-import com.github.tmarsteel.voxamplibrarian.requireEOF
-import com.github.tmarsteel.voxamplibrarian.requirePrefix
-import com.github.tmarsteel.voxamplibrarian.toBoolean
 
 class PedalActiveStateChangedMessage(
     val pedalSlot: PedalSlot,
@@ -25,6 +21,7 @@ class PedalActiveStateChangedMessage(
             requirePrefix(fullMessage, PREFIX, PedalActiveStateChangedMessage::class)
             val slot = PedalSlot.readFrom(fullMessage)
             val enabled = fullMessage.nextByte().toBoolean()
+            requireNextByteEquals(fullMessage, 0x00)
             requireEOF(fullMessage)
 
             return PedalActiveStateChangedMessage(slot, enabled)
