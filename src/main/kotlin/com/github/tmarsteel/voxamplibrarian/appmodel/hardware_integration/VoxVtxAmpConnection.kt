@@ -57,6 +57,19 @@ class VoxVtxAmpConnection(
                     }
                 }
             }
+            is EffectPedalTypeChangedMessage -> {
+                return when (diff.type) {
+                    is Slot1PedalType -> this.withConfiguration(this.configuration.copy(
+                        pedalOne = this.configuration.pedalOne.withDescriptor(diff.type.descriptor)
+                    ))
+                    is Slot2PedalType -> this.withConfiguration(this.configuration.copy(
+                        pedalTwo = this.configuration.pedalTwo.withDescriptor(diff.type.descriptor)
+                    ))
+                    is ReverbPedalType -> this.withConfiguration(this.configuration.copy(
+                        reverbPedal = this.configuration.reverbPedal.withDescriptor(diff.type.descriptor)
+                    ))
+                }
+            }
             else -> {
                 console.error("Unimplemented message ${diff::class.simpleName}")
                 return this
@@ -398,4 +411,34 @@ private fun <T : ReverbPedalDescriptor> DeviceConfiguration<T>.plus(diff: Effect
         0x04 -> withValue(DeviceParameter.Id.REVERB_HIGH_DAMP, diff.value.asZeroZoTen().value.toInt())
         else -> error("Unknown reverb pedal dial ${diff.dialIndex.hex()}")
     }
+}
+
+private val Slot1PedalType.descriptor: SlotOnePedalDescriptor get() = when(this) {
+    Slot1PedalType.COMP -> CompressorPedalDescriptor
+    Slot1PedalType.CHORUS -> ChorusPedalDescriptor
+    Slot1PedalType.OVERDRIVE -> TubeOdDescriptor
+    Slot1PedalType.GOLD_DRIVE -> GoldDriveDescriptor
+    Slot1PedalType.TREBLE_BOOST -> TrebleBoostDescriptor
+    Slot1PedalType.RC_TURBO -> RcTurboDescriptor
+    Slot1PedalType.ORANGE_DIST -> OrangeDistDescriptor
+    Slot1PedalType.FAT_DIST -> FatDistDescriptor
+    Slot1PedalType.BRIT_LEAD -> BritLeadDescriptor
+    Slot1PedalType.FUZZ -> FuzzDescriptor
+}
+
+private val Slot2PedalType.descriptor: SlotTwoPedalDescriptor get() = when(this) {
+    Slot2PedalType.FLANGER -> FlangerPedalDescriptor
+    Slot2PedalType.BLK_PHASER -> BlkPhaserDescriptor
+    Slot2PedalType.ORG_PHASER_1 -> OrgPhaserOneDescriptor
+    Slot2PedalType.ORG_PHASER_2 -> OrgPhaserTwoDescriptor
+    Slot2PedalType.TREMOLO -> TremoloPedalDescriptor
+    Slot2PedalType.TAPE_ECHO -> TapeEchoDescriptor
+    Slot2PedalType.ANALOG_DELAY -> AnalogDelayDescriptor
+}
+
+private val ReverbPedalType.descriptor: ReverbPedalDescriptor get() = when(this) {
+    ReverbPedalType.ROOM -> RoomReverbPedalDescriptor
+    ReverbPedalType.SPRING -> SpringReverbPedalDescriptor
+    ReverbPedalType.HALL -> HallReverbPedalDescriptor
+    ReverbPedalType.PLATE -> PlateReverbPedalDescriptor
 }
