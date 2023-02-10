@@ -113,6 +113,7 @@ class VoxVtxAmpConnection(
 
 private fun Program.toConfiguration(): SimulationConfiguration {
     return SimulationConfiguration(
+        programName = programName.name,
         amplifier = DeviceConfiguration(
             ampModel.descriptor,
             mapOf(

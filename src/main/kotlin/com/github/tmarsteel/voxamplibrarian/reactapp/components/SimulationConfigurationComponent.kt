@@ -4,7 +4,9 @@ import com.github.tmarsteel.voxamplibrarian.appmodel.*
 import csstype.ClassName
 import react.FC
 import react.Props
-import react.dom.html.ReactHTML
+import react.dom.html.ReactHTML.div
+import react.dom.html.ReactHTML.h2
+import react.dom.html.ReactHTML.h3
 
 external interface SimulationConfigurationComponentProps : Props {
     var configuration: SimulationConfiguration
@@ -12,13 +14,21 @@ external interface SimulationConfigurationComponentProps : Props {
 }
 
 val SimulationConfigurationComponent = FC<SimulationConfigurationComponentProps> { props ->
-    ReactHTML.div {
+    div {
         className = ClassName("row")
-        ReactHTML.div {
-            className = ClassName("col-12")
+        props.configuration.programName?.let { programName ->
+            div {
+                className = ClassName("col-12")
+                h2 {
+                    +programName
+                }
+            }
         }
-        ReactHTML.h2 {
-            +"Amplifier"
+        div {
+            className = ClassName("col-12")
+            h3 {
+                +"Amplifier"
+            }
         }
     }
     (DeviceSlotComponent<AmplifierDescriptor>()) {
@@ -29,12 +39,12 @@ val SimulationConfigurationComponent = FC<SimulationConfigurationComponentProps>
         }
     }
 
-    ReactHTML.div {
+    div {
         className = ClassName("row mt-4")
-        ReactHTML.div {
+        div {
             className = ClassName("col-12")
         }
-        ReactHTML.h2 {
+        h3 {
             +"Pedal 1"
         }
     }
@@ -46,12 +56,12 @@ val SimulationConfigurationComponent = FC<SimulationConfigurationComponentProps>
         }
     }
 
-    ReactHTML.div {
+    div {
         className = ClassName("row mt-4")
-        ReactHTML.div {
+        div {
             className = ClassName("col-12")
         }
-        ReactHTML.h2 {
+        h3 {
             +"Pedal 2"
         }
     }
@@ -63,12 +73,12 @@ val SimulationConfigurationComponent = FC<SimulationConfigurationComponentProps>
         }
     }
 
-    ReactHTML.div {
+    div {
         className = ClassName("row mt-4")
-        ReactHTML.div {
+        div {
             className = ClassName("col-12")
         }
-        ReactHTML.h2 {
+        h3 {
             +"Reverb Pedal"
         }
     }
