@@ -4,6 +4,13 @@ data class DeviceConfiguration<out D : DeviceDescriptor>(
     val descriptor: D,
     val values: Map<DeviceParameter.Id, Any>,
 ) {
+    init {
+        val missingParameterIds = descriptor.parameters.asSequence().map { it.id }.filter { it !in values }.toList()
+        if (missingParameterIds.isNotEmpty()) {
+            throw IllegalArgumentException("Missing parameters ${missingParameterIds.joinToString()} for ${descriptor.name}")
+        }
+    }
+
     fun rejectInvalid() {
         for (parameter in descriptor.parameters) {
             check(parameter.id in values)

@@ -245,7 +245,7 @@ private val Program.slotTwoPedal: DeviceConfiguration<SlotTwoPedalDescriptor> ge
         TremoloPedalDescriptor,
         mapOf(
             DeviceParameter.Id.PEDAL_ENABLED to pedal2Enabled,
-            DeviceParameter.Id.MODULATION_DEPTH to pedal2Dial1.semanticValue.toInt(),
+            DeviceParameter.Id.MODULATION_SPEED to pedal2Dial1.semanticValue.toInt(),
             DeviceParameter.Id.MODULATION_DEPTH to pedal2Dial2.toInt(),
             DeviceParameter.Id.TREMOLO_DUTY to pedal2Dial3.toInt(),
             DeviceParameter.Id.TREMOLO_SHAPE to pedal2Dial4.toInt(),
