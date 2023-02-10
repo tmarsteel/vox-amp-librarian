@@ -110,9 +110,9 @@ data class Program(
     }
 
     companion object {
-        private val FLAG_PEDAL_1_ENABLED = 0x0000_0010
-        private val FLAG_PEDAL_2_ENABLED = 0x0000_0100
-        private val FLAG_REVERB_PEDAL_ENABLED = 0x0001_0000
+        private val FLAG_PEDAL_1_ENABLED = 0b0000_0010
+        private val FLAG_PEDAL_2_ENABLED = 0b0000_0100
+        private val FLAG_REVERB_PEDAL_ENABLED = 0b0001_0000
 
         fun readFrom(input: BinaryInput): Program {
             val encodedProgramName = ByteArray(ProgramName.FIXED_LENGTH)

@@ -2,16 +2,7 @@ package com.github.tmarsteel.voxamplibrarian.vtxprog
 
 import com.github.tmarsteel.voxamplibrarian.BinaryInput
 import com.github.tmarsteel.voxamplibrarian.BinaryOutput
-import com.github.tmarsteel.voxamplibrarian.protocol.AmpClass
-import com.github.tmarsteel.voxamplibrarian.protocol.AmpModel
-import com.github.tmarsteel.voxamplibrarian.protocol.Program
-import com.github.tmarsteel.voxamplibrarian.protocol.ProgramName
-import com.github.tmarsteel.voxamplibrarian.protocol.ReverbPedalType
-import com.github.tmarsteel.voxamplibrarian.protocol.Slot1PedalType
-import com.github.tmarsteel.voxamplibrarian.protocol.Slot2PedalType
-import com.github.tmarsteel.voxamplibrarian.protocol.TubeBias
-import com.github.tmarsteel.voxamplibrarian.protocol.TwoByteDial
-import com.github.tmarsteel.voxamplibrarian.protocol.ZeroToTenDial
+import com.github.tmarsteel.voxamplibrarian.protocol.*
 import com.github.tmarsteel.voxamplibrarian.requireNextByteEquals
 import com.github.tmarsteel.voxamplibrarian.toBoolean
 
@@ -87,9 +78,9 @@ data class VtxProgFile(
             0x56, 0x54, 0x58, 0x50, 0x52, 0x4F, 0x47, 0x31, 0x30, 0x30, 0x30, 0x20, 0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         )
-        private val FLAG_PEDAL_1_ENABLED = 0x0000_0010
-        private val FLAG_PEDAL_2_ENABLED = 0x0000_0100
-        private val FLAG_REVERB_PEDAL_ENABLED = 0x0001_0000
+        private val FLAG_PEDAL_1_ENABLED = 0b0000_0010
+        private val FLAG_PEDAL_2_ENABLED = 0b0000_0100
+        private val FLAG_REVERB_PEDAL_ENABLED = 0b0001_0000
 
         fun readFromInVtxProgFormat(input: BinaryInput): VtxProgFile {
             val prefixFromFile = ByteArray(PREFIX.size)
