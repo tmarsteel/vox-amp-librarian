@@ -1,6 +1,6 @@
 package com.github.tmarsteel.voxamplibrarian.appmodel
 
-interface SlotTwoPedalDescriptor : DeviceDescriptor {
+sealed interface SlotTwoPedalDescriptor : DeviceDescriptor {
     companion object {
         val ALL = listOf(
             FlangerPedalDescriptor,

@@ -55,11 +55,11 @@ enum class Slot1PedalType(val protocolValue: Byte) : PedalType {
 
 enum class Slot2PedalType(val protocolValue: Byte): PedalType {
     FLANGER(0x00),
-    BLK_PHASE(0x01),
+    BLK_PHASER(0x01),
     ORG_PHASER_1(0x02),
     ORG_PHASER_2(0x03),
     TREMOLO(0x04),
-    DELAY(0x05),
+    TAPE_ECHO(0x05),
     ANALOG_DELAY(0x06),
     ;
 

@@ -1,7 +1,5 @@
 package com.github.tmarsteel.voxamplibrarian.appmodel
 
-import com.github.tmarsteel.voxamplibrarian.protocol.Slot1PedalType
-
 interface SlotOnePedalDescriptor : DeviceDescriptor {
     companion object {
         val ALL = listOf(
