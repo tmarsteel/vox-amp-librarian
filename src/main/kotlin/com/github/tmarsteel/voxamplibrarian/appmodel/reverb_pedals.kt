@@ -8,7 +8,7 @@ abstract class ReverbPedalDescriptor(
         ContinuousRangeParameter(DeviceParameter.Id.PEDAL_MIX),
         ContinuousRangeParameter(
             id = DeviceParameter.Id.REVERB_TIME,
-            valueRange = 0..70,
+            valueRange = 0..100,
             semantic = ContinuousRangeParameter.Semantic.TIME,
         ),
         ContinuousRangeParameter(DeviceParameter.Id.REVERB_PRE_DELAY),
