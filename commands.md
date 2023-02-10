@@ -316,6 +316,23 @@ Where `XX` is the sensitivity level (from 00 left to 64 right)
 | PEDAL 2 | `02`                  |
 | REVERB  | `04`                  |
 
+## Effect Pedal Type Changed
+
+`30 00 01 34 41 03 XX YY 00`
+
+* `XX` is the slot (see below)
+* `YY` is the pedal  (see table "Pedal Identifiers").
+
+| Slot    | `XX` in sysex message |
+|---------|-----------------------|
+| PEDAL 1 | `01`                  |
+| PEDAL 2 | `02`                  |
+| REVERB  | `04`                  |
+
+### Host to Amp
+
+The amp responds with an effect dial value (see "Effect Dial Turned")
+
 # Host to AMP
 
 ## Request Current Mode
@@ -373,21 +390,6 @@ Where `XX` is the preset identifier
 The amp responds with `30 00 01 34 65 00`, and in the same message,
 with the data for the amp preset. This format hasn't been documented yet.
 
-## Set Effect Pedal Type
-
-`30 00 01 34 41 03 XX YY 00`
-
-* `XX` is the slot (see below)
-* `YY` is the pedal  (see table "Pedal Identifiers").
-
-| Slot    | `XX` in sysex message |
-|---------|-----------------------|
-| PEDAL 1 | `01`                  |
-| PEDAL 2 | `02`                  |
-| REVERB  | `04`                  |
-
-The amp responds with an effect dial value (see "Effect Dial Turned")
-
 ## Write User Program
 
 `30 00 01 34 4c 00 XX 00 ...`
@@ -402,11 +404,6 @@ where `XX` is the program identifier. !! is this for saving/persisting?
 ## Simulated Amp model changed
 
 TODO
-
-## Effect Pedal Type Changed
-
-The amp will not send a dedicated message to indicate this. Rather,
-it sends one or more effect dial values (see "Effect Dial Turned").
 
 ## Switched [to] builtin presets
 

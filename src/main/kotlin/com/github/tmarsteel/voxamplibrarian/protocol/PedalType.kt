@@ -8,7 +8,7 @@ import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageParseExcepti
 enum class PedalSlot(private val protocolIdentifier: Byte) : ProtocolSerializable {
     PEDAL1(0x01),
     PEDAL2(0x02),
-    REVERB(0x03),
+    REVERB(0x04),
     ;
 
     override fun writeTo(out: BinaryOutput) {
@@ -79,7 +79,7 @@ enum class ReverbPedalType(val protocolValue: Byte) : PedalType {
     ROOM(0x00),
     SPRING(0x01),
     HALL(0x02),
-    PLATE(0x04),
+    PLATE(0x03),
     ;
 
     override val slot: PedalSlot = PedalSlot.REVERB
