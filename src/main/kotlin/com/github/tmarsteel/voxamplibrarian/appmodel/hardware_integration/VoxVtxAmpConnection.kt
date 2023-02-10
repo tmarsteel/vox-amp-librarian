@@ -20,7 +20,12 @@ class VoxVtxAmpConnection(
         emit(state)
         messagesToHost.consumeAsFlow()
             .runningFold(state) { previousState, message ->
-                previousState.plus(message)
+                try {
+                    previousState.plus(message)
+                }
+                catch (ex: DifferentialUpdateNotSupportedException) {
+                    fetchCurrentState()
+                }
             }
             .collect {
                 emit(it)
@@ -103,7 +108,7 @@ class VoxVtxAmpConnection(
                 }
             }
             is ProgramSlotChangedMessage -> {
-                TODO()
+                throw DifferentialUpdateNotSupportedException()
             }
             else -> {
                 console.error("Unimplemented message ${diff::class.simpleName}")
@@ -145,6 +150,8 @@ class VoxVtxAmpConnection(
             }
     }
 }
+
+private class DifferentialUpdateNotSupportedException : RuntimeException()
 
 private fun Program.toConfiguration(): SimulationConfiguration {
     return SimulationConfiguration(
