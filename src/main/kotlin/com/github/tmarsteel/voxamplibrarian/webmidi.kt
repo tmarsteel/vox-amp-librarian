@@ -5,6 +5,7 @@ This file is supposed to completely contain/abstract the web/w3c/browser part of
 so the rest of the app can stay agnostic and work on other APIs (android, java, ...), too.
  */
 
+import com.github.tmarsteel.voxamplibrarian.logging.LoggerFactory
 import com.github.tmarsteel.voxamplibrarian.protocol.MidiDevice
 import kotlinx.browser.window
 import kotlinx.coroutines.GlobalScope
@@ -100,7 +101,7 @@ private class WebMidiVoxVtxDevice private constructor(val input: MidiInput, val 
         writer(binaryOutput)
         binaryOutput.write(0xf7.toByte())
         val rawData = binaryOutput.contentAsArrayOfUnsignedInts()
-        console.info("> ${rawData.hex()}")
+        logger.debug("> ${rawData.hex()}")
         output.send(rawData)
     }
 
@@ -108,7 +109,8 @@ private class WebMidiVoxVtxDevice private constructor(val input: MidiInput, val 
 
     init {
         input.onmidimessage = onmidimessage@{ messageEvent ->
-            console.info("< ${messageEvent.data.toByteArray().hex()}")
+            logger.debug("< ${messageEvent.data.toByteArray().hex()}")
+
             if (!this::incomingSysExMessageHandler.isInitialized) {
                 console.warn("Dropping incoming message because no handler is registered.", messageEvent)
                 return@onmidimessage
@@ -139,6 +141,7 @@ private class WebMidiVoxVtxDevice private constructor(val input: MidiInput, val 
     }
 
     companion object {
+        private val logger = LoggerFactory["vtx-midi"]
         fun tryBuildFrom(midiState: MidiState.Available): WebMidiVoxVtxDevice? {
             val input = midiState.inputs.entries.singleOrNull { (_, input) -> input.isVtxAmp }
                 ?: return null

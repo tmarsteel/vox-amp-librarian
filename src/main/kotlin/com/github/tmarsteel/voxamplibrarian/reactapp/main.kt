@@ -2,6 +2,7 @@ package com.github.tmarsteel.voxamplibrarian.reactapp
 
 import com.github.tmarsteel.voxamplibrarian.appmodel.SimulationConfiguration
 import com.github.tmarsteel.voxamplibrarian.appmodel.hardware_integration.VoxVtxAmpConnection
+import com.github.tmarsteel.voxamplibrarian.reactapp.components.LogLevelComponent
 import com.github.tmarsteel.voxamplibrarian.reactapp.components.SimulationConfigurationComponent
 import csstype.ClassName
 import kotlinx.browser.document
@@ -27,7 +28,13 @@ val AppComponent = FC<Props> {
 
     div {
         className = ClassName("container")
-
+        div {
+            className = ClassName("row justify-content-end")
+            div {
+                className = ClassName("col-2")
+                LogLevelComponent {}
+            }
+        }
         SimulationConfigurationComponent {
             configuration = simulationConfig
             onConfigurationChanged = { newConfig ->

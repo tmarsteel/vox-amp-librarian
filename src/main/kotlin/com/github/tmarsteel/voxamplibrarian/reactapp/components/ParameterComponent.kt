@@ -4,9 +4,9 @@ import com.github.tmarsteel.voxamplibrarian.appmodel.BooleanParameter
 import com.github.tmarsteel.voxamplibrarian.appmodel.ContinuousRangeParameter
 import com.github.tmarsteel.voxamplibrarian.appmodel.DeviceParameter
 import com.github.tmarsteel.voxamplibrarian.appmodel.DiscreteChoiceParameter
+import com.github.tmarsteel.voxamplibrarian.logging.LoggerFactory
 import react.FC
 import react.Props
-import react.dom.html.ReactHTML.span
 
 external interface ParameterComponentProps : Props {
     var parameter: DeviceParameter<*>
@@ -14,11 +14,13 @@ external interface ParameterComponentProps : Props {
     var onValueChanged: (Any) -> Unit
 }
 
+private val logger = LoggerFactory["react:parameter-component"]
+
 val ParameterComponent = FC<ParameterComponentProps> { props ->
     when(val parameter = props.parameter) {
         is ContinuousRangeParameter -> {
             if (props.value !is Int) {
-                console.log("uh oh", props.value)
+                logger.error("Value should be an int", props.value)
             }
             ContinuousDialComponent {
                 descriptor = parameter
@@ -38,11 +40,6 @@ val ParameterComponent = FC<ParameterComponentProps> { props ->
                 descriptor = parameter
                 value = props.value
                 onValueChanged = props.onValueChanged
-            }
-        }
-        else -> {
-            span {
-                +"unsupported parameter of type ${parameter::class.simpleName}"
             }
         }
     }
