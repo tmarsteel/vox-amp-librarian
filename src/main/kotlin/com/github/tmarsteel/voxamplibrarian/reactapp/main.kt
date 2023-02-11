@@ -14,6 +14,16 @@ import react.*
 import react.dom.client.createRoot
 import react.dom.html.ReactHTML.div
 
+private val startupCode = mutableListOf<() -> Unit>()
+private var appInitStarted = false
+fun appInit(block: () -> Unit) {
+    if (appInitStarted) {
+        block()
+    } else {
+        startupCode.add(block)
+    }
+}
+
 val AppComponent = FC<Props> {
     var simulationConfig by useState(SimulationConfiguration.DEFAULT)
     useEffect {
@@ -45,6 +55,10 @@ val AppComponent = FC<Props> {
 }
 
 fun main() {
+    appInitStarted = true
+    startupCode.forEach {
+        it.invoke()
+    }
     val rootElement = document.getElementById("root") ?: error("Couldn't find root container!")
     createRoot(rootElement).render(Fragment.create {
         AppComponent {

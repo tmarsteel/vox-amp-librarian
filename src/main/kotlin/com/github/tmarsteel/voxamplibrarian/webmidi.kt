@@ -23,16 +23,22 @@ import kotlin.js.Promise
 
 private class WebMidiPermissionDeniedException(override val cause: Throwable) : RuntimeException(cause)
 
+private val logger = LoggerFactory["webmidi"]
+
 private sealed class MidiState {
+    object Initializing : MidiState()
     object NotSupported : MidiState()
     class PermissionDenied(val cause: Throwable) : MidiState()
     data class Available(
         val inputs: Map<String, MidiInput>,
         val outputs: Map<String, MidiOutput>,
-    ) : MidiState()
+    ) : MidiState() {
+        val connectionStates: Map<String, Boolean> = (inputs.values + outputs.values).associate { it.id to (it.state == "connected") }
+    }
 }
 
 private val midiState: Flow<MidiState> = flow {
+    logger.trace("root webmidi flow is initializing")
     val dynamicNavigator = window.navigator.asDynamic()
     if (dynamicNavigator.requestMIDIAccess === undefined) {
         emit(MidiState.NotSupported)
@@ -63,15 +69,30 @@ private val midiState: Flow<MidiState> = flow {
     }
 
     val initialState = MidiState.Available(midiAccess.inputs.toKotlinMap(), midiAccess.outputs.toKotlinMap())
-    emit(initialState)
-    stateChangeEvents.consumeAsFlow().collect {
-        emit(MidiState.Available(midiAccess.inputs.toKotlinMap(), midiAccess.outputs.toKotlinMap()))
-    }
+    //emit(initialState)
+    stateChangeEvents.consumeAsFlow()
+        .runningFold(MidiStateFilterCarry(initialState, true)) { filterState, event ->
+            val currentState = MidiState.Available(midiAccess.inputs.toKotlinMap(), midiAccess.outputs.toKotlinMap())
+            val previousPortConnectionState =  filterState.previousState.connectionStates[event.port.id]
+            val currentPortConnectionState = event.port.state == "connected"
+            val actualChanges = previousPortConnectionState != currentPortConnectionState
+            logger.trace("state change event for port ${event.port.id}: previous: $previousPortConnectionState, now: $currentPortConnectionState, changed = $actualChanges")
+            MidiStateFilterCarry(currentState, actualChanges)
+        }
+        .filter { it.actualChanges }
+        .map { it.previousState }
+        .collect(this@flow::emit)
 }.shareIn(GlobalScope, SharingStarted.Lazily, 0)
+
+private class MidiStateFilterCarry(
+    val previousState: MidiState.Available,
+    val actualChanges: Boolean,
+)
 
 val VOX_AMP_MIDI_DEVICE: Flow<MidiDevice?> = midiState
     .runningFold<MidiState, WebMidiVoxVtxDevice?>(null) { currentDevice, currentMidiState ->
         when (currentMidiState) {
+            is MidiState.Initializing -> return@runningFold null
             is MidiState.PermissionDenied,
             MidiState.NotSupported -> {
                 currentDevice?.close()

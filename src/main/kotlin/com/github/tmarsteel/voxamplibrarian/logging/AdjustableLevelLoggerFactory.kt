@@ -15,7 +15,7 @@ object AdjustableLevelLoggerFactory : LoggerFactory {
         var level: Logger.Level,
         val handler: LogHandler,
     ) : Logger {
-        override fun log(level: Logger.Level, message: String, vararg additionalObjects: Any) {
+        override fun log(level: Logger.Level, message: String, vararg additionalObjects: Any?) {
             if (level < this.level || level < rootLevel) {
                 return
             }

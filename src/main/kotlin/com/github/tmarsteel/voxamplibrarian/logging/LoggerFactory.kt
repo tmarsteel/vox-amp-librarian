@@ -10,6 +10,6 @@ interface LoggerFactory {
     }
 
     private object DelegatingLogHandler : LogHandler {
-        override fun handle(module: String, level: Logger.Level, message: String, additionalObjects: Array<out Any>) = logHandler.handle(module, level, message, additionalObjects)
+        override fun handle(module: String, level: Logger.Level, message: String, additionalObjects: Array<out Any?>) = logHandler.handle(module, level, message, additionalObjects)
     }
 }

@@ -5,12 +5,14 @@ import com.github.tmarsteel.voxamplibrarian.appmodel.*
 import com.github.tmarsteel.voxamplibrarian.hex
 import com.github.tmarsteel.voxamplibrarian.protocol.*
 import com.github.tmarsteel.voxamplibrarian.protocol.message.*
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.runningFold
 
 class VoxVtxAmpConnection(
-    private val midiDevice: MidiDevice,
+    midiDevice: MidiDevice,
 ) {
     private val client = VoxVtxAmplifierClient(midiDevice, listener = this::onMessage)
 
@@ -30,7 +32,7 @@ class VoxVtxAmpConnection(
             .collect {
                 emit(it)
             }
-    }.shareIn(GlobalScope, SharingStarted.Lazily, 0)
+    }
 
     private suspend fun onMessage(message: MessageToHost) {
         messagesToHost.send(message)
