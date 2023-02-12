@@ -21,7 +21,7 @@ val DeviceComponent = FC<DeviceComponentProps> { props ->
                 className = ClassName("col-xs-12 col-sm-6 col-lg-4 col-xl-3 mt-4")
                 ParameterComponent {
                     this.parameter = parameter
-                    value = props.configuration.values.getValue(parameter.id)
+                    value = props.configuration.getValue(parameter)
                     onValueChanged = { newValue ->
                         props.onValueChanged(parameter, newValue)
                     }

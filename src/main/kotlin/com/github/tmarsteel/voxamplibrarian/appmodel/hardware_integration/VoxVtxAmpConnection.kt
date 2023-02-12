@@ -91,19 +91,19 @@ class VoxVtxAmpConnection(
                 return when (diff.pedalSlot) {
                     PedalSlot.PEDAL1 -> this.withConfiguration(this.configuration.copy(
                         pedalOne = this.configuration.pedalOne.withValue(
-                            DeviceParameter.Id.PEDAL_ENABLED,
+                            DeviceParameter.Id.PedalEnabled,
                             diff.enabled,
                         )
                     ))
                     PedalSlot.PEDAL2 -> this.withConfiguration(this.configuration.copy(
                         pedalTwo = this.configuration.pedalTwo.withValue(
-                            DeviceParameter.Id.PEDAL_ENABLED,
+                            DeviceParameter.Id.PedalEnabled,
                             diff.enabled,
                         )
                     ))
                     PedalSlot.REVERB -> this.withConfiguration(this.configuration.copy(
                         reverbPedal = this.configuration.reverbPedal.withValue(
-                            DeviceParameter.Id.PEDAL_ENABLED,
+                            DeviceParameter.Id.PedalEnabled,
                             diff.enabled,
                         )
                     ))
@@ -161,20 +161,20 @@ private fun Program.toConfiguration(): SimulationConfiguration {
         amplifier = DeviceConfiguration(
             ampModel.descriptor,
             mapOf(
-                DeviceParameter.Id.GAIN to gain.value.toInt(),
-                DeviceParameter.Id.EQ_BASS to bass.value.toInt(),
-                DeviceParameter.Id.EQ_MIDDLE to middle.value.toInt(),
-                DeviceParameter.Id.EQ_TREBLE to treble.value.toInt(),
-                DeviceParameter.Id.AMP_VOLUME to volume.value.toInt(),
-                DeviceParameter.Id.RESONANCE to resonance.value.toInt(),
-                DeviceParameter.Id.AMP_NOISE_REDUCTION_SENSITIVITY to noiseReductionSensitivity.value.toInt(),
-                DeviceParameter.Id.AMP_LOW_CUT to lowCut,
-                DeviceParameter.Id.AMP_MID_BOOST to midBoost,
-                DeviceParameter.Id.AMP_BRIGHT_CAP to brightCap,
-                DeviceParameter.Id.AMP_TUBE_BIAS to tubeBias,
-                DeviceParameter.Id.AMP_CLASS to ampClass,
-                DeviceParameter.Id.AMP_TONE to presence.value.toInt(),
-                DeviceParameter.Id.AMP_PRESENCE to presence.value.toInt(),
+                DeviceParameter.Id.Gain to gain.value.toInt(),
+                DeviceParameter.Id.EqBass to bass.value.toInt(),
+                DeviceParameter.Id.EqMiddle to middle.value.toInt(),
+                DeviceParameter.Id.EqTreble to treble.value.toInt(),
+                DeviceParameter.Id.AmpVolume to volume.value.toInt(),
+                DeviceParameter.Id.Resonance to resonance.value.toInt(),
+                DeviceParameter.Id.AmpNoiseReductionSensitivity to noiseReductionSensitivity.value.toInt(),
+                DeviceParameter.Id.AmpLowCut to lowCut,
+                DeviceParameter.Id.AmpMidBoost to midBoost,
+                DeviceParameter.Id.AmpBrightCap to brightCap,
+                DeviceParameter.Id.AmpTubeBias to tubeBias,
+                DeviceParameter.Id.AmpClass to ampClass,
+                DeviceParameter.Id.AmpTone to presence.value.toInt(),
+                DeviceParameter.Id.AmpPresence to presence.value.toInt(),
             ),
         ),
         pedalOne = slotOnePedal,
@@ -214,23 +214,23 @@ private val Program.slotOnePedal: DeviceConfiguration<SlotOnePedalDescriptor> ge
     Slot1PedalType.COMP -> DeviceConfiguration(
         CompressorPedalDescriptor,
         mapOf(
-            DeviceParameter.Id.PEDAL_ENABLED to pedal1Enabled,
-            DeviceParameter.Id.COMP_SENSITIVITY to pedal1Dial1.asZeroZoTen().value.toInt(),
-            DeviceParameter.Id.PEDAL_LEVEL to pedal1Dial2.toInt(),
-            DeviceParameter.Id.COMP_ATTACK to pedal1Dial3.toInt(),
-            DeviceParameter.Id.COMP_VOICE to pedal1Dial4.toInt().asCompressorVoice(),
+            DeviceParameter.Id.PedalEnabled to pedal1Enabled,
+            DeviceParameter.Id.CompSensitivity to pedal1Dial1.asZeroZoTen().value.toInt(),
+            DeviceParameter.Id.PedalLevel to pedal1Dial2.toInt(),
+            DeviceParameter.Id.CompAttack to pedal1Dial3.toInt(),
+            DeviceParameter.Id.CompVoice to pedal1Dial4.toInt().asCompressorVoice(),
         )
     )
     Slot1PedalType.CHORUS -> DeviceConfiguration(
         ChorusPedalDescriptor,
         mapOf(
-            DeviceParameter.Id.PEDAL_ENABLED to pedal1Enabled,
-            DeviceParameter.Id.MODULATION_SPEED to pedal1Dial1.semanticValue.toInt(),
-            DeviceParameter.Id.MODULATION_DEPTH to pedal1Dial2.toInt(),
-            DeviceParameter.Id.MODULATION_MANUAL to pedal1Dial3.toInt(),
-            DeviceParameter.Id.PEDAL_MIX to pedal1Dial4.toInt(),
-            DeviceParameter.Id.EQ_LOW_CUT to (pedal1Dial5.toInt() == 1),
-            DeviceParameter.Id.EQ_HIGH_CUT to (pedal1Dial6.toInt() == 1),
+            DeviceParameter.Id.PedalEnabled to pedal1Enabled,
+            DeviceParameter.Id.ModulationSpeed to pedal1Dial1.semanticValue.toInt(),
+            DeviceParameter.Id.ModulationDepth to pedal1Dial2.toInt(),
+            DeviceParameter.Id.ModulationManual to pedal1Dial3.toInt(),
+            DeviceParameter.Id.PedalMix to pedal1Dial4.toInt(),
+            DeviceParameter.Id.EqLowCut to (pedal1Dial5.toInt() == 1),
+            DeviceParameter.Id.EqHighCut to (pedal1Dial6.toInt() == 1),
         )
     )
     else -> {
@@ -247,13 +247,13 @@ private val Program.slotOnePedal: DeviceConfiguration<SlotOnePedalDescriptor> ge
                 else -> error("unreachable")
             },
             mapOf(
-                DeviceParameter.Id.PEDAL_ENABLED to pedal1Enabled,
-                DeviceParameter.Id.OVERDRIVE_DRIVE to pedal1Dial1.asZeroZoTen().value.toInt(),
-                DeviceParameter.Id.EQ_TONE to pedal1Dial2.toInt(),
-                DeviceParameter.Id.PEDAL_LEVEL to pedal1Dial3.toInt(),
-                DeviceParameter.Id.EQ_TREBLE to pedal1Dial4.toInt(),
-                DeviceParameter.Id.EQ_MIDDLE to pedal1Dial5.toInt(),
-                DeviceParameter.Id.EQ_BASS to pedal1Dial6.toInt(),
+                DeviceParameter.Id.PedalEnabled to pedal1Enabled,
+                DeviceParameter.Id.OverdriveDrive to pedal1Dial1.asZeroZoTen().value.toInt(),
+                DeviceParameter.Id.EqTone to pedal1Dial2.toInt(),
+                DeviceParameter.Id.PedalLevel to pedal1Dial3.toInt(),
+                DeviceParameter.Id.EqTreble to pedal1Dial4.toInt(),
+                DeviceParameter.Id.EqMiddle to pedal1Dial5.toInt(),
+                DeviceParameter.Id.EqBass to pedal1Dial6.toInt(),
             )
         )
     }
@@ -263,13 +263,13 @@ private val Program.slotTwoPedal: DeviceConfiguration<SlotTwoPedalDescriptor> ge
     Slot2PedalType.FLANGER -> DeviceConfiguration(
         FlangerPedalDescriptor,
         mapOf(
-            DeviceParameter.Id.PEDAL_ENABLED to pedal2Enabled,
-            DeviceParameter.Id.MODULATION_SPEED to pedal2Dial1.semanticValue.toInt(),
-            DeviceParameter.Id.MODULATION_DEPTH to pedal2Dial2.toInt(),
-            DeviceParameter.Id.MODULATION_MANUAL to pedal2Dial3.toInt(),
-            DeviceParameter.Id.EQ_LOW_CUT to (pedal2Dial4.toInt() == 1),
-            DeviceParameter.Id.EQ_HIGH_CUT to (pedal2Dial5.toInt() == 1),
-            DeviceParameter.Id.RESONANCE to pedal2Dial6.toInt(),
+            DeviceParameter.Id.PedalEnabled to pedal2Enabled,
+            DeviceParameter.Id.ModulationSpeed to pedal2Dial1.semanticValue.toInt(),
+            DeviceParameter.Id.ModulationDepth to pedal2Dial2.toInt(),
+            DeviceParameter.Id.ModulationManual to pedal2Dial3.toInt(),
+            DeviceParameter.Id.EqLowCut to (pedal2Dial4.toInt() == 1),
+            DeviceParameter.Id.EqHighCut to (pedal2Dial5.toInt() == 1),
+            DeviceParameter.Id.Resonance to pedal2Dial6.toInt(),
         ),
     )
     Slot2PedalType.BLK_PHASER,
@@ -282,22 +282,22 @@ private val Program.slotTwoPedal: DeviceConfiguration<SlotTwoPedalDescriptor> ge
             else -> error("unreachable")
         },
         mapOf(
-            DeviceParameter.Id.PEDAL_ENABLED to pedal2Enabled,
-            DeviceParameter.Id.MODULATION_SPEED to pedal2Dial1.semanticValue.toInt(),
-            DeviceParameter.Id.RESONANCE to pedal2Dial2.toInt(),
-            DeviceParameter.Id.MODULATION_MANUAL to pedal2Dial3.toInt(),
-            DeviceParameter.Id.MODULATION_DEPTH to pedal2Dial4.toInt(),
+            DeviceParameter.Id.PedalEnabled to pedal2Enabled,
+            DeviceParameter.Id.ModulationSpeed to pedal2Dial1.semanticValue.toInt(),
+            DeviceParameter.Id.Resonance to pedal2Dial2.toInt(),
+            DeviceParameter.Id.ModulationManual to pedal2Dial3.toInt(),
+            DeviceParameter.Id.ModulationDepth to pedal2Dial4.toInt(),
         ),
     )
     Slot2PedalType.TREMOLO -> DeviceConfiguration(
         TremoloPedalDescriptor,
         mapOf(
-            DeviceParameter.Id.PEDAL_ENABLED to pedal2Enabled,
-            DeviceParameter.Id.MODULATION_SPEED to pedal2Dial1.semanticValue.toInt(),
-            DeviceParameter.Id.MODULATION_DEPTH to pedal2Dial2.toInt(),
-            DeviceParameter.Id.TREMOLO_DUTY to pedal2Dial3.toInt(),
-            DeviceParameter.Id.TREMOLO_SHAPE to pedal2Dial4.toInt(),
-            DeviceParameter.Id.PEDAL_LEVEL to pedal2Dial5.toInt(),
+            DeviceParameter.Id.PedalEnabled to pedal2Enabled,
+            DeviceParameter.Id.ModulationSpeed to pedal2Dial1.semanticValue.toInt(),
+            DeviceParameter.Id.ModulationDepth to pedal2Dial2.toInt(),
+            DeviceParameter.Id.TremoloDuty to pedal2Dial3.toInt(),
+            DeviceParameter.Id.TremoloShape to pedal2Dial4.toInt(),
+            DeviceParameter.Id.PedalLevel to pedal2Dial5.toInt(),
         )
     )
     else -> DeviceConfiguration(
@@ -307,13 +307,13 @@ private val Program.slotTwoPedal: DeviceConfiguration<SlotTwoPedalDescriptor> ge
             else -> error("unreachable")
         },
         mapOf(
-            DeviceParameter.Id.PEDAL_ENABLED to pedal2Enabled,
-            DeviceParameter.Id.DELAY_TIME to pedal2Dial1.semanticValue.toInt(),
-            DeviceParameter.Id.PEDAL_LEVEL to pedal2Dial2.toInt(),
-            DeviceParameter.Id.DELAY_FEEDBACK to pedal2Dial3.toInt(),
-            DeviceParameter.Id.EQ_TONE to pedal2Dial4.toInt(),
-            DeviceParameter.Id.MODULATION_SPEED to pedal2Dial5.toInt(),
-            DeviceParameter.Id.MODULATION_DEPTH to pedal2Dial6.toInt(),
+            DeviceParameter.Id.PedalEnabled to pedal2Enabled,
+            DeviceParameter.Id.DelayTime to pedal2Dial1.semanticValue.toInt(),
+            DeviceParameter.Id.PedalLevel to pedal2Dial2.toInt(),
+            DeviceParameter.Id.DelayFeedback to pedal2Dial3.toInt(),
+            DeviceParameter.Id.EqTone to pedal2Dial4.toInt(),
+            DeviceParameter.Id.ModulationSpeed to pedal2Dial5.toInt(),
+            DeviceParameter.Id.ModulationDepth to pedal2Dial6.toInt(),
         )
     )
 }
@@ -326,32 +326,32 @@ private val Program.reverbPedal: DeviceConfiguration<ReverbPedalDescriptor> get(
         ReverbPedalType.PLATE -> PlateReverbPedalDescriptor
     },
     mapOf(
-        DeviceParameter.Id.PEDAL_ENABLED to reverbPedalEnabled,
-        DeviceParameter.Id.PEDAL_MIX to reverbPedalDial1.value.toInt(),
-        DeviceParameter.Id.REVERB_TIME to reverbPedalDial2.value.toInt(),
-        DeviceParameter.Id.REVERB_PRE_DELAY to reverbPedalDial3.toInt(),
-        DeviceParameter.Id.REVERB_LOW_DAMP to reverbPedalDial4.value.toInt(),
-        DeviceParameter.Id.REVERB_HIGH_DAMP to reverbPedalDial5.value.toInt(),
+        DeviceParameter.Id.PedalEnabled to reverbPedalEnabled,
+        DeviceParameter.Id.PedalMix to reverbPedalDial1.value.toInt(),
+        DeviceParameter.Id.ReverbTime to reverbPedalDial2.value.toInt(),
+        DeviceParameter.Id.ReverbPreDelay to reverbPedalDial3.toInt(),
+        DeviceParameter.Id.ReverbLowDamp to reverbPedalDial4.value.toInt(),
+        DeviceParameter.Id.ReverbHighDamp to reverbPedalDial5.value.toInt(),
     )
 )
 
 private fun <T : AmplifierDescriptor> DeviceConfiguration<T>.plus(diff: AmpDialTurnedMessage): DeviceConfiguration<T> {
     return when (diff.dial.toInt()) {
-        0x00 -> withValue(DeviceParameter.Id.GAIN, diff.value.semanticValue.toInt())
-        0x01 -> withValue(DeviceParameter.Id.EQ_TREBLE, diff.value.semanticValue.toInt())
-        0x02 -> withValue(DeviceParameter.Id.EQ_MIDDLE, diff.value.semanticValue.toInt())
-        0x03 -> withValue(DeviceParameter.Id.EQ_BASS, diff.value.semanticValue.toInt())
-        0x04 -> withValue(DeviceParameter.Id.AMP_VOLUME, diff.value.semanticValue.toInt())
+        0x00 -> withValue(DeviceParameter.Id.Gain, diff.value.semanticValue.toInt())
+        0x01 -> withValue(DeviceParameter.Id.EqTreble, diff.value.semanticValue.toInt())
+        0x02 -> withValue(DeviceParameter.Id.EqMiddle, diff.value.semanticValue.toInt())
+        0x03 -> withValue(DeviceParameter.Id.EqBass, diff.value.semanticValue.toInt())
+        0x04 -> withValue(DeviceParameter.Id.AmpVolume, diff.value.semanticValue.toInt())
         0x05 -> withValue(
-                if (descriptor.presenceIsCalledTone) DeviceParameter.Id.AMP_TONE else DeviceParameter.Id.AMP_PRESENCE,
+                if (descriptor.presenceIsCalledTone) DeviceParameter.Id.AmpTone else DeviceParameter.Id.AmpPresence,
                 diff.value.semanticValue.toInt(),
             )
-        0x06 -> withValue(DeviceParameter.Id.RESONANCE, diff.value.semanticValue.toInt(),)
-        0x07 -> withValue(DeviceParameter.Id.AMP_BRIGHT_CAP, diff.value.semanticValue.toInt() == 1)
-        0x08 -> withValue(DeviceParameter.Id.AMP_LOW_CUT, diff.value.semanticValue.toInt() == 1)
-        0x09 -> withValue(DeviceParameter.Id.AMP_MID_BOOST, diff.value.semanticValue.toInt() == 1)
+        0x06 -> withValue(DeviceParameter.Id.Resonance, diff.value.semanticValue.toInt(),)
+        0x07 -> withValue(DeviceParameter.Id.AmpBrightCap, diff.value.semanticValue.toInt() == 1)
+        0x08 -> withValue(DeviceParameter.Id.AmpLowCut, diff.value.semanticValue.toInt() == 1)
+        0x09 -> withValue(DeviceParameter.Id.AmpMidBoost, diff.value.semanticValue.toInt() == 1)
         0x0A -> withValue(
-                DeviceParameter.Id.AMP_TUBE_BIAS,
+                DeviceParameter.Id.AmpTubeBias,
                 when (diff.value.semanticValue.toInt()) {
                     0 -> TubeBias.OFF
                     1 -> TubeBias.COLD
@@ -360,7 +360,7 @@ private fun <T : AmplifierDescriptor> DeviceConfiguration<T>.plus(diff: AmpDialT
                 }
             )
         0x0B -> withValue(
-                DeviceParameter.Id.AMP_CLASS,
+                DeviceParameter.Id.AmpClass,
                 when (diff.value.semanticValue.toInt()) {
                     0 -> AmpClass.A
                     1 -> AmpClass.AB
@@ -384,71 +384,71 @@ private fun Int.asCompressorVoice(): CompressorPedalDescriptor.Voice = when (thi
 private fun <T : SlotOnePedalDescriptor> DeviceConfiguration<T>.plus(diff: EffectDialTurnedMessage): DeviceConfiguration<T> {
     return when (descriptor) {
         is CompressorPedalDescriptor -> when (diff.dialIndex.toInt()) {
-            0x00 -> withValue(DeviceParameter.Id.COMP_SENSITIVITY, diff.value.asZeroZoTen().value.toInt())
-            0x01 -> withValue(DeviceParameter.Id.PEDAL_LEVEL, diff.value.asZeroZoTen().value.toInt())
-            0x02 -> withValue(DeviceParameter.Id.COMP_ATTACK, diff.value.asZeroZoTen().value.toInt())
-            0x03 -> withValue(DeviceParameter.Id.COMP_VOICE, diff.value.asZeroZoTen().value.toInt().asCompressorVoice())
+            0x00 -> withValue(DeviceParameter.Id.CompSensitivity, diff.value.asZeroZoTen().value.toInt())
+            0x01 -> withValue(DeviceParameter.Id.PedalLevel, diff.value.asZeroZoTen().value.toInt())
+            0x02 -> withValue(DeviceParameter.Id.CompAttack, diff.value.asZeroZoTen().value.toInt())
+            0x03 -> withValue(DeviceParameter.Id.CompVoice, diff.value.asZeroZoTen().value.toInt().asCompressorVoice())
             else -> error("Unknown compressor dial ${diff.dialIndex}")
         }
         is ChorusPedalDescriptor -> when (diff.dialIndex.toInt()) {
-            0x00 -> withValue(DeviceParameter.Id.MODULATION_SPEED, diff.value.semanticValue.toInt())
-            0x01 -> withValue(DeviceParameter.Id.MODULATION_DEPTH, diff.value.asZeroZoTen().value.toInt())
-            0x02 -> withValue(DeviceParameter.Id.MODULATION_MANUAL, diff.value.asZeroZoTen().value.toInt())
-            0x03 -> withValue(DeviceParameter.Id.PEDAL_MIX, diff.value.asZeroZoTen().value.toInt())
-            0x04 -> withValue(DeviceParameter.Id.EQ_LOW_CUT, diff.value.semanticValue.toInt() == 1)
-            0x05 -> withValue(DeviceParameter.Id.EQ_HIGH_CUT, diff.value.semanticValue.toInt() == 1)
+            0x00 -> withValue(DeviceParameter.Id.ModulationSpeed, diff.value.semanticValue.toInt())
+            0x01 -> withValue(DeviceParameter.Id.ModulationDepth, diff.value.asZeroZoTen().value.toInt())
+            0x02 -> withValue(DeviceParameter.Id.ModulationManual, diff.value.asZeroZoTen().value.toInt())
+            0x03 -> withValue(DeviceParameter.Id.PedalMix, diff.value.asZeroZoTen().value.toInt())
+            0x04 -> withValue(DeviceParameter.Id.EqLowCut, diff.value.semanticValue.toInt() == 1)
+            0x05 -> withValue(DeviceParameter.Id.EqHighCut, diff.value.semanticValue.toInt() == 1)
             else -> error("Unknown chorus pedal dial ${diff.dialIndex}")
         }
         else -> when (diff.dialIndex.toInt()) {
-            0x00 -> withValue(DeviceParameter.Id.OVERDRIVE_DRIVE, diff.value.asZeroZoTen().value.toInt())
-            0x01 -> withValue(DeviceParameter.Id.EQ_TONE, diff.value.asZeroZoTen().value.toInt())
-            0x02 -> withValue(DeviceParameter.Id.PEDAL_LEVEL, diff.value.asZeroZoTen().value.toInt())
-            0x03 -> withValue(DeviceParameter.Id.EQ_TREBLE, diff.value.asZeroZoTen().value.toInt())
-            0x04 -> withValue(DeviceParameter.Id.EQ_MIDDLE, diff.value.asZeroZoTen().value.toInt())
-            0x05 -> withValue(DeviceParameter.Id.EQ_BASS, diff.value.asZeroZoTen().value.toInt())
+            0x00 -> withValue(DeviceParameter.Id.OverdriveDrive, diff.value.asZeroZoTen().value.toInt())
+            0x01 -> withValue(DeviceParameter.Id.EqTone, diff.value.asZeroZoTen().value.toInt())
+            0x02 -> withValue(DeviceParameter.Id.PedalLevel, diff.value.asZeroZoTen().value.toInt())
+            0x03 -> withValue(DeviceParameter.Id.EqTreble, diff.value.asZeroZoTen().value.toInt())
+            0x04 -> withValue(DeviceParameter.Id.EqMiddle, diff.value.asZeroZoTen().value.toInt())
+            0x05 -> withValue(DeviceParameter.Id.EqBass, diff.value.asZeroZoTen().value.toInt())
             else -> error("Unknown slot 1 pedal (${descriptor::class.simpleName}) dial ${diff.dialIndex}")
         }
     }
 }
 
 private fun <T : AmplifierDescriptor> DeviceConfiguration<T>.plus(diff: NoiseReductionSensitivityChangedMessage): DeviceConfiguration<T> {
-    return withValue(DeviceParameter.Id.AMP_NOISE_REDUCTION_SENSITIVITY, diff.sensitivity.value.toInt())
+    return withValue(DeviceParameter.Id.AmpNoiseReductionSensitivity, diff.sensitivity.value.toInt())
 }
 
 private fun <T : SlotTwoPedalDescriptor> DeviceConfiguration<T>.plus(diff: EffectDialTurnedMessage): DeviceConfiguration<T> {
     return when (descriptor) {
         is FlangerPedalDescriptor -> when (diff.dialIndex.toInt()) {
-            0x00 -> withValue(DeviceParameter.Id.MODULATION_SPEED, diff.value.semanticValue.toInt())
-            0x01 -> withValue(DeviceParameter.Id.MODULATION_DEPTH, diff.value.asZeroZoTen().value.toInt())
-            0x02 -> withValue(DeviceParameter.Id.MODULATION_MANUAL, diff.value.asZeroZoTen().value.toInt())
-            0x03 -> withValue(DeviceParameter.Id.EQ_LOW_CUT, diff.value.semanticValue.toInt() == 1)
-            0x04 -> withValue(DeviceParameter.Id.EQ_HIGH_CUT, diff.value.semanticValue.toInt() == 1)
-            0x05 -> withValue(DeviceParameter.Id.RESONANCE, diff.value.asZeroZoTen().value.toInt())
+            0x00 -> withValue(DeviceParameter.Id.ModulationSpeed, diff.value.semanticValue.toInt())
+            0x01 -> withValue(DeviceParameter.Id.ModulationDepth, diff.value.asZeroZoTen().value.toInt())
+            0x02 -> withValue(DeviceParameter.Id.ModulationManual, diff.value.asZeroZoTen().value.toInt())
+            0x03 -> withValue(DeviceParameter.Id.EqLowCut, diff.value.semanticValue.toInt() == 1)
+            0x04 -> withValue(DeviceParameter.Id.EqHighCut, diff.value.semanticValue.toInt() == 1)
+            0x05 -> withValue(DeviceParameter.Id.Resonance, diff.value.asZeroZoTen().value.toInt())
             else -> error("Unknown flanger pedal dial ${diff.dialIndex.hex()}")
         }
         is BlkPhaserDescriptor,
         is OrgPhaserOneDescriptor,
         is OrgPhaserTwoDescriptor -> when (diff.dialIndex.toInt()) {
-            0x00 -> withValue(DeviceParameter.Id.MODULATION_SPEED, diff.value.semanticValue.toInt())
-            0x01 -> withValue(DeviceParameter.Id.RESONANCE, diff.value.asZeroZoTen().value.toInt())
-            0x02 -> withValue(DeviceParameter.Id.MODULATION_MANUAL, diff.value.asZeroZoTen().value.toInt())
-            0x03 -> withValue(DeviceParameter.Id.MODULATION_DEPTH, diff.value.asZeroZoTen().value.toInt())
+            0x00 -> withValue(DeviceParameter.Id.ModulationSpeed, diff.value.semanticValue.toInt())
+            0x01 -> withValue(DeviceParameter.Id.Resonance, diff.value.asZeroZoTen().value.toInt())
+            0x02 -> withValue(DeviceParameter.Id.ModulationManual, diff.value.asZeroZoTen().value.toInt())
+            0x03 -> withValue(DeviceParameter.Id.ModulationDepth, diff.value.asZeroZoTen().value.toInt())
             else -> error("Unknown modulation pedal (${descriptor::class.simpleName}) dial ${diff.dialIndex.hex()}")
         }
         is TremoloPedalDescriptor -> when (diff.dialIndex.toInt()) {
-            0x00 -> withValue(DeviceParameter.Id.MODULATION_SPEED, diff.value.semanticValue.toInt())
-            0x01 -> withValue(DeviceParameter.Id.RESONANCE, diff.value.asZeroZoTen().value.toInt())
-            0x02 -> withValue(DeviceParameter.Id.MODULATION_MANUAL, diff.value.asZeroZoTen().value.toInt())
-            0x03 -> withValue(DeviceParameter.Id.MODULATION_DEPTH, diff.value.asZeroZoTen().value.toInt())
+            0x00 -> withValue(DeviceParameter.Id.ModulationSpeed, diff.value.semanticValue.toInt())
+            0x01 -> withValue(DeviceParameter.Id.Resonance, diff.value.asZeroZoTen().value.toInt())
+            0x02 -> withValue(DeviceParameter.Id.ModulationManual, diff.value.asZeroZoTen().value.toInt())
+            0x03 -> withValue(DeviceParameter.Id.ModulationDepth, diff.value.asZeroZoTen().value.toInt())
             else -> error("Unknown tremolo pedal dial ${diff.dialIndex.hex()}")
         }
         is DelayPedalDescriptor -> when (diff.dialIndex.toInt()) {
-            0x00 -> withValue(DeviceParameter.Id.DELAY_TIME, diff.value.semanticValue.toInt())
-            0x01 -> withValue(DeviceParameter.Id.PEDAL_LEVEL, diff.value.asZeroZoTen().value.toInt())
-            0x02 -> withValue(DeviceParameter.Id.DELAY_FEEDBACK, diff.value.asZeroZoTen().value.toInt())
-            0x03 -> withValue(DeviceParameter.Id.EQ_TONE, diff.value.asZeroZoTen().value.toInt())
-            0x04 -> withValue(DeviceParameter.Id.MODULATION_SPEED, diff.value.asZeroZoTen().value.toInt())
-            0x05 -> withValue(DeviceParameter.Id.MODULATION_DEPTH, diff.value.asZeroZoTen().value.toInt())
+            0x00 -> withValue(DeviceParameter.Id.DelayTime, diff.value.semanticValue.toInt())
+            0x01 -> withValue(DeviceParameter.Id.PedalLevel, diff.value.asZeroZoTen().value.toInt())
+            0x02 -> withValue(DeviceParameter.Id.DelayFeedback, diff.value.asZeroZoTen().value.toInt())
+            0x03 -> withValue(DeviceParameter.Id.EqTone, diff.value.asZeroZoTen().value.toInt())
+            0x04 -> withValue(DeviceParameter.Id.ModulationSpeed, diff.value.asZeroZoTen().value.toInt())
+            0x05 -> withValue(DeviceParameter.Id.ModulationDepth, diff.value.asZeroZoTen().value.toInt())
             else -> error("Unknown delay pedal (${descriptor::class.simpleName}) dial ${diff.dialIndex.hex()}")
         }
         else -> error("Unknown slot two pedal ${descriptor::class.simpleName}")
@@ -457,11 +457,11 @@ private fun <T : SlotTwoPedalDescriptor> DeviceConfiguration<T>.plus(diff: Effec
 
 private fun <T : ReverbPedalDescriptor> DeviceConfiguration<T>.plus(diff: EffectDialTurnedMessage): DeviceConfiguration<T> {
     return when(diff.dialIndex.toInt()) {
-        0x00 -> withValue(DeviceParameter.Id.PEDAL_MIX, diff.value.asZeroZoTen().value.toInt())
-        0x01 -> withValue(DeviceParameter.Id.REVERB_TIME, diff.value.asZeroZoTen().value.toInt())
-        0x02 -> withValue(DeviceParameter.Id.REVERB_PRE_DELAY, diff.value.asZeroZoTen().value.toInt())
-        0x03 -> withValue(DeviceParameter.Id.REVERB_LOW_DAMP, diff.value.asZeroZoTen().value.toInt())
-        0x04 -> withValue(DeviceParameter.Id.REVERB_HIGH_DAMP, diff.value.asZeroZoTen().value.toInt())
+        0x00 -> withValue(DeviceParameter.Id.PedalMix, diff.value.asZeroZoTen().value.toInt())
+        0x01 -> withValue(DeviceParameter.Id.ReverbTime, diff.value.asZeroZoTen().value.toInt())
+        0x02 -> withValue(DeviceParameter.Id.ReverbPreDelay, diff.value.asZeroZoTen().value.toInt())
+        0x03 -> withValue(DeviceParameter.Id.ReverbLowDamp, diff.value.asZeroZoTen().value.toInt())
+        0x04 -> withValue(DeviceParameter.Id.ReverbHighDamp, diff.value.asZeroZoTen().value.toInt())
         else -> error("Unknown reverb pedal dial ${diff.dialIndex.hex()}")
     }
 }

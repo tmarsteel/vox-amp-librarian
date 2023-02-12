@@ -1,5 +1,7 @@
 package com.github.tmarsteel.voxamplibrarian.appmodel
 
+import com.github.tmarsteel.voxamplibrarian.appmodel.Frequency.Companion.mHz
+
 interface SlotOnePedalDescriptor : DeviceDescriptor {
     companion object {
         val ALL = listOf(
@@ -14,29 +16,17 @@ interface SlotOnePedalDescriptor : DeviceDescriptor {
             BritLeadDescriptor,
             FuzzDescriptor,
         )
-        val DEFAULT = DeviceConfiguration<SlotOnePedalDescriptor>(
-            CompressorPedalDescriptor,
-            CompressorPedalDescriptor.defaults,
-        )
     }
 }
 
 object CompressorPedalDescriptor : SlotOnePedalDescriptor {
     override val name = "Compressor"
     override val parameters = listOf(
-        BooleanParameter(DeviceParameter.Id.PEDAL_ENABLED),
-        ContinuousRangeParameter(DeviceParameter.Id.COMP_SENSITIVITY),
-        ContinuousRangeParameter(DeviceParameter.Id.PEDAL_LEVEL),
-        ContinuousRangeParameter(DeviceParameter.Id.COMP_ATTACK),
-        DiscreteChoiceParameter<Voice>(DeviceParameter.Id.COMP_VOICE),
-    )
-
-    override val defaults = mapOf(
-        DeviceParameter.Id.PEDAL_ENABLED to false,
-        DeviceParameter.Id.COMP_SENSITIVITY to 50,
-        DeviceParameter.Id.PEDAL_LEVEL to 67,
-        DeviceParameter.Id.COMP_ATTACK to 57,
-        DeviceParameter.Id.COMP_VOICE to Voice.TWO,
+        BooleanParameter(DeviceParameter.Id.PedalEnabled, false),
+        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.CompSensitivity, 5.0),
+        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.PedalLevel, 6.7),
+        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.CompAttack, 5.7),
+        DiscreteChoiceParameter(DeviceParameter.Id.CompVoice, Voice.TWO),
     )
 
     enum class Voice {
@@ -49,26 +39,18 @@ object CompressorPedalDescriptor : SlotOnePedalDescriptor {
 object ChorusPedalDescriptor : SlotOnePedalDescriptor {
     override val name = "Chorus"
     override val parameters = listOf(
-        BooleanParameter(DeviceParameter.Id.PEDAL_ENABLED),
+        BooleanParameter(DeviceParameter.Id.PedalEnabled, false),
         ContinuousRangeParameter(
-            id = DeviceParameter.Id.MODULATION_SPEED,
-            valueRange = 100..10_000,
-            semantic = ContinuousRangeParameter.Semantic.FREQUENCY,
+            id = DeviceParameter.Id.ModulationSpeed,
+            valueRange = 100.mHz .. 10_000.mHz,
+            default = 100.mHz,
+            valueFactory = ::Frequency,
         ),
-        ContinuousRangeParameter(DeviceParameter.Id.MODULATION_DEPTH),
-        ContinuousRangeParameter(DeviceParameter.Id.MODULATION_MANUAL),
-        ContinuousRangeParameter(DeviceParameter.Id.PEDAL_MIX),
-        BooleanParameter(DeviceParameter.Id.EQ_LOW_CUT),
-        BooleanParameter(DeviceParameter.Id.EQ_HIGH_CUT),
-    )
-    override val defaults = mapOf(
-        DeviceParameter.Id.PEDAL_ENABLED to false,
-        DeviceParameter.Id.MODULATION_SPEED to 100,
-        DeviceParameter.Id.MODULATION_DEPTH to 67,
-        DeviceParameter.Id.MODULATION_MANUAL to 57,
-        DeviceParameter.Id.PEDAL_MIX to 1,
-        DeviceParameter.Id.EQ_LOW_CUT to false,
-        DeviceParameter.Id.EQ_HIGH_CUT to false,
+        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.ModulationDepth, 6.7),
+        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.ModulationManual, 5.7),
+        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.PedalMix, 1.0),
+        BooleanParameter(DeviceParameter.Id.EqLowCut, false),
+        BooleanParameter(DeviceParameter.Id.EqHighCut, false),
     )
 }
 
@@ -76,23 +58,13 @@ abstract class OverdrivePedalDescriptor(
     override val name: String,
 ) : SlotOnePedalDescriptor {
     override val parameters = listOf(
-        BooleanParameter(DeviceParameter.Id.PEDAL_ENABLED),
-        ContinuousRangeParameter(DeviceParameter.Id.OVERDRIVE_DRIVE),
-        ContinuousRangeParameter(DeviceParameter.Id.EQ_TONE),
-        ContinuousRangeParameter(DeviceParameter.Id.PEDAL_LEVEL),
-        ContinuousRangeParameter(DeviceParameter.Id.EQ_TREBLE),
-        ContinuousRangeParameter(DeviceParameter.Id.EQ_MIDDLE),
-        ContinuousRangeParameter(DeviceParameter.Id.EQ_BASS),
-    )
-
-    override val defaults = mapOf(
-        DeviceParameter.Id.PEDAL_ENABLED to false,
-        DeviceParameter.Id.OVERDRIVE_DRIVE to 50,
-        DeviceParameter.Id.EQ_TONE to 67,
-        DeviceParameter.Id.PEDAL_LEVEL to 57,
-        DeviceParameter.Id.EQ_TREBLE to 50,
-        DeviceParameter.Id.EQ_MIDDLE to 50,
-        DeviceParameter.Id.EQ_BASS to 50,
+        BooleanParameter(DeviceParameter.Id.PedalEnabled, false),
+        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.OverdriveDrive, 5.0),
+        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.EqTone, 6.7),
+        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.PedalLevel, 5.7),
+        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.EqTreble, 5.0),
+        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.EqMiddle, 5.0),
+        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.EqBass, 5.0),
     )
 }
 

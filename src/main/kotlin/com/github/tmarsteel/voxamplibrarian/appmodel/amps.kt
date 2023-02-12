@@ -5,36 +5,33 @@ import com.github.tmarsteel.voxamplibrarian.protocol.AmpClass
 import com.github.tmarsteel.voxamplibrarian.protocol.TubeBias
 
 abstract class AmplifierDescriptor(
-    name: String,
+    override val name: String,
     val supportsBrightCap: Boolean,
     val presenceIsCalledTone: Boolean = false,
-) : DeviceDescriptor(
-    name,
-    ALL_AMP_DEFAULTS + listOfNotNull(
-        (BRIGHT_CAP_PARAMETER withValue true) .takeIf { supportsBrightCap },
-        (if (presenceIsCalledTone) TONE_PARAMETER else PRESENCE_PARAMETER) withValue 20,
+) : DeviceDescriptor {
+    override val parameters = ALL_AMP_PARAMETERS + listOfNotNull(
+        BRIGHT_CAP_PARAMETER .takeIf { supportsBrightCap },
+        if (presenceIsCalledTone) TONE_PARAMETER else PRESENCE_PARAMETER,
     )
-) {
+
     companion object {
-        val BRIGHT_CAP_PARAMETER = BooleanParameter(DeviceParameter.Id.AmpBrightCap)
-        val PRESENCE_PARAMETER = ContinuousRangeParameter(DeviceParameter.Id.AmpPresence)
-        val TONE_PARAMETER = ContinuousRangeParameter(DeviceParameter.Id.AmpTone)
+        val BRIGHT_CAP_PARAMETER = BooleanParameter(DeviceParameter.Id.AmpBrightCap, true)
+        val PRESENCE_PARAMETER = ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.AmpPresence, 2.0)
+        val TONE_PARAMETER = ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.AmpTone, 2.0)
 
-        val ALL_AMP_DEFAULTS = listOf<ParameterValue<*>>(
-            ContinuousRangeParameter(DeviceParameter.Id.Gain) withValue 50,
-            ContinuousRangeParameter(DeviceParameter.Id.EqBass) withValue 50,
-            ContinuousRangeParameter(DeviceParameter.Id.EqMiddle) withValue 50,
-            ContinuousRangeParameter(DeviceParameter.Id.EqTreble) withValue 50,
-            ContinuousRangeParameter(DeviceParameter.Id.AmpVolume) withValue 50,
-            ContinuousRangeParameter(DeviceParameter.Id.Resonance) withValue 75,
-            ContinuousRangeParameter(DeviceParameter.Id.AmpNoiseReductionSensitivity) withValue 30,
-            BooleanParameter(DeviceParameter.Id.AmpLowCut) withValue false,
-            BooleanParameter(DeviceParameter.Id.AmpMidBoost) withValue false,
-            DiscreteChoiceParameter(DeviceParameter.Id.AmpTubeBias) withValue TubeBias.OFF,
-            DiscreteChoiceParameter(DeviceParameter.Id.AmpClass) withValue AmpClass.A,
+        val ALL_AMP_PARAMETERS = listOf<DeviceParameter<*>>(
+            ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.Gain, 5.0),
+            ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.EqBass, 5.0),
+            ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.EqMiddle, 5.0),
+            ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.EqTreble, 5.0),
+            ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.AmpVolume, 5.0),
+            ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.Resonance, 7.5),
+            ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.AmpNoiseReductionSensitivity, 3.0),
+            BooleanParameter(DeviceParameter.Id.AmpLowCut, false),
+            BooleanParameter(DeviceParameter.Id.AmpMidBoost, false),
+            DiscreteChoiceParameter(DeviceParameter.Id.AmpTubeBias, TubeBias.OFF),
+            DiscreteChoiceParameter(DeviceParameter.Id.AmpClass, AmpClass.A),
         )
-
-        val DEFAULT: DeviceConfiguration<AmplifierDescriptor> = DeviceConfiguration.defaultOf(VoxAc30Amplifier)
 
         val ALL: List<AmplifierDescriptor> = listOf(
             DeluxeClNormalAmplifier,

@@ -1,5 +1,8 @@
 package com.github.tmarsteel.voxamplibrarian.appmodel
 
+import com.github.tmarsteel.voxamplibrarian.appmodel.Duration.Companion.ms
+import com.github.tmarsteel.voxamplibrarian.appmodel.Frequency.Companion.mHz
+
 sealed interface SlotTwoPedalDescriptor : DeviceDescriptor {
     companion object {
         val ALL = listOf(
@@ -11,37 +14,24 @@ sealed interface SlotTwoPedalDescriptor : DeviceDescriptor {
             TapeEchoDescriptor,
             AnalogDelayDescriptor,
         )
-        val DEFAULT = DeviceConfiguration<SlotTwoPedalDescriptor>(
-            FlangerPedalDescriptor,
-            FlangerPedalDescriptor.defaults,
-        )
     }
 }
 
 object FlangerPedalDescriptor : SlotTwoPedalDescriptor {
     override val name = "Flanger"
     override val parameters = listOf(
-        BooleanParameter(DeviceParameter.Id.PEDAL_ENABLED),
+        BooleanParameter(DeviceParameter.Id.PedalEnabled, false),
         ContinuousRangeParameter(
-            id = DeviceParameter.Id.MODULATION_SPEED,
-            valueRange = 100..5_000,
-            semantic = ContinuousRangeParameter.Semantic.FREQUENCY,
+            id = DeviceParameter.Id.ModulationSpeed,
+            valueRange = 100.mHz..5_000.mHz,
+            default = 100.mHz,
+            valueFactory = ::Frequency,
         ),
-        ContinuousRangeParameter(DeviceParameter.Id.MODULATION_DEPTH),
-        ContinuousRangeParameter(DeviceParameter.Id.MODULATION_MANUAL),
-        BooleanParameter(DeviceParameter.Id.EQ_LOW_CUT),
-        BooleanParameter(DeviceParameter.Id.EQ_HIGH_CUT),
-        ContinuousRangeParameter(DeviceParameter.Id.RESONANCE),
-    )
-
-    override val defaults = mapOf(
-        DeviceParameter.Id.PEDAL_ENABLED to false,
-        DeviceParameter.Id.MODULATION_SPEED to 100,
-        DeviceParameter.Id.MODULATION_DEPTH to 50,
-        DeviceParameter.Id.MODULATION_MANUAL to 77,
-        DeviceParameter.Id.EQ_LOW_CUT to false,
-        DeviceParameter.Id.EQ_HIGH_CUT to false,
-        DeviceParameter.Id.RESONANCE to 35,
+        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.ModulationDepth, 5.0),
+        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.ModulationManual, 7.7),
+        BooleanParameter(DeviceParameter.Id.EqLowCut, false),
+        BooleanParameter(DeviceParameter.Id.EqHighCut, false),
+        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.Resonance, 3.5),
     )
 }
 
@@ -49,23 +39,16 @@ abstract class PhaserPedalDescriptor(
     override val name: String,
 ) : SlotTwoPedalDescriptor {
     override val parameters = listOf(
-        BooleanParameter(DeviceParameter.Id.PEDAL_ENABLED),
+        BooleanParameter(DeviceParameter.Id.PedalEnabled, false),
         ContinuousRangeParameter(
-            id = DeviceParameter.Id.MODULATION_SPEED,
-            valueRange = 100..10_000,
-            semantic = ContinuousRangeParameter.Semantic.FREQUENCY,
+            id = DeviceParameter.Id.ModulationSpeed,
+            valueRange = 100.mHz..10_000.mHz,
+            default = 100.mHz,
+            valueFactory = ::Frequency,
         ),
-        ContinuousRangeParameter(DeviceParameter.Id.RESONANCE),
-        ContinuousRangeParameter(DeviceParameter.Id.MODULATION_MANUAL),
-        ContinuousRangeParameter(DeviceParameter.Id.MODULATION_DEPTH),
-    )
-
-    override val defaults = mapOf(
-        DeviceParameter.Id.PEDAL_ENABLED to false,
-        DeviceParameter.Id.MODULATION_SPEED to 100,
-        DeviceParameter.Id.RESONANCE to 50,
-        DeviceParameter.Id.MODULATION_MANUAL to 77,
-        DeviceParameter.Id.MODULATION_DEPTH to 0,
+        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.Resonance, 5.0),
+        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.ModulationManual, 7.7),
+        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.ModulationDepth, 0.0),
     )
 }
 
@@ -76,25 +59,17 @@ object OrgPhaserTwoDescriptor : PhaserPedalDescriptor("Orange Phaser II")
 object TremoloPedalDescriptor : SlotTwoPedalDescriptor {
     override val name = "Tremolo"
     override val parameters = listOf(
-        BooleanParameter(DeviceParameter.Id.PEDAL_ENABLED),
+        BooleanParameter(DeviceParameter.Id.PedalEnabled, false),
         ContinuousRangeParameter(
-            id = DeviceParameter.Id.MODULATION_SPEED,
-            valueRange = 1_650..10_000,
-            semantic = ContinuousRangeParameter.Semantic.FREQUENCY,
+            id = DeviceParameter.Id.ModulationSpeed,
+            valueRange = 1_650.mHz..10_000.mHz,
+            default = 1_650.mHz,
+            valueFactory = ::Frequency,
         ),
-        ContinuousRangeParameter(DeviceParameter.Id.MODULATION_DEPTH),
-        ContinuousRangeParameter(DeviceParameter.Id.TREMOLO_DUTY),
-        ContinuousRangeParameter(DeviceParameter.Id.TREMOLO_SHAPE),
-        ContinuousRangeParameter(DeviceParameter.Id.PEDAL_LEVEL),
-    )
-
-    override val defaults = mapOf(
-        DeviceParameter.Id.PEDAL_ENABLED to false,
-        DeviceParameter.Id.MODULATION_SPEED to 1650,
-        DeviceParameter.Id.MODULATION_DEPTH to 50,
-        DeviceParameter.Id.TREMOLO_DUTY to 77,
-        DeviceParameter.Id.TREMOLO_SHAPE to 0,
-        DeviceParameter.Id.PEDAL_LEVEL to 1,
+        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.ModulationDepth, 5.0),
+        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.TremoloDuty, 7.7),
+        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.TremoloShape, 0.0),
+        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.PedalLevel, 1.0),
     )
 }
 
@@ -102,27 +77,18 @@ abstract class DelayPedalDescriptor(
     override val name: String,
 ) : SlotTwoPedalDescriptor {
     override val parameters = listOf(
-        BooleanParameter(DeviceParameter.Id.PEDAL_ENABLED),
+        BooleanParameter(DeviceParameter.Id.PedalEnabled, false),
         ContinuousRangeParameter(
-            id = DeviceParameter.Id.DELAY_TIME,
-            valueRange = 30..1_200,
-            semantic = ContinuousRangeParameter.Semantic.TIME,
+            id = DeviceParameter.Id.DelayTime,
+            valueRange = 30.ms..1_200.ms,
+            default = 30.ms,
+            valueFactory = ::Duration,
         ),
-        ContinuousRangeParameter(DeviceParameter.Id.PEDAL_LEVEL),
-        ContinuousRangeParameter(DeviceParameter.Id.DELAY_FEEDBACK),
-        ContinuousRangeParameter(DeviceParameter.Id.EQ_TONE),
-        ContinuousRangeParameter(DeviceParameter.Id.MODULATION_SPEED),
-        ContinuousRangeParameter(DeviceParameter.Id.MODULATION_DEPTH),
-    )
-
-    override val defaults = mapOf(
-        DeviceParameter.Id.PEDAL_ENABLED to false,
-        DeviceParameter.Id.DELAY_TIME to 30,
-        DeviceParameter.Id.PEDAL_LEVEL to 50,
-        DeviceParameter.Id.DELAY_FEEDBACK to 77,
-        DeviceParameter.Id.EQ_TONE to 50,
-        DeviceParameter.Id.MODULATION_SPEED to 10,
-        DeviceParameter.Id.MODULATION_DEPTH to 0,
+        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.PedalLevel, 5.0),
+        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.DelayFeedback, 7.7),
+        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.EqTone, 5.0),
+        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.DelayModulationSpeed, 0.1),
+        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.ModulationDepth, 0.0),
     )
 }
 

@@ -17,10 +17,10 @@ data class SimulationConfiguration(
     companion object {
         val DEFAULT = SimulationConfiguration(
             null,
-            AmplifierDescriptor.DEFAULT,
-            SlotOnePedalDescriptor.DEFAULT,
-            SlotTwoPedalDescriptor.DEFAULT,
-            ReverbPedalDescriptor.DEFAULT,
+            DeviceConfiguration.defaultOf(VoxAc30Amplifier),
+            DeviceConfiguration.defaultOf(CompressorPedalDescriptor),
+            DeviceConfiguration.defaultOf(FlangerPedalDescriptor),
+            DeviceConfiguration.defaultOf(RoomReverbPedalDescriptor),
         )
     }
 }

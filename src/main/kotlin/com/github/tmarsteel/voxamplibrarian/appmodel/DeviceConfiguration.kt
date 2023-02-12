@@ -24,6 +24,12 @@ class DeviceConfiguration<out D : DeviceDescriptor> private constructor(
         }
     }
 
+    fun <V : Any> getValue(param: DeviceParameter<V>): V {
+        val untyped = values[param.id] ?: throw RuntimeException("Device $descriptor does not have parameter ${param.id}")
+        @Suppress("UNCHECKED_CAST")
+        return untyped as V
+    }
+
     fun <V : Any> withValue(param: DeviceParameter.Id<V>, value: V): DeviceConfiguration<D> {
         val newValues = values.toMutableMap()
         newValues[param] = value
@@ -32,10 +38,7 @@ class DeviceConfiguration<out D : DeviceDescriptor> private constructor(
 
     fun <ND : DeviceDescriptor> withDescriptor(newDescriptor: ND): DeviceConfiguration<ND> {
         val newValues = newDescriptor.parameters
-            .map { it.id }
-            .associateWith { id ->
-                values[id] ?: newDescriptor.getDefaultValue(id)
-            }
+            .associate { it.id to (values[it.id] ?: it.default) }
 
         return DeviceConfiguration(newDescriptor, newValues)
     }
@@ -43,7 +46,11 @@ class DeviceConfiguration<out D : DeviceDescriptor> private constructor(
     companion object {
         fun <D : DeviceDescriptor> defaultOf(descriptor: D): DeviceConfiguration<D> = DeviceConfiguration(
             descriptor,
-            descriptor.parameters.map { descriptor.getDefaultValue(it.id) },
+            descriptor.parameters.map {
+                @Suppress("UNCHECKED_CAST")
+                it as DeviceParameter<Any>
+                ParameterValue(it, it.default)
+            }
         )
     }
 }
