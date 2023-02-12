@@ -1,6 +1,7 @@
 package com.github.tmarsteel.voxamplibrarian.reactapp.components
 
 import com.github.tmarsteel.voxamplibrarian.appmodel.BooleanParameter
+import com.github.tmarsteel.voxamplibrarian.appmodel.Continuous
 import com.github.tmarsteel.voxamplibrarian.appmodel.ContinuousRangeParameter
 import com.github.tmarsteel.voxamplibrarian.appmodel.DeviceParameter
 import com.github.tmarsteel.voxamplibrarian.appmodel.DiscreteChoiceParameter
@@ -19,12 +20,9 @@ private val logger = LoggerFactory["react:parameter-component"]
 val ParameterComponent = FC<ParameterComponentProps> { props ->
     when(val parameter = props.parameter) {
         is ContinuousRangeParameter -> {
-            if (props.value !is Int) {
-                logger.error("Value should be an int", props.value)
-            }
             ContinuousDialComponent {
                 descriptor = parameter
-                value = props.value as Int
+                value = props.value as Continuous<*>
                 onValueChanged = props.onValueChanged
             }
         }

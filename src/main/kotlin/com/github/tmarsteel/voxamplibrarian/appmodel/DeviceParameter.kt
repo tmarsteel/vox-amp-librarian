@@ -51,8 +51,8 @@ sealed interface DeviceParameter<Value : Any> {
         object TremoloShape : Id<UnitlessSingleDecimalPrecision>()
         object DelayTime : Id<Duration>()
         object DelayFeedback : Id<UnitlessSingleDecimalPrecision>()
-        object ReverbTime : Id<Duration>()
-        object ReverbPreDelay : Id<UnitlessSingleDecimalPrecision>()
+        object ReverbTime : Id<UnitlessSingleDecimalPrecision>()
+        object ReverbPreDelay : Id<Duration>()
         object ReverbLowDamp : Id<UnitlessSingleDecimalPrecision>()
         object ReverbHighDamp : Id<UnitlessSingleDecimalPrecision>()
     }

@@ -1,24 +1,30 @@
 package com.github.tmarsteel.voxamplibrarian.reactapp.components
 
+import com.github.tmarsteel.voxamplibrarian.appmodel.Continuous
 import com.github.tmarsteel.voxamplibrarian.appmodel.ContinuousRangeParameter
-import com.github.tmarsteel.voxamplibrarian.reactapp.parameterValue
+import com.github.tmarsteel.voxamplibrarian.appmodel.Duration
+import com.github.tmarsteel.voxamplibrarian.appmodel.Frequency
+import com.github.tmarsteel.voxamplibrarian.appmodel.UnitlessSingleDecimalPrecision
+import com.github.tmarsteel.voxamplibrarian.logging.LoggerFactory
 import csstype.Display
 import csstype.TextAlign
 import csstype.VerticalAlign
 import csstype.Width
 import csstype.rem
 import emotion.react.css
+import react.ChildrenBuilder
 import react.FC
 import react.Props
 import react.dom.html.InputType
+import react.dom.html.ReactHTML
 import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.input
 import react.dom.html.ReactHTML.span
 
 external interface ContinuousDialComponentProps : Props {
-    var descriptor: ContinuousRangeParameter
-    var value: Int
-    var onValueChanged: ((Int) -> Unit)?
+    var descriptor: ContinuousRangeParameter<*>
+    var value: Continuous<*>
+    var onValueChanged: ((Continuous<*>) -> Unit)?
 }
 
 val ContinuousDialComponent = FC<ContinuousDialComponentProps> { props ->
@@ -29,12 +35,14 @@ val ContinuousDialComponent = FC<ContinuousDialComponentProps> { props ->
                 width = "calc(100% - 5rem)".unsafeCast<Width>()
             }
             type = InputType.range
-            min = props.descriptor.valueRange.first.toDouble()
-            max = props.descriptor.valueRange.last.toDouble()
+            min = props.descriptor.valueRange.start.intValue.toDouble()
+            max = props.descriptor.valueRange.endInclusive.intValue.toDouble()
             step = 1.0
-            value = props.value.toString()
+            value = props.value.intValue.toString(10)
             onChange = { e ->
-                props.onValueChanged?.invoke(e.target.valueAsNumber.toInt())
+                props.onValueChanged?.invoke(
+                    props.descriptor.constructValue(e.target.valueAsNumber.toInt())
+                )
             }
         }
         div {
@@ -45,7 +53,7 @@ val ContinuousDialComponent = FC<ContinuousDialComponentProps> { props ->
                 paddingLeft = 0.5.rem
                 verticalAlign = VerticalAlign.top
             }
-            parameterValue(props.descriptor, props.value)
+            renderContinuousValue(props.value)
         }
         span {
             css {
@@ -54,5 +62,16 @@ val ContinuousDialComponent = FC<ContinuousDialComponentProps> { props ->
             }
             +props.descriptor.id.name
         }
+    }
+}
+
+private fun ChildrenBuilder.renderContinuousValue(value: Continuous<*>) {
+    val text = when(value) {
+        is UnitlessSingleDecimalPrecision -> (value.intValue / 10).toString() + "," + (value.intValue % 10).toString()
+        is Duration -> "${value.milliseconds} ms"
+        is Frequency -> (value.millihertz / 1000).toString() + "," + (value.millihertz % 1000).toString().padStart(3, '0') + " Hz"
+    }
+    ReactHTML.span {
+        +text
     }
 }

@@ -14,7 +14,7 @@ data class TwoByteDial(val semanticValue: UShort) : ProtocolSerializable {
      * to convert.
      * @see ZeroToTenDial.asTwoByte
      */
-    fun asZeroZoTen(): ZeroToTenDial {
+    fun asZeroToTen(): ZeroToTenDial {
         check(semanticValue in 0u..127u)
         return ZeroToTenDial(semanticValue.toByte())
     }

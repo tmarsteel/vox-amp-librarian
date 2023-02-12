@@ -8,13 +8,13 @@ abstract class ReverbPedalDescriptor(
     override val parameters = listOf(
         BooleanParameter(DeviceParameter.Id.PedalEnabled, false),
         ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.PedalMix, 7.5),
+        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.ReverbTime, 4.5),
         ContinuousRangeParameter(
-            id = DeviceParameter.Id.ReverbTime,
-            valueRange = (0.ms) .. (100.ms),
-            default = 45.ms,
-            valueFactory = ::Duration
+            id = DeviceParameter.Id.ReverbPreDelay,
+            valueRange = 0.ms .. 70.ms,
+            default = 0.ms,
+            valueFactory = ::Duration,
         ),
-        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.ReverbPreDelay, 0.0),
         ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.ReverbLowDamp, 3.6),
         ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.ReverbHighDamp, 2.5),
     )

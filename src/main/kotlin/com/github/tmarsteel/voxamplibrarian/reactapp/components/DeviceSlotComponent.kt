@@ -32,18 +32,9 @@ private val DeviceSlotComponentImpl = FC<DeviceSlotComponentProps<*>> { props ->
         configuration = props.configuration
         onValueChanged = { param, newValue ->
             props.onConfigurationChanged.unsafeCast<(DeviceConfiguration<*>) -> Unit>()(
-                props.configuration.withValue(param.unsafeCast<DeviceParameter<Any>>(), newValue)
+                props.configuration.withValue(param.id.unsafeCast<DeviceParameter.Id<Any>>(), newValue)
             )
         }
     }
 }
 fun <T : DeviceDescriptor> DeviceSlotComponent(): FC<DeviceSlotComponentProps<T>> = DeviceSlotComponentImpl.unsafeCast<FC<DeviceSlotComponentProps<T>>>()
-
-private fun <D : DeviceDescriptor, T : Any> DeviceConfiguration<D>.withValue(parameter: DeviceParameter<T>, newValue: T): DeviceConfiguration<D> {
-    return copy(
-        values = values.toMutableMap()
-            .also {
-                it[parameter.id] = newValue
-            }
-    )
-}

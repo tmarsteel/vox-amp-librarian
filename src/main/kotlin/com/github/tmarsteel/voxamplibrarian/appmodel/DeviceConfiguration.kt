@@ -1,12 +1,14 @@
 package com.github.tmarsteel.voxamplibrarian.appmodel
 
+import com.github.tmarsteel.voxamplibrarian.appmodel.ParameterValue.Companion.withValue
+
 class DeviceConfiguration<out D : DeviceDescriptor> private constructor(
     val descriptor: D,
     private val values: Map<DeviceParameter.Id<*>, Any>,
 ) {
     constructor(descriptor: D, values: List<ParameterValue<*>>) : this(
         descriptor,
-        values.associate { it.parameter.id to it.value },
+        values.associate { it.parameterId to it.value },
     )
 
     init {
@@ -49,7 +51,7 @@ class DeviceConfiguration<out D : DeviceDescriptor> private constructor(
             descriptor.parameters.map {
                 @Suppress("UNCHECKED_CAST")
                 it as DeviceParameter<Any>
-                ParameterValue(it, it.default)
+                it.id.withValue(it.default)
             }
         )
     }

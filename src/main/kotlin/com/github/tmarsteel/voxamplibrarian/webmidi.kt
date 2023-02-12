@@ -113,6 +113,7 @@ val VOX_AMP_MIDI_DEVICE: Flow<MidiDevice?> = midiState
             }
         }
     }
+    .shareIn(GlobalScope, SharingStarted.Lazily, 0)
 
 private class WebMidiVoxVtxDevice private constructor(val input: MidiInput, val output: MidiOutput) : MidiDevice {
     override suspend fun sendSysExMessage(manufacturerId: Byte, writer: (BinaryOutput) -> Unit) {
