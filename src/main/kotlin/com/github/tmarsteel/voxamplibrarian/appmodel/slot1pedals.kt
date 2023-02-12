@@ -2,7 +2,7 @@ package com.github.tmarsteel.voxamplibrarian.appmodel
 
 import com.github.tmarsteel.voxamplibrarian.appmodel.Frequency.Companion.mHz
 
-interface SlotOnePedalDescriptor : DeviceDescriptor {
+sealed interface SlotOnePedalDescriptor : DeviceDescriptor {
     companion object {
         val ALL = listOf(
             CompressorPedalDescriptor,
@@ -54,7 +54,7 @@ object ChorusPedalDescriptor : SlotOnePedalDescriptor {
     )
 }
 
-abstract class OverdrivePedalDescriptor(
+sealed class OverdrivePedalDescriptor(
     override val name: String,
 ) : SlotOnePedalDescriptor {
     override val parameters = listOf(

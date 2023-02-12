@@ -26,8 +26,8 @@ class DeviceConfiguration<out D : DeviceDescriptor> private constructor(
         }
     }
 
-    fun <V : Any> getValue(param: DeviceParameter<V>): V {
-        val untyped = values[param.id] ?: throw RuntimeException("Device $descriptor does not have parameter ${param.id}")
+    fun <V : Any> getValue(parameterId: DeviceParameter.Id<V>): V {
+        val untyped = values[parameterId] ?: throw RuntimeException("Device $descriptor does not have parameter $parameterId")
         @Suppress("UNCHECKED_CAST")
         return untyped as V
     }

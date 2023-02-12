@@ -35,7 +35,7 @@ object FlangerPedalDescriptor : SlotTwoPedalDescriptor {
     )
 }
 
-abstract class PhaserPedalDescriptor(
+sealed class PhaserPedalDescriptor(
     override val name: String,
 ) : SlotTwoPedalDescriptor {
     override val parameters = listOf(
@@ -73,7 +73,7 @@ object TremoloPedalDescriptor : SlotTwoPedalDescriptor {
     )
 }
 
-abstract class DelayPedalDescriptor(
+sealed class DelayPedalDescriptor(
     override val name: String,
 ) : SlotTwoPedalDescriptor {
     override val parameters = listOf(

@@ -122,7 +122,7 @@ class VoxVtxAmpConnection(
 
     private suspend fun fetchCurrentState(): VtxAmpState {
         val currentModeResponse = client.exchange(RequestCurrentModeMessage())
-        val currentConfig = client.exchange(RequestCurrentProgramMessage()).program.toConfiguration()
+        val currentConfig = client.exchange(RequestCurrentProgramMessage()).program.toUiDataModel()
         return when(currentModeResponse.mode) {
             CurrentModeResponse.Mode.PROGRAM_SLOT -> {
                 VtxAmpState.ProgramSlotSelected(currentModeResponse.slot!!, currentConfig)
@@ -162,7 +162,7 @@ private fun TwoByteDial.toFrequency() = Frequency(this.semanticValue.toInt())
 private fun TwoByteDial.toDuration() = Duration(this.semanticValue.toInt())
 private fun Byte.toDuration() = Duration(this.toInt())
 
-private fun Program.toConfiguration(): SimulationConfiguration {
+private fun Program.toUiDataModel(): SimulationConfiguration {
     return SimulationConfiguration(
         programName = programName.name,
         amplifier = DeviceConfiguration(
@@ -188,10 +188,6 @@ private fun Program.toConfiguration(): SimulationConfiguration {
         pedalTwo = slotTwoPedal,
         reverbPedal = reverbPedal,
     )
-}
-
-private fun SimulationConfiguration.toProgram(): Program {
-    TODO()
 }
 
 private val AmpModel.descriptor: AmplifierDescriptor get() = when(this) {
@@ -502,3 +498,184 @@ private val ReverbPedalType.descriptor: ReverbPedalDescriptor get() = when(this)
     ReverbPedalType.HALL -> HallReverbPedalDescriptor
     ReverbPedalType.PLATE -> PlateReverbPedalDescriptor
 }
+
+// ------------------------------------------------------------------------------------------------
+
+private fun UnitlessSingleDecimalPrecision.toZeroToTenDial() = ZeroToTenDial(intValue.toByte())
+private val AmplifierDescriptor.model: AmpModel get() = when(this) {
+    DeluxeClVibratoAmplifier -> AmpModel.DELUXE_CL_VIBRATO
+    DeluxeClNormalAmplifier -> AmpModel.DELUXE_CL_NORMAL
+    Tweed4X10BrightAmplifier -> AmpModel.TWEED_410_BRIGHT
+    Tweed4X10NormalAmplifier -> AmpModel.TWEED_410_NORMAL
+    BoutiqueClAmplifier -> AmpModel.BOUTIQUE_CL
+    BoutiqueOdAmplifier -> AmpModel.BOUTIQUE_OD
+    VoxAc30Amplifier -> AmpModel.VOX_AC30
+    VoxAc30TbAmplifier -> AmpModel.VOX_AC30TB
+    Brit1959TrebleAmplifier -> AmpModel.BRIT_1959_TREBLE
+    Brit1959NormalAmplifier -> AmpModel.BRIT_1959_NORMAL
+    Brit800Amplifier -> AmpModel.BRIT_800
+    BritVmAmplifier -> AmpModel.BRIT_VM
+    SlOdAmplifier -> AmpModel.SL_OD
+    DoubleRecAmplifier -> AmpModel.DOUBLE_REC
+    CaliElationAmplifier -> AmpModel.CALI_ELATION
+    EruptThreeChannelTwoAmplifier -> AmpModel.ERUPT_III_CH2
+    EruptThreeChannelThreeAmplifier -> AmpModel.ERUPT_III_CH3
+    BoutiqueMetalAmplifier -> AmpModel.BOUTIQUE_METAL
+    BritOrMkTwoAmplifier -> AmpModel.BRIT_OR_MKII
+    OriginalCleanAmplifier -> AmpModel.ORIGINAL_CL
+    else -> error("Unknown amplifier type: ${this::class.simpleName}")
+}
+
+private fun CompressorPedalDescriptor.Voice.toProtocolDataModel(): Byte = when(this) {
+    CompressorPedalDescriptor.Voice.ONE -> 0x01
+    CompressorPedalDescriptor.Voice.TWO -> 0x02
+    CompressorPedalDescriptor.Voice.THREE -> 0x03
+}
+private fun Continuous<*>.toTwoByteDial() = TwoByteDial(intValue.toUShort())
+private fun Boolean.toByte(): Byte = if (this) 0x01 else 0x00
+
+private fun SimulationConfiguration.toProtocolDataModel(): Program {
+    return Program(
+        ProgramName(programName ?: ""), 
+        amplifier.getValue(DeviceParameter.Id.AmpNoiseReductionSensitivity).toZeroToTenDial(),
+        amplifier.descriptor.model,
+        amplifier.getValue(DeviceParameter.Id.Gain).toZeroToTenDial(),
+        amplifier.getValue(DeviceParameter.Id.EqTreble).toZeroToTenDial(),
+        amplifier.getValue(DeviceParameter.Id.EqMiddle).toZeroToTenDial(),
+        amplifier.getValue(DeviceParameter.Id.EqBass).toZeroToTenDial(),
+        amplifier.getValue(DeviceParameter.Id.AmpVolume).toZeroToTenDial(),
+        amplifier.getValue(DeviceParameter.Id.AmpPresence).toZeroToTenDial(),
+        amplifier.getValue(DeviceParameter.Id.Resonance).toZeroToTenDial(),
+        amplifier.getValue(DeviceParameter.Id.AmpBrightCap),
+        amplifier.getValue(DeviceParameter.Id.AmpLowCut),
+        amplifier.getValue(DeviceParameter.Id.AmpMidBoost),
+        amplifier.getValue(DeviceParameter.Id.AmpTubeBias),
+        amplifier.getValue(DeviceParameter.Id.AmpClass),
+        // defaults
+        pedalOne.getValue(DeviceParameter.Id.PedalEnabled),
+        Slot1PedalType.COMP,
+        TwoByteDial(0u),
+        0,
+        0,
+        0,
+        0,
+        0,
+        pedalTwo.getValue(DeviceParameter.Id.PedalEnabled),
+        Slot2PedalType.FLANGER,
+        TwoByteDial(0u),
+        0,
+        0,
+        0,
+        0,
+        0,
+        reverbPedal.getValue(DeviceParameter.Id.PedalEnabled),
+        ReverbPedalType.ROOM,
+        ZeroToTenDial(0),
+        ZeroToTenDial(0),
+        0,
+        ZeroToTenDial(0),
+        ZeroToTenDial(0),
+    )
+        .withPedalOne(pedalOne)
+        .withPedalTwo(pedalTwo)
+        .withReverbPedal(reverbPedal)
+}
+
+private fun Program.withPedalOne(pedal: DeviceConfiguration<SlotOnePedalDescriptor>) = when(pedal.descriptor) {
+    CompressorPedalDescriptor -> copy(
+        pedal1Type = Slot1PedalType.COMP,
+        pedal1Dial1 = pedal.getValue(DeviceParameter.Id.CompSensitivity).toZeroToTenDial().asTwoByte(),
+        pedal1Dial2 = pedal.getValue(DeviceParameter.Id.PedalLevel).intValue.toByte(),
+        pedal1Dial3 = pedal.getValue(DeviceParameter.Id.CompAttack).intValue.toByte(),
+        pedal1Dial4 = pedal.getValue(DeviceParameter.Id.CompVoice).toProtocolDataModel(),
+        pedal1Dial5 = 0,
+        pedal1Dial6 = 0,
+    )
+    ChorusPedalDescriptor -> copy(
+        pedal1Type = Slot1PedalType.CHORUS,
+        pedal1Dial1 = pedal.getValue(DeviceParameter.Id.ModulationSpeed).toTwoByteDial(),
+        pedal1Dial2 = pedal.getValue(DeviceParameter.Id.ModulationDepth).intValue.toByte(),
+        pedal1Dial3 = pedal.getValue(DeviceParameter.Id.ModulationManual).intValue.toByte(),
+        pedal1Dial4 = pedal.getValue(DeviceParameter.Id.PedalMix).intValue.toByte(),
+        pedal1Dial5 = pedal.getValue(DeviceParameter.Id.EqLowCut).toByte(),
+        pedal1Dial6 = pedal.getValue(DeviceParameter.Id.EqHighCut).toByte(),
+    )
+    is OverdrivePedalDescriptor -> copy(
+        pedal1Type = when(pedal.descriptor) {
+            TubeOdDescriptor -> Slot1PedalType.OVERDRIVE
+            GoldDriveDescriptor -> Slot1PedalType.GOLD_DRIVE
+            TrebleBoostDescriptor -> Slot1PedalType.TREBLE_BOOST
+            RcTurboDescriptor -> Slot1PedalType.RC_TURBO
+            OrangeDistDescriptor -> Slot1PedalType.ORANGE_DIST
+            FatDistDescriptor -> Slot1PedalType.FAT_DIST
+            BritLeadDescriptor -> Slot1PedalType.BRIT_LEAD
+            FuzzDescriptor -> Slot1PedalType.FUZZ
+        },
+        pedal1Dial1 = pedal.getValue(DeviceParameter.Id.OverdriveDrive).toTwoByteDial(),
+        pedal1Dial2 = pedal.getValue(DeviceParameter.Id.EqTone).intValue.toByte(),
+        pedal1Dial3 = pedal.getValue(DeviceParameter.Id.PedalLevel).intValue.toByte(),
+        pedal1Dial4 = pedal.getValue(DeviceParameter.Id.EqTreble).intValue.toByte(),
+        pedal1Dial5 = pedal.getValue(DeviceParameter.Id.EqMiddle).intValue.toByte(),
+        pedal1Dial6 = pedal.getValue(DeviceParameter.Id.EqBass).intValue.toByte(),
+    )
+}
+
+private fun Program.withPedalTwo(pedal: DeviceConfiguration<SlotTwoPedalDescriptor>): Program = when(pedal.descriptor) {
+    FlangerPedalDescriptor -> copy(
+        pedal2Type = Slot2PedalType.FLANGER,
+        pedal2Dial1 = pedal.getValue(DeviceParameter.Id.ModulationSpeed).toTwoByteDial(),
+        pedal2Dial2 = pedal.getValue(DeviceParameter.Id.ModulationDepth).intValue.toByte(),
+        pedal2Dial3 = pedal.getValue(DeviceParameter.Id.ModulationManual).intValue.toByte(),
+        pedal2Dial4 = pedal.getValue(DeviceParameter.Id.EqLowCut).toByte(),
+        pedal2Dial5 = pedal.getValue(DeviceParameter.Id.EqHighCut).toByte(),
+        pedal2Dial6 = pedal.getValue(DeviceParameter.Id.Resonance).intValue.toByte(),
+    )
+    is PhaserPedalDescriptor -> copy(
+        pedal2Type = when (pedal.descriptor) {
+            BlkPhaserDescriptor -> Slot2PedalType.BLK_PHASER
+            OrgPhaserOneDescriptor -> Slot2PedalType.ORG_PHASER_1
+            OrgPhaserTwoDescriptor -> Slot2PedalType.ORG_PHASER_2
+        },
+        pedal2Dial1 = pedal.getValue(DeviceParameter.Id.ModulationSpeed).toTwoByteDial(),
+        pedal2Dial2 = pedal.getValue(DeviceParameter.Id.Resonance).intValue.toByte(),
+        pedal2Dial3 = pedal.getValue(DeviceParameter.Id.ModulationManual).intValue.toByte(),
+        pedal2Dial4 = pedal.getValue(DeviceParameter.Id.ModulationDepth).intValue.toByte(),
+        pedal2Dial5 = 0,
+        pedal2Dial6 = 0,
+    )
+    TremoloPedalDescriptor -> copy(
+        pedal2Type = Slot2PedalType.TREMOLO,
+        pedal2Dial1 = pedal.getValue(DeviceParameter.Id.ModulationSpeed).toTwoByteDial(),
+        pedal2Dial2 = pedal.getValue(DeviceParameter.Id.ModulationDepth).intValue.toByte(),
+        pedal2Dial3 = pedal.getValue(DeviceParameter.Id.TremoloDuty).intValue.toByte(),
+        pedal2Dial4 = pedal.getValue(DeviceParameter.Id.TremoloShape).intValue.toByte(),
+        pedal2Dial5 = pedal.getValue(DeviceParameter.Id.PedalLevel).intValue.toByte(),
+        pedal2Dial6 = 0,
+    )
+    is DelayPedalDescriptor -> copy(
+        pedal2Type = when(pedal.descriptor) {
+            TapeEchoDescriptor -> Slot2PedalType.TAPE_ECHO
+            AnalogDelayDescriptor -> Slot2PedalType.ANALOG_DELAY
+        },
+        pedal2Dial1 = pedal.getValue(DeviceParameter.Id.DelayTime).toTwoByteDial(),
+        pedal2Dial2 = pedal.getValue(DeviceParameter.Id.PedalLevel).intValue.toByte(),
+        pedal2Dial3 = pedal.getValue(DeviceParameter.Id.DelayFeedback).intValue.toByte(),
+        pedal2Dial4 = pedal.getValue(DeviceParameter.Id.EqTone).intValue.toByte(),
+        pedal2Dial5 = pedal.getValue(DeviceParameter.Id.DelayModulationSpeed).intValue.toByte(),
+        pedal2Dial6 = pedal.getValue(DeviceParameter.Id.ModulationDepth).intValue.toByte(),
+    )
+}
+
+private fun Program.withReverbPedal(pedal: DeviceConfiguration<ReverbPedalDescriptor>): Program = copy(
+    reverbPedalType = when(pedal.descriptor) {
+        RoomReverbPedalDescriptor -> ReverbPedalType.ROOM
+        SpringReverbPedalDescriptor -> ReverbPedalType.SPRING
+        HallReverbPedalDescriptor -> ReverbPedalType.HALL
+        PlateReverbPedalDescriptor -> ReverbPedalType.PLATE
+    },
+    reverbPedalDial1 = pedal.getValue(DeviceParameter.Id.PedalMix).toZeroToTenDial(),
+    reverbPedalDial2 = pedal.getValue(DeviceParameter.Id.ReverbTime).toZeroToTenDial(),
+    reverbPedalDial3 = pedal.getValue(DeviceParameter.Id.ReverbPreDelay).milliseconds.toByte(),
+    reverbPedalDial4 = pedal.getValue(DeviceParameter.Id.ReverbLowDamp).toZeroToTenDial(),
+    reverbPedalDial5 = pedal.getValue(DeviceParameter.Id.ReverbHighDamp).toZeroToTenDial(),
+)

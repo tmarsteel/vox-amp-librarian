@@ -2,7 +2,7 @@ package com.github.tmarsteel.voxamplibrarian.appmodel
 
 import com.github.tmarsteel.voxamplibrarian.appmodel.Duration.Companion.ms
 
-abstract class ReverbPedalDescriptor(
+sealed class ReverbPedalDescriptor(
     override val name: String,
 ) : DeviceDescriptor {
     override val parameters = listOf(
