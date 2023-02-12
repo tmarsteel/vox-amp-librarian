@@ -1,0 +1,3 @@
+package com.github.tmarsteel.voxamplibrarian.appmodel.hardware_integration
+
+class DifferentialUpdateNotSupportedException : RuntimeException()
