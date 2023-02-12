@@ -20,12 +20,15 @@ import com.github.tmarsteel.voxamplibrarian.appmodel.DelayPedalDescriptor
 import com.github.tmarsteel.voxamplibrarian.appmodel.DeluxeClNormalAmplifier
 import com.github.tmarsteel.voxamplibrarian.appmodel.DeluxeClVibratoAmplifier
 import com.github.tmarsteel.voxamplibrarian.appmodel.DeviceConfiguration
+import com.github.tmarsteel.voxamplibrarian.appmodel.DeviceDescriptor
 import com.github.tmarsteel.voxamplibrarian.appmodel.DeviceParameter
 import com.github.tmarsteel.voxamplibrarian.appmodel.DoubleRecAmplifier
+import com.github.tmarsteel.voxamplibrarian.appmodel.Duration
 import com.github.tmarsteel.voxamplibrarian.appmodel.EruptThreeChannelThreeAmplifier
 import com.github.tmarsteel.voxamplibrarian.appmodel.EruptThreeChannelTwoAmplifier
 import com.github.tmarsteel.voxamplibrarian.appmodel.FatDistDescriptor
 import com.github.tmarsteel.voxamplibrarian.appmodel.FlangerPedalDescriptor
+import com.github.tmarsteel.voxamplibrarian.appmodel.Frequency
 import com.github.tmarsteel.voxamplibrarian.appmodel.FuzzDescriptor
 import com.github.tmarsteel.voxamplibrarian.appmodel.GoldDriveDescriptor
 import com.github.tmarsteel.voxamplibrarian.appmodel.HallReverbPedalDescriptor
@@ -54,6 +57,7 @@ import com.github.tmarsteel.voxamplibrarian.appmodel.UnitlessSingleDecimalPrecis
 import com.github.tmarsteel.voxamplibrarian.appmodel.VoxAc30Amplifier
 import com.github.tmarsteel.voxamplibrarian.appmodel.VoxAc30TbAmplifier
 import com.github.tmarsteel.voxamplibrarian.protocol.AmpModel
+import com.github.tmarsteel.voxamplibrarian.protocol.PedalType
 import com.github.tmarsteel.voxamplibrarian.protocol.Program
 import com.github.tmarsteel.voxamplibrarian.protocol.ProgramName
 import com.github.tmarsteel.voxamplibrarian.protocol.ReverbPedalType
@@ -61,10 +65,15 @@ import com.github.tmarsteel.voxamplibrarian.protocol.Slot1PedalType
 import com.github.tmarsteel.voxamplibrarian.protocol.Slot2PedalType
 import com.github.tmarsteel.voxamplibrarian.protocol.TwoByteDial
 import com.github.tmarsteel.voxamplibrarian.protocol.ZeroToTenDial
+import com.github.tmarsteel.voxamplibrarian.protocol.message.AmpDialTurnedMessage
+import com.github.tmarsteel.voxamplibrarian.protocol.message.CommandWithoutResponse
+import com.github.tmarsteel.voxamplibrarian.protocol.message.EffectDialTurnedMessage
+import com.github.tmarsteel.voxamplibrarian.protocol.message.EffectPedalTypeChangedMessage
+import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageToAmp
+import com.github.tmarsteel.voxamplibrarian.protocol.message.SimulatedAmpModelChangedMessage
 
 private fun UnitlessSingleDecimalPrecision.toZeroToTenDial() = ZeroToTenDial(intValue.toByte())
-private val AmplifierDescriptor.model: AmpModel
-    get() = when(this) {
+private val AmplifierDescriptor.model: AmpModel get() = when(this) {
     DeluxeClVibratoAmplifier -> AmpModel.DELUXE_CL_VIBRATO
     DeluxeClNormalAmplifier -> AmpModel.DELUXE_CL_NORMAL
     Tweed4X10BrightAmplifier -> AmpModel.TWEED_410_BRIGHT
@@ -242,3 +251,153 @@ private fun Program.withReverbPedal(pedal: DeviceConfiguration<ReverbPedalDescri
     reverbPedalDial4 = pedal.getValue(DeviceParameter.Id.ReverbLowDamp).toZeroToTenDial(),
     reverbPedalDial5 = pedal.getValue(DeviceParameter.Id.ReverbHighDamp).toZeroToTenDial(),
 )
+
+sealed class ConfigurationDiff {
+    abstract fun toUpdateMessage(): MessageToAmp<*>
+
+    class Parameter<V : Any>(
+        val device: DeviceDescriptor,
+        val parameterId: DeviceParameter.Id<V>,
+        val newValue: V,
+    ): ConfigurationDiff() {
+        private val valueForProtocol = TwoByteDial(when (newValue) {
+            is Boolean -> newValue.toByte().toUShort()
+            is Frequency -> newValue.millihertz.toUShort()
+            is Duration -> newValue.milliseconds.toUShort()
+            is UnitlessSingleDecimalPrecision -> newValue.intValue.toUShort()
+            is CompressorPedalDescriptor.Voice -> newValue.toProtocolDataModel().toUShort()
+            else -> error("Unsupported value of type ${newValue::class.simpleName} for parameter $parameterId")
+        })
+
+        override fun toUpdateMessage(): MessageToAmp<*> {
+            return when (device) {
+                is AmplifierDescriptor -> AmpDialTurnedMessage(
+                    AMP_DIAL_INDICES.getValue(parameterId),
+                    valueForProtocol,
+                )
+                else -> EffectDialTurnedMessage(
+                    device.protocolPedalType.slot,
+                    pedalDialIndex(device, parameterId),
+                    valueForProtocol,
+                )
+            }
+        }
+    }
+
+    class DeviceType(
+        val oldType: DeviceDescriptor,
+        val newType: DeviceDescriptor,
+    ) : ConfigurationDiff() {
+        override fun toUpdateMessage(): MessageToAmp<*> {
+            return if (oldType is AmplifierDescriptor) {
+                check(newType is AmplifierDescriptor)
+                SimulatedAmpModelChangedMessage(newType.model)
+            } else {
+                EffectPedalTypeChangedMessage(newType.protocolPedalType)
+            }
+        }
+    }
+}
+
+private fun diffTo(old: SimulationConfiguration, new: SimulationConfiguration): List<ConfigurationDiff> {
+    return diffTo(old.amplifier, new.amplifier) +
+            diffTo(old.pedalOne, new.pedalOne) +
+            diffTo(old.pedalTwo, new.pedalTwo) +
+            diffTo(old.reverbPedal, new.reverbPedal)
+}
+
+private fun diffTo(old: DeviceConfiguration<*>, new: DeviceConfiguration<*>): List<ConfigurationDiff> {
+    // type change: no diff, possible, reset all values
+    if (old.descriptor !== new.descriptor) {
+        return listOf(
+            ConfigurationDiff.DeviceType(old.descriptor, new.descriptor),
+        ) + new.parameterValues.entries.map { (parameterId, newValue) ->
+            @Suppress("UNCHECKED_CAST")
+            ConfigurationDiff.Parameter(
+                new.descriptor,
+                parameterId as DeviceParameter.Id<Any>,
+                newValue,
+            )
+        }
+    }
+
+    val oldValues = old.parameterValues
+    val newValues = new.parameterValues
+    check(oldValues.keys == newValues.keys) {
+        "Identical device descriptors but different parameters from each configurations"
+    }
+
+    return oldValues.entries.mapNotNull { (parameterId, oldValue) ->
+        @Suppress("UNCHECKED_CAST")
+        parameterId as DeviceParameter.Id<Any>
+
+        val newValue = newValues.getValue(parameterId)
+        if (oldValue != newValue) {
+            return@mapNotNull null
+        }
+
+        ConfigurationDiff.Parameter(
+            new.descriptor,
+            parameterId,
+            newValue,
+        )
+    }
+}
+
+private val DeviceConfiguration<*>.parameterValues: Map<DeviceParameter.Id<*>, Any> get() = descriptor.parameters.associate {
+    @Suppress("UNCHECKED_CAST")
+    it as DeviceParameter<Any>
+    it.id to getValue(it.id)
+}
+
+private val DeviceDescriptor.protocolPedalType: PedalType get() =
+    when(this) {
+        is SlotOnePedalDescriptor -> when (this) {
+            is CompressorPedalDescriptor -> Slot1PedalType.COMP
+            is ChorusPedalDescriptor -> Slot1PedalType.CHORUS
+            is OverdrivePedalDescriptor -> Slot1PedalType.OVERDRIVE
+            is GoldDriveDescriptor -> Slot1PedalType.GOLD_DRIVE
+            is TrebleBoostDescriptor -> Slot1PedalType.TREBLE_BOOST
+            is RcTurboDescriptor -> Slot1PedalType.RC_TURBO
+            is OrangeDistDescriptor -> Slot1PedalType.ORANGE_DIST
+            is FatDistDescriptor -> Slot1PedalType.FAT_DIST
+            is BritLeadDescriptor -> Slot1PedalType.BRIT_LEAD
+            is FuzzDescriptor -> Slot1PedalType.FUZZ
+        }
+        is SlotTwoPedalDescriptor -> when(this) {
+            is FlangerPedalDescriptor -> Slot2PedalType.FLANGER
+            is BlkPhaserDescriptor -> Slot2PedalType.BLK_PHASER
+            is OrgPhaserOneDescriptor -> Slot2PedalType.ORG_PHASER_1
+            is OrgPhaserTwoDescriptor -> Slot2PedalType.ORG_PHASER_2
+            is TremoloPedalDescriptor -> Slot2PedalType.TREMOLO
+            is TapeEchoDescriptor -> Slot2PedalType.TAPE_ECHO
+            is AnalogDelayDescriptor -> Slot2PedalType.ANALOG_DELAY
+        }
+        is ReverbPedalDescriptor -> when(this) {
+            is RoomReverbPedalDescriptor -> ReverbPedalType.ROOM
+            is SpringReverbPedalDescriptor -> ReverbPedalType.SPRING
+            is HallReverbPedalDescriptor -> ReverbPedalType.HALL
+            is PlateReverbPedalDescriptor -> ReverbPedalType.PLATE
+        }
+        else -> error("The given descriptor ${this::class.simpleName} is not a pedal")
+    }
+
+private val AMP_DIAL_INDICES = mapOf<DeviceParameter.Id<*>, Byte>(
+    DeviceParameter.Id.Gain to 0x00,
+    DeviceParameter.Id.EqTreble to 0x01,
+    DeviceParameter.Id.EqMiddle to 0x02,
+    DeviceParameter.Id.EqBass to 0x03,
+    DeviceParameter.Id.AmpVolume to 0x04,
+    DeviceParameter.Id.AmpPresence to 0x05,
+    DeviceParameter.Id.AmpTone to 0x05,
+    DeviceParameter.Id.Resonance to 0x06,
+    DeviceParameter.Id.AmpBrightCap to 0x07,
+    DeviceParameter.Id.AmpLowCut to 0x08,
+    DeviceParameter.Id.AmpMidBoost to 0x09,
+    DeviceParameter.Id.AmpTubeBias to 0x0A,
+    DeviceParameter.Id.AmpClass to 0x0B,
+)
+
+private fun pedalDialIndex(pedal: DeviceDescriptor, parameterId: DeviceParameter.Id<*>): Byte {
+    TODO()
+}

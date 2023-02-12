@@ -135,7 +135,7 @@ class VoxVtxAmpConnection(
     }
 
     fun close() {
-
+        TODO()
     }
 
     companion object {
