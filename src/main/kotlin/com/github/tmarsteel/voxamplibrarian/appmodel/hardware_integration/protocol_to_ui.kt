@@ -53,9 +53,11 @@ import com.github.tmarsteel.voxamplibrarian.appmodel.Tweed4X10NormalAmplifier
 import com.github.tmarsteel.voxamplibrarian.appmodel.UnitlessSingleDecimalPrecision
 import com.github.tmarsteel.voxamplibrarian.appmodel.VoxAc30Amplifier
 import com.github.tmarsteel.voxamplibrarian.appmodel.VoxAc30TbAmplifier
+import com.github.tmarsteel.voxamplibrarian.appmodel.VtxAmpState
 import com.github.tmarsteel.voxamplibrarian.hex
 import com.github.tmarsteel.voxamplibrarian.protocol.AmpClass
 import com.github.tmarsteel.voxamplibrarian.protocol.AmpModel
+import com.github.tmarsteel.voxamplibrarian.protocol.PedalSlot
 import com.github.tmarsteel.voxamplibrarian.protocol.Program
 import com.github.tmarsteel.voxamplibrarian.protocol.ReverbPedalType
 import com.github.tmarsteel.voxamplibrarian.protocol.Slot1PedalType
@@ -65,7 +67,12 @@ import com.github.tmarsteel.voxamplibrarian.protocol.TwoByteDial
 import com.github.tmarsteel.voxamplibrarian.protocol.ZeroToTenDial
 import com.github.tmarsteel.voxamplibrarian.protocol.message.AmpDialTurnedMessage
 import com.github.tmarsteel.voxamplibrarian.protocol.message.EffectDialTurnedMessage
+import com.github.tmarsteel.voxamplibrarian.protocol.message.EffectPedalTypeChangedMessage
+import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageToHost
 import com.github.tmarsteel.voxamplibrarian.protocol.message.NoiseReductionSensitivityChangedMessage
+import com.github.tmarsteel.voxamplibrarian.protocol.message.PedalActiveStateChangedMessage
+import com.github.tmarsteel.voxamplibrarian.protocol.message.ProgramSlotChangedMessage
+import com.github.tmarsteel.voxamplibrarian.protocol.message.SimulatedAmpModelChangedMessage
 
 internal fun ZeroToTenDial.toUiDataModel() = UnitlessSingleDecimalPrecision(value.toInt())
 internal fun Byte.toUiZeroToTenDial() = UnitlessSingleDecimalPrecision(toInt())
@@ -415,4 +422,85 @@ internal val ReverbPedalType.descriptor: ReverbPedalDescriptor
     ReverbPedalType.SPRING -> SpringReverbPedalDescriptor
     ReverbPedalType.HALL -> HallReverbPedalDescriptor
     ReverbPedalType.PLATE -> PlateReverbPedalDescriptor
+}
+
+fun VtxAmpState.plus(diff: MessageToHost): VtxAmpState {
+    when (diff) {
+        is AmpDialTurnedMessage -> {
+            return this.withConfiguration(this.configuration.copy(
+                amplifier = this.configuration.amplifier.plus(diff)
+            ))
+        }
+        is EffectDialTurnedMessage -> {
+            when (diff.pedalSlot) {
+                PedalSlot.PEDAL1 -> {
+                    return this.withConfiguration(this.configuration.copy(
+                        pedalOne = this.configuration.pedalOne.plus(diff)
+                    ))
+                }
+                PedalSlot.PEDAL2 -> {
+                    return this.withConfiguration(this.configuration.copy(
+                        pedalTwo = this.configuration.pedalTwo.plus(diff)
+                    ))
+                }
+                PedalSlot.REVERB -> {
+                    return this.withConfiguration(this.configuration.copy(
+                        reverbPedal = this.configuration.reverbPedal.plus(diff)
+                    ))
+                }
+            }
+        }
+        is EffectPedalTypeChangedMessage -> {
+            return when (diff.type) {
+                is Slot1PedalType -> this.withConfiguration(this.configuration.copy(
+                    pedalOne = this.configuration.pedalOne.withDescriptor(diff.type.descriptor)
+                ))
+                is Slot2PedalType -> this.withConfiguration(this.configuration.copy(
+                    pedalTwo = this.configuration.pedalTwo.withDescriptor(diff.type.descriptor)
+                ))
+                is ReverbPedalType -> this.withConfiguration(this.configuration.copy(
+                    reverbPedal = this.configuration.reverbPedal.withDescriptor(diff.type.descriptor)
+                ))
+            }
+        }
+        is NoiseReductionSensitivityChangedMessage -> {
+            return this.withConfiguration(this.configuration.copy(
+                amplifier = this.configuration.amplifier.plus(diff)
+            ))
+        }
+        is SimulatedAmpModelChangedMessage -> {
+            return this.withConfiguration(this.configuration.copy(
+                amplifier = this.configuration.amplifier.withDescriptor(diff.model.descriptor)
+            ))
+        }
+        is PedalActiveStateChangedMessage -> {
+            return when (diff.pedalSlot) {
+                PedalSlot.PEDAL1 -> this.withConfiguration(this.configuration.copy(
+                    pedalOne = this.configuration.pedalOne.withValue(
+                        DeviceParameter.Id.PedalEnabled,
+                        diff.enabled,
+                    )
+                ))
+                PedalSlot.PEDAL2 -> this.withConfiguration(this.configuration.copy(
+                    pedalTwo = this.configuration.pedalTwo.withValue(
+                        DeviceParameter.Id.PedalEnabled,
+                        diff.enabled,
+                    )
+                ))
+                PedalSlot.REVERB -> this.withConfiguration(this.configuration.copy(
+                    reverbPedal = this.configuration.reverbPedal.withValue(
+                        DeviceParameter.Id.PedalEnabled,
+                        diff.enabled,
+                    )
+                ))
+            }
+        }
+        is ProgramSlotChangedMessage -> {
+            throw DifferentialUpdateNotSupportedException()
+        }
+        else -> {
+            console.error("Unimplemented message ${diff::class.simpleName}")
+            return this
+        }
+    }
 }
