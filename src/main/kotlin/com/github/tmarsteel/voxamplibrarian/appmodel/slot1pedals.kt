@@ -48,17 +48,17 @@ object CompressorPedalDescriptor : SlotOnePedalDescriptor {
         ),
         ContinuousRangeParameter.zeroToTenUnitless(
             DeviceParameter.Id.PedalLevel,
-            unitlessPedalDial(0x01, MutableProgram::pedal2Dial2),
+            unitlessPedalDial(0x01, MutableProgram::pedal1Dial2),
             6.7,
         ),
         ContinuousRangeParameter.zeroToTenUnitless(
             DeviceParameter.Id.CompAttack,
-            unitlessPedalDial(0x02, MutableProgram::pedal2Dial3),
+            unitlessPedalDial(0x02, MutableProgram::pedal1Dial3),
             5.7,
         ),
         DiscreteChoiceParameter(
             DeviceParameter.Id.CompVoice,
-            pedalSelector(0x03, MutableProgram::pedal2Dial4),
+            pedalSelector(0x03, MutableProgram::pedal1Dial4),
             Voice.TWO,
         ),
     )
