@@ -83,28 +83,10 @@ internal fun Byte.toDuration() = Duration(this.toInt())
 internal fun Program.toUiDataModel(): SimulationConfiguration {
     return SimulationConfiguration(
         programName = programName.name,
-        amplifier = DeviceConfiguration(
-            ampModel.descriptor,
-            listOf(
-                DeviceParameter.Id.Gain withValue gain.toUiDataModel(),
-                DeviceParameter.Id.EqBass withValue bass.toUiDataModel(),
-                DeviceParameter.Id.EqMiddle withValue middle.toUiDataModel(),
-                DeviceParameter.Id.EqTreble withValue treble.toUiDataModel(),
-                DeviceParameter.Id.AmpVolume withValue volume.toUiDataModel(),
-                DeviceParameter.Id.Resonance withValue resonance.toUiDataModel(),
-                DeviceParameter.Id.AmpNoiseReductionSensitivity withValue noiseReductionSensitivity.toUiDataModel(),
-                DeviceParameter.Id.AmpLowCut withValue lowCut,
-                DeviceParameter.Id.AmpMidBoost withValue midBoost,
-                DeviceParameter.Id.AmpBrightCap withValue brightCap,
-                DeviceParameter.Id.AmpTubeBias withValue tubeBias,
-                DeviceParameter.Id.AmpClass withValue ampClass,
-                DeviceParameter.Id.AmpTone withValue presence.toUiDataModel(),
-                DeviceParameter.Id.AmpPresence withValue presence.toUiDataModel(),
-            ),
-        ),
-        pedalOne = slotOnePedal,
-        pedalTwo = slotTwoPedal,
-        reverbPedal = reverbPedal,
+        amplifier = DeviceConfiguration.from(this, AmplifierDescriptor.ALL),
+        pedalOne = DeviceConfiguration.from(this, SlotOnePedalDescriptor.ALL),
+        pedalTwo = DeviceConfiguration.from(this, SlotTwoPedalDescriptor.ALL),
+        reverbPedal = DeviceConfiguration.from(this, ReverbPedalDescriptor.ALL),
     )
 }
 

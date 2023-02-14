@@ -2,6 +2,7 @@ package com.github.tmarsteel.voxamplibrarian.appmodel
 
 import com.github.tmarsteel.voxamplibrarian.protocol.MutableProgram
 import com.github.tmarsteel.voxamplibrarian.protocol.PedalSlot
+import com.github.tmarsteel.voxamplibrarian.protocol.Program
 import com.github.tmarsteel.voxamplibrarian.protocol.SingleByteProtocolSerializable
 import com.github.tmarsteel.voxamplibrarian.protocol.TubeBias
 import com.github.tmarsteel.voxamplibrarian.protocol.TwoByteDial
@@ -18,7 +19,18 @@ import com.github.tmarsteel.voxamplibrarian.protocol.AmpClass as ProtocolAmpClas
 sealed interface DeviceParameter<Value : Any> {
     val id: Id<Value>
     val default: Value
-    val protocolAdapter: ProtocolAdapter<Value>
+
+    /**
+     * Builds a message that sets this parameter to the given [value] on the amp.
+     */
+    fun buildUpdateMessage(value: Value): MessageToAmp<*>
+
+    /**
+     * Sets this parameter to the given [value] in the given [program].
+     */
+    fun applyToProgram(program: MutableProgram, value: Value)
+
+    fun getValueFrom(program: Program): Value
 
     fun rejectInvalidValue(value: Value)
 
@@ -69,26 +81,38 @@ sealed interface DeviceParameter<Value : Any> {
         object ReverbHighDamp : Id<UnitlessSingleDecimalPrecision>()
     }
 
-    interface ProtocolAdapter<in Value : Any> {
+    interface ProtocolAdapter<in Parameter : DeviceParameter<Value>, Value : Any> {
         /**
          * Builds a message that sets this parameter to the given [value] on the amp.
          */
-        fun buildUpdateMessage(value: Value): MessageToAmp<*>
+        fun buildUpdateMessage(parameter: Parameter, value: Value): MessageToAmp<*>
 
         /**
          * Sets this parameter to the given [value] in the given [program].
          */
-        fun applyToProgram(program: MutableProgram, value: Value)
+        fun applyToProgram(program: MutableProgram, parameter: Parameter, value: Value)
+
+        fun getValueFrom(program: Program, parameter: Parameter): Value
     }
+}
+
+abstract class BaseDeviceParameter<Value : Any, Self : DeviceParameter<Value>>(
+    protected val protocolAdapter: DeviceParameter.ProtocolAdapter<Self, Value>
+) : DeviceParameter<Value> {
+    override fun buildUpdateMessage(value: Value) = protocolAdapter.buildUpdateMessage(this as Self, value)
+
+    override fun applyToProgram(program: MutableProgram, value: Value) = protocolAdapter.applyToProgram(program, this as Self, value)
+
+    override fun getValueFrom(program: Program): Value = protocolAdapter.getValueFrom(program, this as Self)
 }
 
 class ContinuousRangeParameter<V : Continuous<V>>(
     override val id: DeviceParameter.Id<V>,
-    override val protocolAdapter: DeviceParameter.ProtocolAdapter<V>,
+    protocolAdapter: DeviceParameter.ProtocolAdapter<ContinuousRangeParameter<V>, V>,
     val valueRange: ClosedRange<V>,
     override val default: V,
     private val valueFactory: (Int) -> V,
-) : DeviceParameter<V> {
+) : BaseDeviceParameter<V, ContinuousRangeParameter<V>>(protocolAdapter) {
     fun constructValue(intValue: Int): V = valueFactory(intValue)
 
     override fun rejectInvalidValue(value: V) {
@@ -98,7 +122,7 @@ class ContinuousRangeParameter<V : Continuous<V>>(
     companion object {
         fun zeroToTenUnitless(
             id: DeviceParameter.Id<UnitlessSingleDecimalPrecision>,
-            protocolAdapter: DeviceParameter.ProtocolAdapter<UnitlessSingleDecimalPrecision>,
+            protocolAdapter: DeviceParameter.ProtocolAdapter<ContinuousRangeParameter<UnitlessSingleDecimalPrecision>, UnitlessSingleDecimalPrecision>,
             default: Double
         ) : ContinuousRangeParameter<UnitlessSingleDecimalPrecision> {
             require(default in 0.0 .. 10.0) {
@@ -122,156 +146,264 @@ class ContinuousRangeParameter<V : Continuous<V>>(
 
 class DiscreteChoiceParameter<Value : SingleByteProtocolSerializable>(
     override val id: DeviceParameter.Id<Value>,
-    override val protocolAdapter: DeviceParameter.ProtocolAdapter<Value>,
+    protocolAdapter: DeviceParameter.ProtocolAdapter<DiscreteChoiceParameter<Value>, Value>,
     val choices: Set<Value>,
     override val default: Value,
-) : DeviceParameter<Value> {
+) : BaseDeviceParameter<Value, DiscreteChoiceParameter<Value>>(protocolAdapter) {
     override fun rejectInvalidValue(value: Value) {
         check(value in choices)
     }
 
     companion object {
-        inline operator fun <reified V> invoke(
-            id: DeviceParameter.Id<V>,
-            protocolAdapter: DeviceParameter.ProtocolAdapter<V>,
-            default: V,
-        ): DiscreteChoiceParameter<V>
-            where V : Enum<V>, V : SingleByteProtocolSerializable {
-            return DiscreteChoiceParameter(id, protocolAdapter, enumValues<V>().toSet(), default)
+        inline operator fun <reified Value> invoke(
+            id: DeviceParameter.Id<Value>,
+            protocolAdapter: DeviceParameter.ProtocolAdapter<DiscreteChoiceParameter<Value>, Value>,
+            default: Value,
+        ): DiscreteChoiceParameter<Value>
+            where Value : Enum<Value>, Value : SingleByteProtocolSerializable {
+            return DiscreteChoiceParameter(id, protocolAdapter, enumValues<Value>().toSet(), default)
         }
     }
 }
 
 class BooleanParameter(
     override val id: DeviceParameter.Id<Boolean>,
-    override val protocolAdapter: DeviceParameter.ProtocolAdapter<Boolean>,
+    protocolAdapter: DeviceParameter.ProtocolAdapter<BooleanParameter, Boolean>,
     override val default: Boolean,
-) : DeviceParameter<Boolean> {
+) : BaseDeviceParameter<Boolean, BooleanParameter>(protocolAdapter) {
     override fun rejectInvalidValue(value: Boolean) {
         // nothing to do
     }
 }
 
-fun ampDial(
-    index: Byte,
-    field: KMutableProperty1<in MutableProgram, in ZeroToTenDial>,
-): DeviceParameter.ProtocolAdapter<Continuous<*>> {
-    return object : DeviceParameter.ProtocolAdapter<Continuous<*>> {
-        private fun Continuous<*>.asZeroToTen() = ZeroToTenDial(intValue.toByte())
-        override fun buildUpdateMessage(value: Continuous<*>) = AmpDialTurnedMessage(index, value.asZeroToTen().asTwoByte())
-        override fun applyToProgram(program: MutableProgram, value: Continuous<*>) {
-            field.set(program, value.asZeroToTen())
-        }
+private fun Continuous<*>.asZeroToTenDial() = ZeroToTenDial(intValue.toByte())
+private fun Continuous<*>.asTwoByteDial() = TwoByteDial(intValue.toUShort())
+
+private class ContinuousAmpDialProtocolAdapter<Value: Continuous<Value>, ProtocolValue : Any>(
+    val dial: Byte,
+    val field: KMutableProperty1<in MutableProgram, ProtocolValue>,
+    val serializeToProtocol: (Value) -> ProtocolValue,
+    val deserializeFromProtocol: (ProtocolValue) -> Value,
+) : DeviceParameter.ProtocolAdapter<ContinuousRangeParameter<Value>, Value> {
+    override fun buildUpdateMessage(parameter: ContinuousRangeParameter<Value>, value: Value): MessageToAmp<*> {
+        return AmpDialTurnedMessage(dial, value.asTwoByteDial())
     }
+
+    override fun applyToProgram(program: MutableProgram, parameter: ContinuousRangeParameter<Value>, value: Value) {
+        field.set(program, serializeToProtocol(value))
+    }
+
+    override fun getValueFrom(program: Program, parameter: ContinuousRangeParameter<Value>): Value {
+        return field.get(program.unsafeCast<MutableProgram>()).let(deserializeFromProtocol)
+    }
+}
+
+private class ContinuousPedalDialProtocolAdapter<Value : Continuous<Value>, ProtocolValue : Any>(
+    val slot: PedalSlot,
+    val dial: Byte,
+    val field: KMutableProperty1<in MutableProgram, ProtocolValue>,
+    val serializeToProtocol: (Value) -> ProtocolValue,
+    val deserializeFromProtocol: (ProtocolValue) -> Value,
+) : DeviceParameter.ProtocolAdapter<DeviceParameter<Value>, Value> {
+    override fun buildUpdateMessage(parameter: DeviceParameter<Value>, value: Value): MessageToAmp<*> {
+        return EffectDialTurnedMessage(slot, dial, value.asTwoByteDial())
+    }
+
+    override fun applyToProgram(program: MutableProgram, parameter: DeviceParameter<Value>, value: Value) {
+        field.set(program, serializeToProtocol(value))
+    }
+
+    override fun getValueFrom(program: Program, parameter: DeviceParameter<Value>): Value {
+        return field.get(program.unsafeCast<MutableProgram>()).let(deserializeFromProtocol)
+    }
+}
+
+fun ampSelector(
+    index: Byte,
+    field: KMutableProperty1<in MutableProgram, ZeroToTenDial>,
+): DeviceParameter.ProtocolAdapter<ContinuousRangeParameter<UnitlessSingleDecimalPrecision>, UnitlessSingleDecimalPrecision> {
+    return ContinuousAmpDialProtocolAdapter(index, field, Continuous<*>::asZeroToTenDial, { UnitlessSingleDecimalPrecision(it.value.toInt()) })
 }
 
 fun ampSwitch(
     index: Byte,
-    field: KMutableProperty1<in MutableProgram, in Boolean>,
-): DeviceParameter.ProtocolAdapter<Boolean> {
-    return object : DeviceParameter.ProtocolAdapter<Boolean> {
-        override fun buildUpdateMessage(value: Boolean) = AmpDialTurnedMessage(index, TwoByteDial(if (value) 0x01u else 0x00u))
-        override fun applyToProgram(program: MutableProgram, value: Boolean) {
+    field: KMutableProperty1<MutableProgram, Boolean>,
+): DeviceParameter.ProtocolAdapter<DeviceParameter<Boolean>, Boolean> {
+    return object : DeviceParameter.ProtocolAdapter<DeviceParameter<Boolean>, Boolean> {
+        override fun buildUpdateMessage(parameter: DeviceParameter<Boolean>, value: Boolean): MessageToAmp<*> {
+            return AmpDialTurnedMessage(index, TwoByteDial(if (value) 0x01u else 0x00u))
+        }
+        override fun applyToProgram(program: MutableProgram, parameter: DeviceParameter<Boolean>, value: Boolean) {
             field.set(program, value)
+        }
+
+        override fun getValueFrom(program: Program, parameter: DeviceParameter<Boolean>): Boolean {
+            return field.get(program.unsafeCast<MutableProgram>())
         }
     }
 }
 
-fun <V : SingleByteProtocolSerializable> ampDial(
+fun <Value : SingleByteProtocolSerializable> ampSelector(
     index: Byte,
-    field: KMutableProperty1<in MutableProgram, in V>,
-): DeviceParameter.ProtocolAdapter<V> {
-    return object : DeviceParameter.ProtocolAdapter<V> {
-        override fun buildUpdateMessage(value: V) = AmpDialTurnedMessage(index, TwoByteDial(value.protocolValue.toUShort()))
-        override fun applyToProgram(program: MutableProgram, value: V) {
+    field: KMutableProperty1<in MutableProgram, Value>,
+): DeviceParameter.ProtocolAdapter<DiscreteChoiceParameter<Value>, Value> {
+    return object : DeviceParameter.ProtocolAdapter<DiscreteChoiceParameter<Value>, Value> {
+        override fun buildUpdateMessage(parameter: DiscreteChoiceParameter<Value>, value: Value) = AmpDialTurnedMessage(index, TwoByteDial(value.protocolValue.toUShort()))
+        override fun applyToProgram(program: MutableProgram, parameter: DiscreteChoiceParameter<Value>, value: Value) {
             field.set(program, value)
+        }
+
+        override fun getValueFrom(program: Program, parameter: DiscreteChoiceParameter<Value>): Value {
+            return field.get(program.unsafeCast<MutableProgram>())
         }
     }
 }
 
-object NoiseReductionSensitivityProtocolAdapter : DeviceParameter.ProtocolAdapter<UnitlessSingleDecimalPrecision> {
-    override fun buildUpdateMessage(value: UnitlessSingleDecimalPrecision) = NoiseReductionSensitivityChangedMessage(
+object NoiseReductionSensitivityProtocolAdapter : DeviceParameter.ProtocolAdapter<DeviceParameter<UnitlessSingleDecimalPrecision>, UnitlessSingleDecimalPrecision> {
+    override fun buildUpdateMessage(parameter: DeviceParameter<UnitlessSingleDecimalPrecision>, value: UnitlessSingleDecimalPrecision) = NoiseReductionSensitivityChangedMessage(
         ZeroToTenDial(value.intValue.toByte())
     )
 
-    override fun applyToProgram(program: MutableProgram, value: UnitlessSingleDecimalPrecision) {
+    override fun applyToProgram(program: MutableProgram, parameter: DeviceParameter<UnitlessSingleDecimalPrecision>, value: UnitlessSingleDecimalPrecision) {
         program.noiseReductionSensitivity = ZeroToTenDial(value.intValue.toByte())
     }
+
+    override fun getValueFrom(program: Program, parameter: DeviceParameter<UnitlessSingleDecimalPrecision>): UnitlessSingleDecimalPrecision {
+        return UnitlessSingleDecimalPrecision(program.noiseReductionSensitivity.value.toInt())
+    }
 }
 
-fun PedalDescriptor.pedalEnabledSwitch() : DeviceParameter.ProtocolAdapter<Boolean> {
-    return object : DeviceParameter.ProtocolAdapter<Boolean> {
-        override fun buildUpdateMessage(value: Boolean) = PedalActiveStateChangedMessage(pedalType.slot, value)
+fun PedalDescriptor<*>.pedalEnabledSwitch() : DeviceParameter.ProtocolAdapter<DeviceParameter<Boolean>, Boolean> {
+    return object : DeviceParameter.ProtocolAdapter<DeviceParameter<Boolean>, Boolean> {
+        override fun buildUpdateMessage(parameter: DeviceParameter<Boolean>, value: Boolean) = PedalActiveStateChangedMessage(pedalType.slot, value)
 
-        override fun applyToProgram(program: MutableProgram, value: Boolean) {
+        override fun applyToProgram(program: MutableProgram, parameter: DeviceParameter<Boolean>, value: Boolean) {
             pedalType.slot.programEnabledField.set(program, value)
         }
-    }
-}
 
-fun PedalDescriptor.pedalDial(
-    index: Byte,
-    field: KMutableProperty1<in MutableProgram, in ZeroToTenDial>,
-) : DeviceParameter.ProtocolAdapter<Continuous<*>> = object : DeviceParameter.ProtocolAdapter<Continuous<*>> {
-    private fun Continuous<*>.asZeroToTen() = ZeroToTenDial(intValue.toByte())
-    override fun buildUpdateMessage(value: Continuous<*>) = EffectDialTurnedMessage(pedalType.slot, index, value.asZeroToTen().asTwoByte())
-
-    override fun applyToProgram(program: MutableProgram, value: Continuous<*>) {
-        field.set(program, value.asZeroToTen())
-    }
-}
-
-fun PedalDescriptor.pedalDial(
-    index: Byte,
-    field: KMutableProperty1<in MutableProgram, in TwoByteDial>,
-) : DeviceParameter.ProtocolAdapter<Continuous<*>> = object : DeviceParameter.ProtocolAdapter<Continuous<*>> {
-    private fun Continuous<*>.asTwoByteDial() = TwoByteDial(intValue.toUShort())
-    override fun buildUpdateMessage(value: Continuous<*>) = EffectDialTurnedMessage(pedalType.slot, index, value.asTwoByteDial())
-
-    override fun applyToProgram(program: MutableProgram, value: Continuous<*>) {
-        field.set(program, value.asTwoByteDial())
-    }
-}
-
-fun PedalDescriptor.pedalDial(
-    index: Byte,
-    field: KMutableProperty1<in MutableProgram, in Byte>,
-) : DeviceParameter.ProtocolAdapter<Continuous<*>> {
-    return object : DeviceParameter.ProtocolAdapter<Continuous<*>> {
-        override fun buildUpdateMessage(value: Continuous<*>) = EffectDialTurnedMessage(pedalType.slot, index, TwoByteDial(value.intValue.toUShort()))
-
-        override fun applyToProgram(program: MutableProgram, value: Continuous<*>) {
-            field.set(program, value.intValue.toByte())
+        override fun getValueFrom(program: Program, parameter: DeviceParameter<Boolean>): Boolean {
+            return pedalType.slot.programEnabledField.get(program.unsafeCast<MutableProgram>())
         }
     }
 }
 
-fun <V : SingleByteProtocolSerializable> PedalDescriptor.pedalSelector(
+fun PedalDescriptor<*>.unitlessPedalDial(
     index: Byte,
-    field: KMutableProperty1<in MutableProgram, in Byte>,
-) : DeviceParameter.ProtocolAdapter<V> {
-    return object : DeviceParameter.ProtocolAdapter<V> {
-        override fun buildUpdateMessage(value: V): MessageToAmp<*> {
+    field: KMutableProperty1<in MutableProgram, ZeroToTenDial>,
+) : DeviceParameter.ProtocolAdapter<DeviceParameter<UnitlessSingleDecimalPrecision>, UnitlessSingleDecimalPrecision> {
+    return ContinuousPedalDialProtocolAdapter(
+        pedalType.slot,
+        index,
+        field,
+        UnitlessSingleDecimalPrecision::asZeroToTenDial,
+        { UnitlessSingleDecimalPrecision(it.value.toInt()) },
+    )
+}
+
+fun PedalDescriptor<*>.unitlessPedalDial(
+    index: Byte,
+    field: KMutableProperty1<in MutableProgram, TwoByteDial>,
+) : DeviceParameter.ProtocolAdapter<DeviceParameter<UnitlessSingleDecimalPrecision>, UnitlessSingleDecimalPrecision> {
+    return ContinuousPedalDialProtocolAdapter(
+        pedalType.slot,
+        index,
+        field,
+        UnitlessSingleDecimalPrecision::asTwoByteDial,
+        { UnitlessSingleDecimalPrecision(it.semanticValue.toInt()) },
+    )
+}
+
+fun PedalDescriptor<*>.unitlessPedalDial(
+    index: Byte,
+    field: KMutableProperty1<in MutableProgram, Byte>,
+) : DeviceParameter.ProtocolAdapter<DeviceParameter<UnitlessSingleDecimalPrecision>, UnitlessSingleDecimalPrecision> {
+    return ContinuousPedalDialProtocolAdapter(
+        pedalType.slot,
+        index,
+        field,
+        { it.intValue.toByte() },
+        { UnitlessSingleDecimalPrecision(it.toInt()) },
+    )
+}
+
+fun PedalDescriptor<*>.frequencyPedalDial(
+    index: Byte,
+    field: KMutableProperty1<in MutableProgram, TwoByteDial>,
+) : DeviceParameter.ProtocolAdapter<DeviceParameter<Frequency>, Frequency> {
+    return ContinuousPedalDialProtocolAdapter(
+        pedalType.slot,
+        index,
+        field,
+        { TwoByteDial(it.millihertz.toUShort()) },
+        { Frequency(it.semanticValue.toInt()) }
+    )
+}
+
+fun PedalDescriptor<*>.durationPedalDial(
+    index: Byte,
+    field: KMutableProperty1<in MutableProgram, TwoByteDial>,
+) : DeviceParameter.ProtocolAdapter<DeviceParameter<Duration>, Duration> {
+    return ContinuousPedalDialProtocolAdapter(
+        pedalType.slot,
+        index,
+        field,
+        { TwoByteDial(it.milliseconds.toUShort()) },
+        { Duration(it.semanticValue.toInt()) }
+    )
+}
+
+fun PedalDescriptor<*>.durationPedalDial(
+    index: Byte,
+    field: KMutableProperty1<in MutableProgram, Byte>,
+) : DeviceParameter.ProtocolAdapter<DeviceParameter<Duration>, Duration> {
+    return ContinuousPedalDialProtocolAdapter(
+        pedalType.slot,
+        index,
+        field,
+        { it.milliseconds.toByte() },
+        { Duration(it.toInt()) }
+    )
+}
+
+fun <Value : SingleByteProtocolSerializable> PedalDescriptor<*>.pedalSelector(
+    index: Byte,
+    field: KMutableProperty1<in MutableProgram, Byte>
+) : DeviceParameter.ProtocolAdapter<DiscreteChoiceParameter<Value>, Value> {
+    return object : DeviceParameter.ProtocolAdapter<DiscreteChoiceParameter<Value>, Value> {
+        override fun buildUpdateMessage(parameter: DiscreteChoiceParameter<Value>, value: Value): MessageToAmp<*> {
             return EffectDialTurnedMessage(pedalType.slot, index, TwoByteDial(value.protocolValue.toUShort()))
         }
 
-        override fun applyToProgram(program: MutableProgram, value: V) {
+        override fun applyToProgram(program: MutableProgram, parameter: DiscreteChoiceParameter<Value>, value: Value) {
             field.set(program, value.protocolValue)
+        }
+
+        override fun getValueFrom(program: Program, parameter: DiscreteChoiceParameter<Value>): Value {
+            val byteValue = field.get(program.unsafeCast<MutableProgram>())
+            return parameter.choices.single { it.protocolValue == byteValue }
         }
     }
 }
 
-fun PedalDescriptor.pedalSwitch(
+fun PedalDescriptor<*>.pedalSwitch(
     index: Byte,
-    field: KMutableProperty1<in MutableProgram, in Byte>,
-) : DeviceParameter.ProtocolAdapter<Boolean> {
-    return object : DeviceParameter.ProtocolAdapter<Boolean> {
-        override fun buildUpdateMessage(value: Boolean): MessageToAmp<*> {
+    field: KMutableProperty1<in MutableProgram, Byte>,
+) : DeviceParameter.ProtocolAdapter<DeviceParameter<Boolean>, Boolean> {
+    return object : DeviceParameter.ProtocolAdapter<DeviceParameter<Boolean>, Boolean> {
+        override fun buildUpdateMessage(parameter: DeviceParameter<Boolean>, value: Boolean): MessageToAmp<*> {
             return EffectDialTurnedMessage(pedalType.slot, index, TwoByteDial(if (value) 0x01u else 0x00u))
         }
 
-        override fun applyToProgram(program: MutableProgram, value: Boolean) {
+        override fun applyToProgram(program: MutableProgram, parameter: DeviceParameter<Boolean>, value: Boolean) {
             field.set(program, if (value) 0x01 else 0x00)
+        }
+
+        override fun getValueFrom(program: Program, parameter: DeviceParameter<Boolean>): Boolean {
+            return when (val value = field.get(program.unsafeCast<MutableProgram>()).toInt()) {
+                0x00 -> true
+                0x01 -> false
+                else -> error("Boolean value was not 0x00 or 0x01: $field = $value")
+            }
         }
     }
 }

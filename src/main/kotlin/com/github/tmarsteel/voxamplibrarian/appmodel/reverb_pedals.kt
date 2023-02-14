@@ -2,15 +2,21 @@ package com.github.tmarsteel.voxamplibrarian.appmodel
 
 import com.github.tmarsteel.voxamplibrarian.appmodel.Duration.Companion.ms
 import com.github.tmarsteel.voxamplibrarian.protocol.MutableProgram
+import com.github.tmarsteel.voxamplibrarian.protocol.Program
 import com.github.tmarsteel.voxamplibrarian.protocol.ReverbPedalType
 
 sealed class ReverbPedalDescriptor(
     override val name: String,
     override val pedalType: ReverbPedalType,
-) : PedalDescriptor {
+) : PedalDescriptor<ReverbPedalDescriptor> {
     override fun applyTypeToProgram(program: MutableProgram) {
         program.reverbPedalType = pedalType
     }
+
+    override fun isContainedIn(program: Program): Boolean {
+        return program.reverbPedalType == pedalType
+    }
+
     override val parameters = listOf(
         BooleanParameter(
             DeviceParameter.Id.PedalEnabled,
@@ -19,29 +25,29 @@ sealed class ReverbPedalDescriptor(
         ),
         ContinuousRangeParameter.zeroToTenUnitless(
             DeviceParameter.Id.PedalMix,
-            pedalDial(0x00, MutableProgram::pedal2Dial1),
+            unitlessPedalDial(0x00, MutableProgram::pedal2Dial1),
             7.5
         ),
         ContinuousRangeParameter.zeroToTenUnitless(
             DeviceParameter.Id.ReverbTime,
-            pedalDial(0x01, MutableProgram::pedal2Dial2),
+            unitlessPedalDial(0x01, MutableProgram::pedal2Dial2),
             4.5
         ),
         ContinuousRangeParameter(
             id = DeviceParameter.Id.ReverbPreDelay,
-            protocolAdapter = pedalDial(0x02, MutableProgram::pedal2Dial3),
+            protocolAdapter = durationPedalDial(0x02, MutableProgram::pedal2Dial3),
             valueRange = 0.ms .. 70.ms,
             default = 0.ms,
             valueFactory = ::Duration,
         ),
         ContinuousRangeParameter.zeroToTenUnitless(
             DeviceParameter.Id.ReverbLowDamp,
-            pedalDial(0x03, MutableProgram::pedal2Dial4),
+            unitlessPedalDial(0x03, MutableProgram::pedal2Dial4),
             3.6
         ),
         ContinuousRangeParameter.zeroToTenUnitless(
             DeviceParameter.Id.ReverbHighDamp,
-            pedalDial(0x04, MutableProgram::pedal2Dial5),
+            unitlessPedalDial(0x04, MutableProgram::pedal2Dial5),
             2.5
         ),
     )

@@ -2,8 +2,9 @@ package com.github.tmarsteel.voxamplibrarian.appmodel
 
 import com.github.tmarsteel.voxamplibrarian.appmodel.ParameterValue.Companion.withValue
 import com.github.tmarsteel.voxamplibrarian.protocol.MutableProgram
+import com.github.tmarsteel.voxamplibrarian.protocol.Program
 
-class DeviceConfiguration<out D : DeviceDescriptor> private constructor(
+class DeviceConfiguration<out D : DeviceDescriptor<*>> private constructor(
     val descriptor: D,
     private val values: Map<DeviceParameter.Id<*>, Any>,
 ) {
@@ -39,7 +40,7 @@ class DeviceConfiguration<out D : DeviceDescriptor> private constructor(
         return DeviceConfiguration(descriptor, newValues)
     }
 
-    fun <ND : DeviceDescriptor> withDescriptor(newDescriptor: ND): DeviceConfiguration<ND> {
+    fun <ND : DeviceDescriptor<*>> withDescriptor(newDescriptor: ND): DeviceConfiguration<ND> {
         val newValues = newDescriptor.parameters
             .associate { it.id to (values[it.id] ?: it.default) }
 
@@ -51,12 +52,12 @@ class DeviceConfiguration<out D : DeviceDescriptor> private constructor(
         descriptor.parameters.forEach {
             @Suppress("UNCHECKED_CAST")
             it as DeviceParameter<in Any>
-            it.protocolAdapter.applyToProgram(program, values.getValue(it.id))
+            it.applyToProgram(program, values.getValue(it.id))
         }
     }
 
     companion object {
-        fun <D : DeviceDescriptor> defaultOf(descriptor: D): DeviceConfiguration<D> = DeviceConfiguration(
+        fun <D : DeviceDescriptor<*>> defaultOf(descriptor: D): DeviceConfiguration<D> = DeviceConfiguration(
             descriptor,
             descriptor.parameters.map {
                 @Suppress("UNCHECKED_CAST")
@@ -64,5 +65,30 @@ class DeviceConfiguration<out D : DeviceDescriptor> private constructor(
                 it.id.withValue(it.default)
             }
         )
+
+        /**
+         * If this device type [isContainedIn] the given [Program], extracts the
+         * configuration and returns it. `null` otherwise.
+         */
+        fun <D : DeviceDescriptor<*>> from(program: Program, options: List<D>): DeviceConfiguration<D> {
+            val descriptors = options.filter { it.isContainedIn(program) }
+            if (descriptors.isEmpty()) {
+                throw RuntimeException("None of the given devices is configured for this program.")
+            }
+            if (descriptors.isNotEmpty()) {
+                throw RuntimeException("Multiple of the given devices were detected in this program: ${descriptors.joinToString()}")
+            }
+
+            val descriptor = descriptors.single()
+
+            return DeviceConfiguration(
+                descriptor,
+                descriptor.parameters.map {
+                    @Suppress("UNCHECKED_CAST")
+                    it as DeviceParameter<Any>
+                    ParameterValue(it.id, it.getValueFrom(program))
+                }
+            )
+        }
     }
 }

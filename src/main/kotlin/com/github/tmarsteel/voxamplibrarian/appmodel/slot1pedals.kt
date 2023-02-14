@@ -2,14 +2,18 @@ package com.github.tmarsteel.voxamplibrarian.appmodel
 
 import com.github.tmarsteel.voxamplibrarian.appmodel.Frequency.Companion.mHz
 import com.github.tmarsteel.voxamplibrarian.protocol.MutableProgram
-import com.github.tmarsteel.voxamplibrarian.protocol.PedalType
+import com.github.tmarsteel.voxamplibrarian.protocol.Program
 import com.github.tmarsteel.voxamplibrarian.protocol.SingleByteProtocolSerializable
 import com.github.tmarsteel.voxamplibrarian.protocol.Slot1PedalType
 
-sealed interface SlotOnePedalDescriptor : PedalDescriptor {
+sealed interface SlotOnePedalDescriptor : PedalDescriptor<SlotOnePedalDescriptor> {
     override val pedalType: Slot1PedalType
     override fun applyTypeToProgram(program: MutableProgram) {
         program.pedal1Type = pedalType
+    }
+
+    override fun isContainedIn(program: Program): Boolean {
+        return program.pedal1Type == pedalType
     }
 
     companion object {
@@ -39,17 +43,17 @@ object CompressorPedalDescriptor : SlotOnePedalDescriptor {
         ),
         ContinuousRangeParameter.zeroToTenUnitless(
             DeviceParameter.Id.CompSensitivity,
-            pedalDial(0x00, MutableProgram::pedal1Dial1),
+            unitlessPedalDial(0x00, MutableProgram::pedal1Dial1),
             5.0
         ),
         ContinuousRangeParameter.zeroToTenUnitless(
             DeviceParameter.Id.PedalLevel,
-            pedalDial(0x01, MutableProgram::pedal2Dial2),
+            unitlessPedalDial(0x01, MutableProgram::pedal2Dial2),
             6.7,
         ),
         ContinuousRangeParameter.zeroToTenUnitless(
             DeviceParameter.Id.CompAttack,
-            pedalDial(0x02, MutableProgram::pedal2Dial3),
+            unitlessPedalDial(0x02, MutableProgram::pedal2Dial3),
             5.7,
         ),
         DiscreteChoiceParameter(
@@ -77,24 +81,24 @@ object ChorusPedalDescriptor : SlotOnePedalDescriptor {
         ),
         ContinuousRangeParameter(
             id = DeviceParameter.Id.ModulationSpeed,
-            protocolAdapter = pedalDial(0x00, MutableProgram::pedal1Dial1),
+            protocolAdapter = frequencyPedalDial(0x00, MutableProgram::pedal1Dial1),
             valueRange = 100.mHz .. 10_000.mHz,
             default = 100.mHz,
             valueFactory = ::Frequency,
         ),
         ContinuousRangeParameter.zeroToTenUnitless(
             DeviceParameter.Id.ModulationDepth,
-            pedalDial(0x01, MutableProgram::pedal2Dial2),
+            unitlessPedalDial(0x01, MutableProgram::pedal2Dial2),
             6.7,
         ),
         ContinuousRangeParameter.zeroToTenUnitless(
             DeviceParameter.Id.ModulationManual,
-            pedalDial(0x02, MutableProgram::pedal2Dial3),
+            unitlessPedalDial(0x02, MutableProgram::pedal2Dial3),
             5.7,
         ),
         ContinuousRangeParameter.zeroToTenUnitless(
             DeviceParameter.Id.PedalMix,
-            pedalDial(0x03, MutableProgram::pedal2Dial4),
+            unitlessPedalDial(0x03, MutableProgram::pedal2Dial4),
             1.0,
         ),
         BooleanParameter(
@@ -122,32 +126,32 @@ sealed class OverdrivePedalDescriptor(
         ),
         ContinuousRangeParameter.zeroToTenUnitless(
             DeviceParameter.Id.OverdriveDrive,
-            pedalDial(0x00, MutableProgram::pedal1Dial1),
+            unitlessPedalDial(0x00, MutableProgram::pedal1Dial1),
             5.0,
         ),
         ContinuousRangeParameter.zeroToTenUnitless(
             DeviceParameter.Id.EqTone,
-            pedalDial(0x01, MutableProgram::pedal1Dial2),
+            unitlessPedalDial(0x01, MutableProgram::pedal1Dial2),
             6.7,
         ),
         ContinuousRangeParameter.zeroToTenUnitless(
             DeviceParameter.Id.PedalLevel,
-            pedalDial(0x02, MutableProgram::pedal1Dial3),
+            unitlessPedalDial(0x02, MutableProgram::pedal1Dial3),
             5.7,
         ),
         ContinuousRangeParameter.zeroToTenUnitless(
             DeviceParameter.Id.EqTreble,
-            pedalDial(0x03, MutableProgram::pedal1Dial4),
+            unitlessPedalDial(0x03, MutableProgram::pedal1Dial4),
             5.0,
         ),
         ContinuousRangeParameter.zeroToTenUnitless(
             DeviceParameter.Id.EqMiddle,
-            pedalDial(0x05, MutableProgram::pedal1Dial5),
+            unitlessPedalDial(0x05, MutableProgram::pedal1Dial5),
             5.0,
         ),
         ContinuousRangeParameter.zeroToTenUnitless(
             DeviceParameter.Id.EqBass,
-            pedalDial(0x06, MutableProgram::pedal1Dial6),
+            unitlessPedalDial(0x06, MutableProgram::pedal1Dial6),
             5.0,
         ),
     )

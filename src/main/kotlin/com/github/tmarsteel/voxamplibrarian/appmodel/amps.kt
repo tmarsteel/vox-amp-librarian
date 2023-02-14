@@ -3,6 +3,7 @@ package com.github.tmarsteel.voxamplibrarian.appmodel
 import com.github.tmarsteel.voxamplibrarian.protocol.AmpClass
 import com.github.tmarsteel.voxamplibrarian.protocol.AmpModel
 import com.github.tmarsteel.voxamplibrarian.protocol.MutableProgram
+import com.github.tmarsteel.voxamplibrarian.protocol.Program
 import com.github.tmarsteel.voxamplibrarian.protocol.TubeBias
 import com.github.tmarsteel.voxamplibrarian.protocol.message.SimulatedAmpModelChangedMessage
 
@@ -11,7 +12,7 @@ abstract class AmplifierDescriptor(
     val protocolModel: AmpModel,
     val supportsBrightCap: Boolean,
     val presenceIsCalledTone: Boolean = false,
-) : DeviceDescriptor {
+) : DeviceDescriptor<AmplifierDescriptor> {
     override val parameters = ALL_AMP_PARAMETERS + listOfNotNull(
         BRIGHT_CAP_PARAMETER .takeIf { supportsBrightCap },
         if (presenceIsCalledTone) TONE_PARAMETER else PRESENCE_PARAMETER,
@@ -23,6 +24,10 @@ abstract class AmplifierDescriptor(
         program.ampModel = protocolModel
     }
 
+    override fun isContainedIn(program: Program): Boolean {
+        return program.ampModel == protocolModel
+    }
+
     companion object {
         val BRIGHT_CAP_PARAMETER = BooleanParameter(
             DeviceParameter.Id.AmpBrightCap,
@@ -31,44 +36,44 @@ abstract class AmplifierDescriptor(
         )
         val PRESENCE_PARAMETER = ContinuousRangeParameter.zeroToTenUnitless(
             DeviceParameter.Id.AmpPresence,
-            ampDial(0x05, MutableProgram::presence),
+            ampSelector(0x05, MutableProgram::presence),
             2.0
         )
         val TONE_PARAMETER = ContinuousRangeParameter.zeroToTenUnitless(
             DeviceParameter.Id.AmpTone,
-            ampDial(0x05, MutableProgram::presence),
+            ampSelector(0x05, MutableProgram::presence),
             2.0
         )
 
         val ALL_AMP_PARAMETERS = listOf<DeviceParameter<*>>(
             ContinuousRangeParameter.zeroToTenUnitless(
                 DeviceParameter.Id.Gain,
-                ampDial(0x00, MutableProgram::gain),
+                ampSelector(0x00, MutableProgram::gain),
                 5.0
             ),
             ContinuousRangeParameter.zeroToTenUnitless(
                 DeviceParameter.Id.EqBass,
-                ampDial(0x01, MutableProgram::bass),
+                ampSelector(0x01, MutableProgram::bass),
                 5.0
             ),
             ContinuousRangeParameter.zeroToTenUnitless(
                 DeviceParameter.Id.EqMiddle,
-                ampDial(0x02, MutableProgram::middle),
+                ampSelector(0x02, MutableProgram::middle),
                 5.0
             ),
             ContinuousRangeParameter.zeroToTenUnitless(
                 DeviceParameter.Id.EqTreble,
-                ampDial(0x03, MutableProgram::treble),
+                ampSelector(0x03, MutableProgram::treble),
                 5.0
             ),
             ContinuousRangeParameter.zeroToTenUnitless(
                 DeviceParameter.Id.AmpVolume,
-                ampDial(0x04, MutableProgram::volume),
+                ampSelector(0x04, MutableProgram::volume),
                 5.0
             ),
             ContinuousRangeParameter.zeroToTenUnitless(
                 DeviceParameter.Id.Resonance,
-                ampDial(0x06, MutableProgram::resonance),
+                ampSelector(0x06, MutableProgram::resonance),
                 7.5
             ),
             ContinuousRangeParameter.zeroToTenUnitless(
@@ -88,12 +93,12 @@ abstract class AmplifierDescriptor(
             ),
             DiscreteChoiceParameter(
                 DeviceParameter.Id.AmpTubeBias,
-                ampDial(0x0A, MutableProgram::tubeBias),
+                ampSelector(0x0A, MutableProgram::tubeBias),
                 TubeBias.OFF
             ),
             DiscreteChoiceParameter(
                 DeviceParameter.Id.AmpClass,
-                ampDial(0x0B, MutableProgram::ampClass),
+                ampSelector(0x0B, MutableProgram::ampClass),
                 AmpClass.A
             ),
         )
