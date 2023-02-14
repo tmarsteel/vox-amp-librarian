@@ -1,16 +1,14 @@
 package com.github.tmarsteel.voxamplibrarian.reactapp
 
-import com.github.tmarsteel.voxamplibrarian.appmodel.DeviceConfiguration
-import com.github.tmarsteel.voxamplibrarian.appmodel.DeviceParameter
-import com.github.tmarsteel.voxamplibrarian.appmodel.OriginalCleanAmplifier
 import com.github.tmarsteel.voxamplibrarian.appmodel.SimulationConfiguration
-import com.github.tmarsteel.voxamplibrarian.appmodel.UnitlessSingleDecimalPrecision
+import com.github.tmarsteel.voxamplibrarian.appmodel.VtxAmpState
 import com.github.tmarsteel.voxamplibrarian.appmodel.hardware_integration.VoxVtxAmpConnection
 import com.github.tmarsteel.voxamplibrarian.reactapp.components.LogLevelComponent
 import com.github.tmarsteel.voxamplibrarian.reactapp.components.SimulationConfigurationComponent
 import csstype.ClassName
 import kotlinx.browser.document
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
@@ -22,6 +20,7 @@ import react.dom.client.createRoot
 import react.dom.html.ReactHTML.div
 import react.useEffect
 import react.useState
+import kotlin.reflect.KProperty
 
 private val startupCode = mutableListOf<() -> Unit>()
 private var appInitStarted = false
@@ -33,17 +32,53 @@ fun appInit(block: () -> Unit) {
     }
 }
 
-val AppComponent = FC<Props> {
-    var simulationConfig by useState(SimulationConfiguration.DEFAULT)
+class ValueDelegate<T>(private val obtain: () -> T, private val set: (T) -> Unit) {
+    operator fun getValue(
+        thisRef: Nothing?,
+        property: KProperty<*>,
+    ): T = obtain()
+
+    operator fun setValue(
+        thisRef: Nothing?,
+        property: KProperty<*>,
+        value: T,
+    ) {
+        set(value)
+    }
+}
+
+fun useAmpState(source: StateFlow<VoxVtxAmpConnection?>): ValueDelegate<VtxAmpState?> {
+    var ampStateInstance: VtxAmpState? by useState(null)
+
+    val delegate = ValueDelegate(
+        obtain = { ampStateInstance },
+        set = { newState ->
+            if (newState == null) {
+                return@ValueDelegate
+            }
+
+            GlobalScope.launch {
+                source.value?.setState(newState)
+                ampStateInstance = newState
+            }
+        }
+    )
+
     useEffect {
         GlobalScope.launch {
-            VoxVtxAmpConnection.VOX_AMP
+            source
                 .flatMapLatest { it?.ampState ?: emptyFlow() }
                 .collect {
-                    simulationConfig = it.configuration
+                    delegate.setValue(null, String::length, it)
                 }
         }
     }
+
+    return delegate
+}
+
+val AppComponent = FC<Props> {
+    var ampState by useAmpState(VoxVtxAmpConnection.VOX_AMP)
 
     div {
         className = ClassName("container")
@@ -55,9 +90,11 @@ val AppComponent = FC<Props> {
             }
         }
         SimulationConfigurationComponent {
-            configuration = simulationConfig
+            configuration = ampState?.configuration ?: SimulationConfiguration.DEFAULT
             onConfigurationChanged = { newConfig ->
-                simulationConfig = newConfig
+                ampState?.let { oldState ->
+                    ampState = oldState.withConfiguration(newConfig)
+                }
             }
         }
     }
@@ -68,11 +105,6 @@ fun main() {
     startupCode.forEach {
         it.invoke()
     }
-
-    var config = DeviceConfiguration.defaultOf(OriginalCleanAmplifier)
-    console.log(config.getValue(DeviceParameter.Id.Gain))
-    config = config.withValue(DeviceParameter.Id.Gain, UnitlessSingleDecimalPrecision(20))
-    console.log(config.getValue(DeviceParameter.Id.Gain))
 
     val rootElement = document.getElementById("root") ?: error("Couldn't find root container!")
     createRoot(rootElement).render(Fragment.create {

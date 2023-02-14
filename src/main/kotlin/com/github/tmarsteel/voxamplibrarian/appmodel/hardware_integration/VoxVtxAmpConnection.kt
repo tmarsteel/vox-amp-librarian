@@ -1,19 +1,20 @@
 package com.github.tmarsteel.voxamplibrarian.appmodel.hardware_integration
 
 import com.github.tmarsteel.voxamplibrarian.VOX_AMP_MIDI_DEVICE
-import com.github.tmarsteel.voxamplibrarian.appmodel.*
-import com.github.tmarsteel.voxamplibrarian.protocol.*
-import com.github.tmarsteel.voxamplibrarian.protocol.message.*
+import com.github.tmarsteel.voxamplibrarian.appmodel.VtxAmpState
+import com.github.tmarsteel.voxamplibrarian.protocol.MidiDevice
+import com.github.tmarsteel.voxamplibrarian.protocol.VoxVtxAmplifierClient
+import com.github.tmarsteel.voxamplibrarian.protocol.message.CurrentModeResponse
+import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageToHost
+import com.github.tmarsteel.voxamplibrarian.protocol.message.RequestCurrentModeMessage
+import com.github.tmarsteel.voxamplibrarian.protocol.message.RequestCurrentProgramMessage
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.flow.runningFold
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.single
@@ -75,7 +76,7 @@ class VoxVtxAmpConnection(
     }
 
     companion object {
-        val VOX_AMP: Flow<VoxVtxAmpConnection?> = VOX_AMP_MIDI_DEVICE
+        val VOX_AMP: StateFlow<VoxVtxAmpConnection?> = VOX_AMP_MIDI_DEVICE
             .runningFold<MidiDevice?, VoxVtxAmpConnection?>(null) { currentConnection, midiDevice ->
                 currentConnection?.close()
 
@@ -85,5 +86,6 @@ class VoxVtxAmpConnection(
 
                 VoxVtxAmpConnection(midiDevice)
             }
+            .stateIn(GlobalScope, SharingStarted.Lazily, null)
     }
 }
