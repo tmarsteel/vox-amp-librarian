@@ -30,18 +30,19 @@ class VoxVtxAmpConnection(
     val ampState: SharedFlow<VtxAmpState> = flow {
         val state = fetchCurrentState()
         emit(state)
-        ampStateEvents.consumeAsFlow().runningFold(state) { previousState, event ->
-            console.log("Folding", event)
-            when (event) {
-                is AmpStateEvent.NewStateAcked -> event.state
-                is AmpStateEvent.Message -> try {
-                    previousState.plus(event.message)
-                }
-                catch (ex: DifferentialUpdateNotSupportedException) {
-                    fetchCurrentState()
+        ampStateEvents.consumeAsFlow()
+            .runningFold(state) { previousState, event ->
+                when (event) {
+                    is AmpStateEvent.NewStateAcked -> event.state
+                    is AmpStateEvent.Message -> try {
+                        previousState.plus(event.message)
+                    }
+                    catch (ex: DifferentialUpdateNotSupportedException) {
+                        fetchCurrentState()
+                    }
                 }
             }
-        }
+            .collect { emit(it) }
     }.shareIn(GlobalScope, SharingStarted.Lazily, 1)
 
     private suspend fun onMessage(message: MessageToHost) {
@@ -69,7 +70,7 @@ class VoxVtxAmpConnection(
         for (updateMessage in currentState.diffTo(value)) {
             client.exchange(updateMessage)
         }
-
+        ampStateEvents.send(AmpStateEvent.NewStateAcked(value))
     }
 
     fun close() {
