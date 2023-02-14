@@ -5,6 +5,7 @@ import com.github.tmarsteel.voxamplibrarian.appmodel.DeviceDescriptor
 import com.github.tmarsteel.voxamplibrarian.appmodel.DeviceParameter
 import com.github.tmarsteel.voxamplibrarian.appmodel.SimulationConfiguration
 import com.github.tmarsteel.voxamplibrarian.appmodel.VtxAmpState
+import com.github.tmarsteel.voxamplibrarian.logging.LoggerFactory
 import com.github.tmarsteel.voxamplibrarian.protocol.AmpClass
 import com.github.tmarsteel.voxamplibrarian.protocol.AmpModel
 import com.github.tmarsteel.voxamplibrarian.protocol.Program
@@ -19,6 +20,8 @@ import com.github.tmarsteel.voxamplibrarian.protocol.ZeroToTenDial
 import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageToAmp
 import com.github.tmarsteel.voxamplibrarian.protocol.message.ProgramSlotChangedMessage
 import com.github.tmarsteel.voxamplibrarian.protocol.message.WriteUserProgramMessage
+
+private val logger = LoggerFactory["host-to-amp-diff"]
 
 internal fun SimulationConfiguration.toProtocolDataModel(): Program {
     val program = ProgramImpl(
@@ -82,6 +85,8 @@ sealed class ConfigurationDiff {
         override fun toUpdateMessage(): MessageToAmp<*> {
             return device.getParameter(parameterId).buildUpdateMessage(newValue)
         }
+
+        override fun toString() = "${device.name} $parameterId = $newValue"
     }
 
     class DeviceType(
@@ -89,6 +94,8 @@ sealed class ConfigurationDiff {
         val newType: DeviceDescriptor<*>,
     ) : ConfigurationDiff() {
         override fun toUpdateMessage() = newType.typeChangedMessage
+
+        override fun toString() = "exchanging ${oldType.name} for ${newType.name}"
     }
 }
 
@@ -101,7 +108,11 @@ private fun diff(old: VtxAmpState, new: VtxAmpState): List<MessageToAmp<*>> {
             }
 
             if (old.slot == new.slot) {
-                diff(old, new)
+                diff(old.configuration, new.configuration)
+                    .onEach {
+                        logger.debug("Differential update: $it")
+                    }
+                    .map { it.toUpdateMessage() }
             } else {
                 listOf(
                     ProgramSlotChangedMessage(new.slot),
@@ -146,7 +157,7 @@ private fun diff(old: DeviceConfiguration<*>, new: DeviceConfiguration<*>): List
         parameterId as DeviceParameter.Id<Any>
 
         val newValue = newValues.getValue(parameterId)
-        if (oldValue != newValue) {
+        if (oldValue == newValue) {
             return@mapNotNull null
         }
 
