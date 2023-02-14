@@ -132,6 +132,7 @@ class VoxVtxAmplifierClient(
             ProgramSlotChangedMessage.Companion,
             SimulatedAmpModelChangedMessage.Companion,
             EffectPedalTypeChangedMessage.Companion,
+            ErrorMessage.Companion,
         )
     }
 }
