@@ -175,7 +175,13 @@ private class WebMidiVoxVtxDevice private constructor(val input: MidiInput, val 
         }
 
         private val MidiPort.isVtxAmp: Boolean
+            get() = isVtxAmpOnWindows || isVtxAmpOnLinuxAlsa
+
+        private val MidiPort.isVtxAmpOnWindows: Boolean
             get() = manufacturer?.lowercase() == "korg, inc." && name == "Valvetronix X"
+
+        private val MidiPort.isVtxAmpOnLinuxAlsa: Boolean
+            get() = manufacturer?.lowercase() == "vox amplification ltd." && (name?.contains("valvetronix x", ignoreCase = true) == true)
     }
 }
 
