@@ -288,10 +288,6 @@ into the program slot mode.
 
 Where `XX` is the amp model.
 
-### Host to Amp
-
-The AMP will respond with the setting for the tube bias (`30 00 01 34 41 04 0b XX 00`).
-
 ### Amp to Host
 
 When turning the model Knob on the Amp, it will send this message. It will also

@@ -1,17 +1,15 @@
 package com.github.tmarsteel.voxamplibrarian.protocol.message
 
-import com.github.tmarsteel.voxamplibrarian.protocol.AmpModel
 import com.github.tmarsteel.voxamplibrarian.BinaryInput
 import com.github.tmarsteel.voxamplibrarian.BinaryOutput
+import com.github.tmarsteel.voxamplibrarian.protocol.AmpModel
 import com.github.tmarsteel.voxamplibrarian.requireEOF
 import com.github.tmarsteel.voxamplibrarian.requireNextByteEquals
 import com.github.tmarsteel.voxamplibrarian.requirePrefix
 
 data class SimulatedAmpModelChangedMessage(
     val model: AmpModel,
-) : MessageToAmp<AmpDialTurnedMessage>, MessageToHost {
-    override val responseFactory = AmpDialTurnedMessage.Companion
-
+) : CommandWithoutResponse, MessageToHost {
     override fun writeTo(out: BinaryOutput) {
         out.write(PREFIX)
         out.write(model)
