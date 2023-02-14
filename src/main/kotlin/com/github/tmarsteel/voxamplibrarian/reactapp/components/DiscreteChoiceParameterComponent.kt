@@ -1,6 +1,7 @@
 package com.github.tmarsteel.voxamplibrarian.reactapp.components
 
 import com.github.tmarsteel.voxamplibrarian.appmodel.DiscreteChoiceParameter
+import com.github.tmarsteel.voxamplibrarian.protocol.SingleByteProtocolSerializable
 import csstype.Display
 import csstype.TextAlign
 import csstype.pct
@@ -15,7 +16,7 @@ import react.dom.html.ReactHTML.span
 import react.useState
 
 external interface DiscreteChoiceParameterComponentProps : Props {
-    var descriptor: DiscreteChoiceParameter<out Any>
+    var descriptor: DiscreteChoiceParameter<*>
     var value: Any
     var onValueChanged: (Any) -> Unit
 }

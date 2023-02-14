@@ -1,6 +1,7 @@
 package com.github.tmarsteel.voxamplibrarian.appmodel
 
 import com.github.tmarsteel.voxamplibrarian.appmodel.ParameterValue.Companion.withValue
+import com.github.tmarsteel.voxamplibrarian.protocol.MutableProgram
 
 class DeviceConfiguration<out D : DeviceDescriptor> private constructor(
     val descriptor: D,
@@ -43,6 +44,15 @@ class DeviceConfiguration<out D : DeviceDescriptor> private constructor(
             .associate { it.id to (values[it.id] ?: it.default) }
 
         return DeviceConfiguration(newDescriptor, newValues)
+    }
+
+    fun applyToProgram(program: MutableProgram) {
+        descriptor.applyTypeToProgram(program)
+        descriptor.parameters.forEach {
+            @Suppress("UNCHECKED_CAST")
+            it as DeviceParameter<in Any>
+            it.protocolAdapter.applyToProgram(program, values.getValue(it.id))
+        }
     }
 
     companion object {

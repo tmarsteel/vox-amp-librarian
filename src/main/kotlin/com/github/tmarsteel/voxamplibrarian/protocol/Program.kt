@@ -5,56 +5,56 @@ import com.github.tmarsteel.voxamplibrarian.BinaryOutput
 import com.github.tmarsteel.voxamplibrarian.requireNextByteEquals
 import com.github.tmarsteel.voxamplibrarian.toBoolean
 
-data class Program(
-    val programName: ProgramName,
-    val noiseReductionSensitivity: ZeroToTenDial,
-    val ampModel: AmpModel,
-    val gain: ZeroToTenDial,
-    val treble: ZeroToTenDial,
-    val middle: ZeroToTenDial,
-    val bass: ZeroToTenDial,
-    val volume: ZeroToTenDial,
-    val presence: ZeroToTenDial,
-    val resonance: ZeroToTenDial,
-    val brightCap: Boolean,
-    val lowCut: Boolean,
-    val midBoost: Boolean,
-    val tubeBias: TubeBias,
-    val ampClass: AmpClass,
-    val pedal1Enabled: Boolean,
-    val pedal1Type: Slot1PedalType,
-    val pedal1Dial1: TwoByteDial,
-    val pedal1Dial2: Byte,
-    val pedal1Dial3: Byte,
-    val pedal1Dial4: Byte,
-    val pedal1Dial5: Byte,
-    val pedal1Dial6: Byte,
-    val pedal2Enabled: Boolean,
-    val pedal2Type: Slot2PedalType,
-    val pedal2Dial1: TwoByteDial,
-    val pedal2Dial2: Byte,
-    val pedal2Dial3: Byte,
-    val pedal2Dial4: Byte,
-    val pedal2Dial5: Byte,
-    val pedal2Dial6: Byte,
-    val reverbPedalEnabled: Boolean,
-    val reverbPedalType: ReverbPedalType,
-    val reverbPedalDial1: ZeroToTenDial,
-    val reverbPedalDial2: ZeroToTenDial,
-    val reverbPedalDial3: Byte,
-    val reverbPedalDial4: ZeroToTenDial,
-    val reverbPedalDial5: ZeroToTenDial,
-) : ProtocolSerializable {
+interface Program : ProtocolSerializable {
+    val programName: ProgramName
+    val noiseReductionSensitivity: ZeroToTenDial
+    val ampModel: AmpModel
+    val gain: ZeroToTenDial
+    val treble: ZeroToTenDial
+    val middle: ZeroToTenDial
+    val bass: ZeroToTenDial
+    val volume: ZeroToTenDial
+    val presence: ZeroToTenDial
+    val resonance: ZeroToTenDial
+    val brightCap: Boolean
+    val lowCut: Boolean
+    val midBoost: Boolean
+    val tubeBias: TubeBias
+    val ampClass: AmpClass
+    val pedal1Enabled: Boolean
+    val pedal1Type: Slot1PedalType
+    val pedal1Dial1: TwoByteDial
+    val pedal1Dial2: Byte
+    val pedal1Dial3: Byte
+    val pedal1Dial4: Byte
+    val pedal1Dial5: Byte
+    val pedal1Dial6: Byte
+    val pedal2Enabled: Boolean
+    val pedal2Type: Slot2PedalType
+    val pedal2Dial1: TwoByteDial
+    val pedal2Dial2: Byte
+    val pedal2Dial3: Byte
+    val pedal2Dial4: Byte
+    val pedal2Dial5: Byte
+    val pedal2Dial6: Byte
+    val reverbPedalEnabled: Boolean
+    val reverbPedalType: ReverbPedalType
+    val reverbPedalDial1: ZeroToTenDial
+    val reverbPedalDial2: ZeroToTenDial
+    val reverbPedalDial3: Byte
+    val reverbPedalDial4: ZeroToTenDial
+    val reverbPedalDial5: ZeroToTenDial
+
     override fun writeTo(out: BinaryOutput) {
         var flags = 0x00
         if (pedal1Enabled) {
-            flags = flags or FLAG_PEDAL_1_ENABLED
+            flags = flags or Program.FLAG_PEDAL_1_ENABLED
         }
         if (pedal2Enabled) {
-            flags = flags or FLAG_PEDAL_2_ENABLED
+            flags = flags or Program.FLAG_PEDAL_2_ENABLED
         }
         if (reverbPedalEnabled) {
-            flags = flags or FLAG_REVERB_PEDAL_ENABLED
+            flags = flags or Program.FLAG_REVERB_PEDAL_ENABLED
         }
 
         out.write(programName.encoded, 0x00, 0x7)
@@ -166,7 +166,7 @@ data class Program(
             val reverbPedalDial5 = ZeroToTenDial.readFrom(input)
             input.skip(1)
 
-            return Program(
+            return ProgramImpl(
                 programName = programName,
                 noiseReductionSensitivity = nrSens,
                 ampModel = ampModel,
@@ -209,3 +209,85 @@ data class Program(
         }
     }
 }
+
+interface MutableProgram : Program {
+    override var programName: ProgramName
+    override var noiseReductionSensitivity: ZeroToTenDial
+    override var ampModel: AmpModel
+    override var gain: ZeroToTenDial
+    override var treble: ZeroToTenDial
+    override var middle: ZeroToTenDial
+    override var bass: ZeroToTenDial
+    override var volume: ZeroToTenDial
+    override var presence: ZeroToTenDial
+    override var resonance: ZeroToTenDial
+    override var brightCap: Boolean
+    override var lowCut: Boolean
+    override var midBoost: Boolean
+    override var tubeBias: TubeBias
+    override var ampClass: AmpClass
+    override var pedal1Enabled: Boolean
+    override var pedal1Type: Slot1PedalType
+    override var pedal1Dial1: TwoByteDial
+    override var pedal1Dial2: Byte
+    override var pedal1Dial3: Byte
+    override var pedal1Dial4: Byte
+    override var pedal1Dial5: Byte
+    override var pedal1Dial6: Byte
+    override var pedal2Enabled: Boolean
+    override var pedal2Type: Slot2PedalType
+    override var pedal2Dial1: TwoByteDial
+    override var pedal2Dial2: Byte
+    override var pedal2Dial3: Byte
+    override var pedal2Dial4: Byte
+    override var pedal2Dial5: Byte
+    override var pedal2Dial6: Byte
+    override var reverbPedalEnabled: Boolean
+    override var reverbPedalType: ReverbPedalType
+    override var reverbPedalDial1: ZeroToTenDial
+    override var reverbPedalDial2: ZeroToTenDial
+    override var reverbPedalDial3: Byte
+    override var reverbPedalDial4: ZeroToTenDial
+    override var reverbPedalDial5: ZeroToTenDial
+}
+
+class ProgramImpl(
+    override var programName: ProgramName,
+    override var noiseReductionSensitivity: ZeroToTenDial,
+    override var ampModel: AmpModel,
+    override var gain: ZeroToTenDial,
+    override var treble: ZeroToTenDial,
+    override var middle: ZeroToTenDial,
+    override var bass: ZeroToTenDial,
+    override var volume: ZeroToTenDial,
+    override var presence: ZeroToTenDial,
+    override var resonance: ZeroToTenDial,
+    override var brightCap: Boolean,
+    override var lowCut: Boolean,
+    override var midBoost: Boolean,
+    override var tubeBias: TubeBias,
+    override var ampClass: AmpClass,
+    override var pedal1Enabled: Boolean,
+    override var pedal1Type: Slot1PedalType,
+    override var pedal1Dial1: TwoByteDial,
+    override var pedal1Dial2: Byte,
+    override var pedal1Dial3: Byte,
+    override var pedal1Dial4: Byte,
+    override var pedal1Dial5: Byte,
+    override var pedal1Dial6: Byte,
+    override var pedal2Enabled: Boolean,
+    override var pedal2Type: Slot2PedalType,
+    override var pedal2Dial1: TwoByteDial,
+    override var pedal2Dial2: Byte,
+    override var pedal2Dial3: Byte,
+    override var pedal2Dial4: Byte,
+    override var pedal2Dial5: Byte,
+    override var pedal2Dial6: Byte,
+    override var reverbPedalEnabled: Boolean,
+    override var reverbPedalType: ReverbPedalType,
+    override var reverbPedalDial1: ZeroToTenDial,
+    override var reverbPedalDial2: ZeroToTenDial,
+    override var reverbPedalDial3: Byte,
+    override var reverbPedalDial4: ZeroToTenDial,
+    override var reverbPedalDial5: ZeroToTenDial,
+) : MutableProgram

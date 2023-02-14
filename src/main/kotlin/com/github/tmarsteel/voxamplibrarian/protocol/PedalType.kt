@@ -2,13 +2,18 @@ package com.github.tmarsteel.voxamplibrarian.protocol
 
 import com.github.tmarsteel.voxamplibrarian.BinaryInput
 import com.github.tmarsteel.voxamplibrarian.BinaryOutput
+import com.github.tmarsteel.voxamplibrarian.appmodel.hardware_integration.reverbPedal
 import com.github.tmarsteel.voxamplibrarian.hex
 import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageParseException
+import kotlin.reflect.KMutableProperty1
 
-enum class PedalSlot(private val protocolIdentifier: Byte) : ProtocolSerializable {
-    PEDAL1(0x01),
-    PEDAL2(0x02),
-    REVERB(0x04),
+enum class PedalSlot(
+    private val protocolIdentifier: Byte,
+    val programEnabledField: KMutableProperty1<in MutableProgram, in Boolean>,
+) : ProtocolSerializable {
+    PEDAL1(0x01, MutableProgram::pedal1Enabled),
+    PEDAL2(0x02, MutableProgram::pedal2Enabled),
+    REVERB(0x04, MutableProgram::reverbPedalEnabled),
     ;
 
     override fun writeTo(out: BinaryOutput) {
@@ -28,7 +33,7 @@ sealed interface PedalType {
     val slot: PedalSlot
 }
 
-enum class Slot1PedalType(val protocolValue: Byte) : PedalType {
+enum class Slot1PedalType(val protocolValue: Byte): PedalType {
     COMP(0x00),
     CHORUS(0x01),
     OVERDRIVE(0x02),

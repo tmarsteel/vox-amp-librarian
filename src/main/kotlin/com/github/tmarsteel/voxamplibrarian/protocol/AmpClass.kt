@@ -5,7 +5,7 @@ import com.github.tmarsteel.voxamplibrarian.BinaryOutput
 import com.github.tmarsteel.voxamplibrarian.hex
 import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageParseException
 
-enum class AmpClass(val protocolValue: Byte) : ProtocolSerializable {
+enum class AmpClass(override val protocolValue: Byte) : SingleByteProtocolSerializable {
     A(0x00),
     AB(0x01),
     ;

@@ -2,8 +2,16 @@ package com.github.tmarsteel.voxamplibrarian.appmodel
 
 import com.github.tmarsteel.voxamplibrarian.appmodel.Duration.Companion.ms
 import com.github.tmarsteel.voxamplibrarian.appmodel.Frequency.Companion.mHz
+import com.github.tmarsteel.voxamplibrarian.protocol.MutableProgram
+import com.github.tmarsteel.voxamplibrarian.protocol.Slot2PedalType
 
-sealed interface SlotTwoPedalDescriptor : DeviceDescriptor {
+sealed interface SlotTwoPedalDescriptor : PedalDescriptor {
+    override val pedalType: Slot2PedalType
+
+    override fun applyTypeToProgram(program: MutableProgram) {
+        program.pedal2Type = pedalType
+    }
+
     companion object {
         val ALL = listOf(
             FlangerPedalDescriptor,
@@ -19,78 +27,170 @@ sealed interface SlotTwoPedalDescriptor : DeviceDescriptor {
 
 object FlangerPedalDescriptor : SlotTwoPedalDescriptor {
     override val name = "Flanger"
+    override val pedalType = Slot2PedalType.FLANGER
     override val parameters = listOf(
-        BooleanParameter(DeviceParameter.Id.PedalEnabled, false),
+        BooleanParameter(
+            DeviceParameter.Id.PedalEnabled,
+            pedalEnabledSwitch(),
+        false,
+        ),
         ContinuousRangeParameter(
             id = DeviceParameter.Id.ModulationSpeed,
+            protocolAdapter = pedalDial(0x00, MutableProgram::pedal2Dial1),
             valueRange = 100.mHz..5_000.mHz,
             default = 100.mHz,
             valueFactory = ::Frequency,
         ),
-        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.ModulationDepth, 5.0),
-        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.ModulationManual, 7.7),
-        BooleanParameter(DeviceParameter.Id.EqLowCut, false),
-        BooleanParameter(DeviceParameter.Id.EqHighCut, false),
-        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.Resonance, 3.5),
+        ContinuousRangeParameter.zeroToTenUnitless(
+            DeviceParameter.Id.ModulationDepth,
+            pedalDial(0x01, MutableProgram::pedal2Dial2),
+            5.0,
+        ),
+        ContinuousRangeParameter.zeroToTenUnitless(
+            DeviceParameter.Id.ModulationManual,
+            pedalDial(0x02, MutableProgram::pedal2Dial3),
+            7.7,
+        ),
+        BooleanParameter(
+            DeviceParameter.Id.EqLowCut,
+            pedalSwitch(0x03, MutableProgram::pedal2Dial4),
+            false,
+        ),
+        BooleanParameter(
+            DeviceParameter.Id.EqHighCut,
+            pedalSwitch(0x04, MutableProgram::pedal2Dial5),
+            false,
+        ),
+        ContinuousRangeParameter.zeroToTenUnitless(
+            DeviceParameter.Id.Resonance,
+            pedalDial(0x05, MutableProgram::pedal2Dial6),
+            3.5,
+        ),
     )
 }
 
 sealed class PhaserPedalDescriptor(
     override val name: String,
+    override val pedalType: Slot2PedalType,
 ) : SlotTwoPedalDescriptor {
     override val parameters = listOf(
-        BooleanParameter(DeviceParameter.Id.PedalEnabled, false),
+        BooleanParameter(
+            DeviceParameter.Id.PedalEnabled,
+            pedalEnabledSwitch(),
+            false,
+        ),
         ContinuousRangeParameter(
             id = DeviceParameter.Id.ModulationSpeed,
+            pedalDial(0x00, MutableProgram::pedal2Dial1),
             valueRange = 100.mHz..10_000.mHz,
             default = 100.mHz,
             valueFactory = ::Frequency,
         ),
-        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.Resonance, 5.0),
-        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.ModulationManual, 7.7),
-        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.ModulationDepth, 0.0),
+        ContinuousRangeParameter.zeroToTenUnitless(
+            DeviceParameter.Id.Resonance,
+            pedalDial(0x01, MutableProgram::pedal2Dial2),
+            5.0,
+        ),
+        ContinuousRangeParameter.zeroToTenUnitless(
+            DeviceParameter.Id.ModulationManual,
+            pedalDial(0x02, MutableProgram::pedal2Dial3),
+            7.7,
+        ),
+        ContinuousRangeParameter.zeroToTenUnitless(
+            DeviceParameter.Id.ModulationDepth,
+            pedalDial(0x03, MutableProgram::pedal2Dial4),
+            0.0,
+        ),
     )
 }
 
-object BlkPhaserDescriptor : PhaserPedalDescriptor("Blk Phaser")
-object OrgPhaserOneDescriptor : PhaserPedalDescriptor("Orange Phaser I")
-object OrgPhaserTwoDescriptor : PhaserPedalDescriptor("Orange Phaser II")
+object BlkPhaserDescriptor : PhaserPedalDescriptor("Blk Phaser", Slot2PedalType.BLK_PHASER)
+object OrgPhaserOneDescriptor : PhaserPedalDescriptor("Orange Phaser I", Slot2PedalType.ORG_PHASER_1)
+object OrgPhaserTwoDescriptor : PhaserPedalDescriptor("Orange Phaser II", Slot2PedalType.ORG_PHASER_2)
 
 object TremoloPedalDescriptor : SlotTwoPedalDescriptor {
     override val name = "Tremolo"
+    override val pedalType = Slot2PedalType.TREMOLO
     override val parameters = listOf(
-        BooleanParameter(DeviceParameter.Id.PedalEnabled, false),
+        BooleanParameter(
+            DeviceParameter.Id.PedalEnabled,
+            pedalEnabledSwitch(),
+            false
+        ),
         ContinuousRangeParameter(
             id = DeviceParameter.Id.ModulationSpeed,
+            protocolAdapter = pedalDial(0x00, MutableProgram::pedal2Dial1),
             valueRange = 1_650.mHz..10_000.mHz,
             default = 1_650.mHz,
             valueFactory = ::Frequency,
         ),
-        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.ModulationDepth, 5.0),
-        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.TremoloDuty, 7.7),
-        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.TremoloShape, 0.0),
-        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.PedalLevel, 1.0),
+        ContinuousRangeParameter.zeroToTenUnitless(
+            DeviceParameter.Id.ModulationDepth,
+            pedalDial(0x01, MutableProgram::pedal2Dial2),
+            5.0
+        ),
+        ContinuousRangeParameter.zeroToTenUnitless(
+            DeviceParameter.Id.TremoloDuty,
+            pedalDial(0x02, MutableProgram::pedal2Dial3),
+            7.7
+        ),
+        ContinuousRangeParameter.zeroToTenUnitless(
+            DeviceParameter.Id.TremoloShape,
+            pedalDial(0x03, MutableProgram::pedal2Dial4),
+            0.0
+        ),
+        ContinuousRangeParameter.zeroToTenUnitless(
+            DeviceParameter.Id.PedalLevel,
+            pedalDial(0x04, MutableProgram::pedal2Dial5),
+            1.0
+        ),
     )
 }
 
 sealed class DelayPedalDescriptor(
     override val name: String,
+    override val pedalType: Slot2PedalType,
 ) : SlotTwoPedalDescriptor {
     override val parameters = listOf(
-        BooleanParameter(DeviceParameter.Id.PedalEnabled, false),
+        BooleanParameter(
+            DeviceParameter.Id.PedalEnabled,
+            pedalEnabledSwitch(),
+            false
+        ),
         ContinuousRangeParameter(
             id = DeviceParameter.Id.DelayTime,
+            protocolAdapter = pedalDial(0x00, MutableProgram::pedal2Dial1),
             valueRange = 30.ms..1_200.ms,
             default = 30.ms,
             valueFactory = ::Duration,
         ),
-        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.PedalLevel, 5.0),
-        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.DelayFeedback, 7.7),
-        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.EqTone, 5.0),
-        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.DelayModulationSpeed, 0.1),
-        ContinuousRangeParameter.zeroToTenUnitless(DeviceParameter.Id.ModulationDepth, 0.0),
+        ContinuousRangeParameter.zeroToTenUnitless(
+            DeviceParameter.Id.PedalLevel,
+            pedalDial(0x01, MutableProgram::pedal2Dial2),
+            5.0
+        ),
+        ContinuousRangeParameter.zeroToTenUnitless(
+            DeviceParameter.Id.DelayFeedback,
+            pedalDial(0x02, MutableProgram::pedal2Dial3),
+            7.7
+        ),
+        ContinuousRangeParameter.zeroToTenUnitless(
+            DeviceParameter.Id.EqTone,
+            pedalDial(0x04, MutableProgram::pedal2Dial4),
+            5.0
+        ),
+        ContinuousRangeParameter.zeroToTenUnitless(
+            DeviceParameter.Id.DelayModulationSpeed,
+            pedalDial(0x05, MutableProgram::pedal2Dial5),
+            0.1
+        ),
+        ContinuousRangeParameter.zeroToTenUnitless(
+            DeviceParameter.Id.ModulationDepth,
+            pedalDial(0x06, MutableProgram::pedal2Dial6),
+            0.0
+        ),
     )
 }
 
-object TapeEchoDescriptor : DelayPedalDescriptor("Tape Echo")
-object AnalogDelayDescriptor : DelayPedalDescriptor("Analog Delay")
+object TapeEchoDescriptor : DelayPedalDescriptor("Tape Echo", Slot2PedalType.TAPE_ECHO)
+object AnalogDelayDescriptor : DelayPedalDescriptor("Analog Delay", Slot2PedalType.ANALOG_DELAY)

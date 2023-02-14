@@ -5,7 +5,7 @@ import com.github.tmarsteel.voxamplibrarian.BinaryOutput
 import com.github.tmarsteel.voxamplibrarian.hex
 import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageParseException
 
-enum class TubeBias(val protocolValue: Byte) : ProtocolSerializable {
+enum class TubeBias(override val protocolValue: Byte) : SingleByteProtocolSerializable {
     OFF(0x00),
     COLD(0x01),
     HOT(0x02),

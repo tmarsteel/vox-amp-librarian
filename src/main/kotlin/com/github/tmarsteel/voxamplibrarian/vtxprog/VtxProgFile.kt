@@ -89,7 +89,7 @@ data class VtxProgFile(
                 throw IllegalArgumentException("Incorrect prefix")
             }
 
-            var programs = mutableListOf<Program>()
+            val programs = mutableListOf<Program>()
             while (input.bytesRemaining > 0) {
                 if (input.bytesRemaining < 0x3E) {
                     throw IllegalArgumentException("The input file has an incorrect length, programs are always 0x3E bytes long")
@@ -148,7 +148,7 @@ data class VtxProgFile(
             val reverbPedalDial5 = ZeroToTenDial.readFrom(input)
             input.skip(1)
 
-            return Program(
+            return ProgramImpl(
                 programName = programName,
                 noiseReductionSensitivity = nrSens,
                 ampModel = ampModel,
