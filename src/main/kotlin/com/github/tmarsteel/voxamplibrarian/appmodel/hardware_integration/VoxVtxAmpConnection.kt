@@ -26,26 +26,26 @@ class VoxVtxAmpConnection(
 ) {
     private val client = VoxVtxAmplifierClient(midiDevice, listener = this::onMessage)
 
-    private val messagesToHost = Channel<MessageToHost>(Channel.BUFFERED)
+    private val ampStateEvents = Channel<AmpStateEvent>(Channel.BUFFERED)
     val ampState: SharedFlow<VtxAmpState> = flow {
         val state = fetchCurrentState()
         emit(state)
-        messagesToHost.consumeAsFlow()
-            .runningFold(state) { previousState, message ->
-                try {
-                    previousState.plus(message)
+        ampStateEvents.consumeAsFlow().runningFold(state) { previousState, event ->
+            console.log("Folding", event)
+            when (event) {
+                is AmpStateEvent.NewStateAcked -> event.state
+                is AmpStateEvent.Message -> try {
+                    previousState.plus(event.message)
                 }
                 catch (ex: DifferentialUpdateNotSupportedException) {
                     fetchCurrentState()
                 }
             }
-            .collect {
-                emit(it)
-            }
+        }
     }.shareIn(GlobalScope, SharingStarted.Lazily, 1)
 
     private suspend fun onMessage(message: MessageToHost) {
-        messagesToHost.send(message)
+        ampStateEvents.send(AmpStateEvent.Message(message))
     }
 
     private suspend fun fetchCurrentState(): VtxAmpState {
@@ -69,6 +69,7 @@ class VoxVtxAmpConnection(
         for (updateMessage in currentState.diffTo(value)) {
             client.exchange(updateMessage)
         }
+
     }
 
     fun close() {
@@ -88,4 +89,9 @@ class VoxVtxAmpConnection(
             }
             .stateIn(GlobalScope, SharingStarted.Lazily, null)
     }
+}
+
+private sealed class AmpStateEvent {
+    class Message(val message: MessageToHost) : AmpStateEvent()
+    class NewStateAcked(val state: VtxAmpState) : AmpStateEvent()
 }
