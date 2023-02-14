@@ -36,44 +36,44 @@ abstract class AmplifierDescriptor(
         )
         val PRESENCE_PARAMETER = ContinuousRangeParameter.zeroToTenUnitless(
             DeviceParameter.Id.AmpPresence,
-            ampSelector(0x05, MutableProgram::presence),
+            ampDial(0x05, MutableProgram::presence),
             2.0
         )
         val TONE_PARAMETER = ContinuousRangeParameter.zeroToTenUnitless(
             DeviceParameter.Id.AmpTone,
-            ampSelector(0x05, MutableProgram::presence),
+            ampDial(0x05, MutableProgram::presence),
             2.0
         )
 
         val ALL_AMP_PARAMETERS = listOf<DeviceParameter<*>>(
             ContinuousRangeParameter.zeroToTenUnitless(
                 DeviceParameter.Id.Gain,
-                ampSelector(0x00, MutableProgram::gain),
+                ampDial(0x00, MutableProgram::gain),
                 5.0
             ),
             ContinuousRangeParameter.zeroToTenUnitless(
                 DeviceParameter.Id.EqBass,
-                ampSelector(0x01, MutableProgram::bass),
+                ampDial(0x01, MutableProgram::bass),
                 5.0
             ),
             ContinuousRangeParameter.zeroToTenUnitless(
                 DeviceParameter.Id.EqMiddle,
-                ampSelector(0x02, MutableProgram::middle),
+                ampDial(0x02, MutableProgram::middle),
                 5.0
             ),
             ContinuousRangeParameter.zeroToTenUnitless(
                 DeviceParameter.Id.EqTreble,
-                ampSelector(0x03, MutableProgram::treble),
+                ampDial(0x03, MutableProgram::treble),
                 5.0
             ),
             ContinuousRangeParameter.zeroToTenUnitless(
                 DeviceParameter.Id.AmpVolume,
-                ampSelector(0x04, MutableProgram::volume),
+                ampDial(0x04, MutableProgram::volume),
                 5.0
             ),
             ContinuousRangeParameter.zeroToTenUnitless(
                 DeviceParameter.Id.Resonance,
-                ampSelector(0x06, MutableProgram::resonance),
+                ampDial(0x06, MutableProgram::resonance),
                 7.5
             ),
             ContinuousRangeParameter.zeroToTenUnitless(

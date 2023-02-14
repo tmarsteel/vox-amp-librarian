@@ -3,6 +3,7 @@ package com.github.tmarsteel.voxamplibrarian.appmodel
 import com.github.tmarsteel.voxamplibrarian.appmodel.ParameterValue.Companion.withValue
 import com.github.tmarsteel.voxamplibrarian.protocol.MutableProgram
 import com.github.tmarsteel.voxamplibrarian.protocol.Program
+import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageToHost
 
 class DeviceConfiguration<out D : DeviceDescriptor<*>> private constructor(
     val descriptor: D,
@@ -47,6 +48,29 @@ class DeviceConfiguration<out D : DeviceDescriptor<*>> private constructor(
         return DeviceConfiguration(newDescriptor, newValues)
     }
 
+    /**
+     * @return this configuration after it has been modified with the given event, or `null` if not affected.
+     */
+    fun tryApplyEvent(event: MessageToHost): DeviceConfiguration<D>? {
+        val newValues = descriptor.parameters.mapNotNull {
+            val newValue = it.tryGetNewValueFromEvent(event) ?: return@mapNotNull null
+            it.id to newValue
+        }
+
+        if (newValues.isEmpty()) {
+            return null
+        }
+
+        if (newValues.size > 1) {
+            throw RuntimeException("Multiple parameters affected by single event ($event): ${newValues.map { it.first }.joinToString()}")
+        }
+
+        val (id, value) = newValues.single()
+        id as DeviceParameter.Id<Any>
+
+        return withValue(id, value)
+    }
+
     fun applyToProgram(program: MutableProgram) {
         descriptor.applyTypeToProgram(program)
         descriptor.parameters.forEach {
@@ -75,8 +99,8 @@ class DeviceConfiguration<out D : DeviceDescriptor<*>> private constructor(
             if (descriptors.isEmpty()) {
                 throw RuntimeException("None of the given devices is configured for this program.")
             }
-            if (descriptors.isNotEmpty()) {
-                throw RuntimeException("Multiple of the given devices were detected in this program: ${descriptors.joinToString()}")
+            if (descriptors.size > 1) {
+                throw RuntimeException("Multiple of the given devices were detected in this program: ${descriptors.joinToString(transform = {it.name})}")
             }
 
             val descriptor = descriptors.single()

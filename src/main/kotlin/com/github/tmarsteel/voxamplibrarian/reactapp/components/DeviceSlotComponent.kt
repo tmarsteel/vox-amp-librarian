@@ -8,7 +8,7 @@ import react.FC
 import react.Props
 import react.dom.html.ReactHTML
 
-external interface DeviceSlotComponentProps<T : DeviceDescriptor> : Props {
+external interface DeviceSlotComponentProps<T : DeviceDescriptor<*>> : Props {
     var deviceTypes: List<T>
     var configuration: DeviceConfiguration<T>
     var onConfigurationChanged: (DeviceConfiguration<T>) -> Unit
@@ -37,4 +37,4 @@ private val DeviceSlotComponentImpl = FC<DeviceSlotComponentProps<*>> { props ->
         }
     }
 }
-fun <T : DeviceDescriptor> DeviceSlotComponent(): FC<DeviceSlotComponentProps<T>> = DeviceSlotComponentImpl.unsafeCast<FC<DeviceSlotComponentProps<T>>>()
+fun <T : DeviceDescriptor<*>> DeviceSlotComponent(): FC<DeviceSlotComponentProps<T>> = DeviceSlotComponentImpl.unsafeCast<FC<DeviceSlotComponentProps<T>>>()

@@ -1,6 +1,10 @@
 package com.github.tmarsteel.voxamplibrarian.reactapp
 
+import com.github.tmarsteel.voxamplibrarian.appmodel.DeviceConfiguration
+import com.github.tmarsteel.voxamplibrarian.appmodel.DeviceParameter
+import com.github.tmarsteel.voxamplibrarian.appmodel.OriginalCleanAmplifier
 import com.github.tmarsteel.voxamplibrarian.appmodel.SimulationConfiguration
+import com.github.tmarsteel.voxamplibrarian.appmodel.UnitlessSingleDecimalPrecision
 import com.github.tmarsteel.voxamplibrarian.appmodel.hardware_integration.VoxVtxAmpConnection
 import com.github.tmarsteel.voxamplibrarian.reactapp.components.LogLevelComponent
 import com.github.tmarsteel.voxamplibrarian.reactapp.components.SimulationConfigurationComponent
@@ -10,9 +14,14 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
-import react.*
+import react.FC
+import react.Fragment
+import react.Props
+import react.create
 import react.dom.client.createRoot
 import react.dom.html.ReactHTML.div
+import react.useEffect
+import react.useState
 
 private val startupCode = mutableListOf<() -> Unit>()
 private var appInitStarted = false
@@ -59,6 +68,12 @@ fun main() {
     startupCode.forEach {
         it.invoke()
     }
+
+    var config = DeviceConfiguration.defaultOf(OriginalCleanAmplifier)
+    console.log(config.getValue(DeviceParameter.Id.Gain))
+    config = config.withValue(DeviceParameter.Id.Gain, UnitlessSingleDecimalPrecision(20))
+    console.log(config.getValue(DeviceParameter.Id.Gain))
+
     val rootElement = document.getElementById("root") ?: error("Couldn't find root container!")
     createRoot(rootElement).render(Fragment.create {
         AppComponent {

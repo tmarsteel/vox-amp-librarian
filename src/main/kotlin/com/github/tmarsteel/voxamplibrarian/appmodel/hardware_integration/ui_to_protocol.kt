@@ -75,18 +75,18 @@ sealed class ConfigurationDiff {
     abstract fun toUpdateMessage(): MessageToAmp<*>
 
     class Parameter<V : Any>(
-        val device: DeviceDescriptor,
+        val device: DeviceDescriptor<*>,
         val parameterId: DeviceParameter.Id<V>,
         val newValue: V,
     ): ConfigurationDiff() {
         override fun toUpdateMessage(): MessageToAmp<*> {
-            return device.getParameter(parameterId).protocolAdapter.buildUpdateMessage(newValue)
+            return device.getParameter(parameterId).buildUpdateMessage(newValue)
         }
     }
 
     class DeviceType(
-        val oldType: DeviceDescriptor,
-        val newType: DeviceDescriptor,
+        val oldType: DeviceDescriptor<*>,
+        val newType: DeviceDescriptor<*>,
     ) : ConfigurationDiff() {
         override fun toUpdateMessage() = newType.typeChangedMessage
     }

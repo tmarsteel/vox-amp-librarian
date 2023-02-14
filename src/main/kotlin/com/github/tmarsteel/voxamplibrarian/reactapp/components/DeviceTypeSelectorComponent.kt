@@ -7,9 +7,9 @@ import react.dom.html.ReactHTML.option
 import react.dom.html.ReactHTML.select
 
 external interface DeviceTypeSelectorComponentProps : Props {
-    var types: List<DeviceDescriptor>
-    var value: DeviceDescriptor
-    var onChanged: (DeviceDescriptor) -> Unit
+    var types: List<DeviceDescriptor<*>>
+    var value: DeviceDescriptor<*>
+    var onChanged: (DeviceDescriptor<*>) -> Unit
 }
 
 val DeviceTypeSelectorComponent = FC<DeviceTypeSelectorComponentProps> { props ->
