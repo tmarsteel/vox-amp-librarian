@@ -52,8 +52,8 @@ abstract class AmplifierDescriptor(
                 5.0
             ),
             ContinuousRangeParameter.zeroToTenUnitless(
-                DeviceParameter.Id.EqBass,
-                ampDial(0x01, MutableProgram::bass),
+                DeviceParameter.Id.EqTreble,
+                ampDial(0x01, MutableProgram::treble),
                 5.0
             ),
             ContinuousRangeParameter.zeroToTenUnitless(
@@ -62,8 +62,8 @@ abstract class AmplifierDescriptor(
                 5.0
             ),
             ContinuousRangeParameter.zeroToTenUnitless(
-                DeviceParameter.Id.EqTreble,
-                ampDial(0x03, MutableProgram::treble),
+                DeviceParameter.Id.EqBass,
+                ampDial(0x03, MutableProgram::bass),
                 5.0
             ),
             ContinuousRangeParameter.zeroToTenUnitless(
