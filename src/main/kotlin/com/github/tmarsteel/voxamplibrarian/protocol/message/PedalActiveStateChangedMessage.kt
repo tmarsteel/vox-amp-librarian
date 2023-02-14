@@ -11,6 +11,7 @@ class PedalActiveStateChangedMessage(
         out.write(PREFIX)
         out.write(pedalSlot)
         out.write(enabled)
+        out.write(0x00)
     }
 
     companion object : MidiProtocolMessage.Factory<PedalActiveStateChangedMessage> {
