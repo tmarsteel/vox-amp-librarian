@@ -1,5 +1,6 @@
 package com.github.tmarsteel.voxamplibrarian.appmodel
 
+import com.github.tmarsteel.voxamplibrarian.hex
 import com.github.tmarsteel.voxamplibrarian.protocol.MutableProgram
 import com.github.tmarsteel.voxamplibrarian.protocol.PedalSlot
 import com.github.tmarsteel.voxamplibrarian.protocol.Program
@@ -309,7 +310,8 @@ fun <Value : SingleByteProtocolSerializable> ampSelector(
             }
 
             val value = event.value.semanticValue.toByte()
-            return parameter.choices.single { it.protocolValue == value }
+            return parameter.choices.find { it.protocolValue == value }
+                ?: error("Unknown value ${value.hex()} for amp parameter ${parameter.id}")
         }
     }
 }
@@ -454,7 +456,8 @@ fun <Value : SingleByteProtocolSerializable> PedalDescriptor<*>.pedalSelector(
 
         override fun getValueFrom(program: Program, parameter: DiscreteChoiceParameter<Value>): Value {
             val byteValue = field.get(program.unsafeCast<MutableProgram>())
-            return parameter.choices.single { it.protocolValue == byteValue }
+            return parameter.choices.find { it.protocolValue == byteValue }
+                ?: error("Unknown value ${byteValue.hex()} for parameter $pedalType ${parameter.id}")
         }
 
         override fun tryGetNewValueFromEvent(parameter: DiscreteChoiceParameter<Value>, event: MessageToHost): Value? {
@@ -463,7 +466,8 @@ fun <Value : SingleByteProtocolSerializable> PedalDescriptor<*>.pedalSelector(
             }
 
             val value = event.value.semanticValue.toByte()
-            return parameter.choices.single { it.protocolValue == value }
+            return parameter.choices.find { it.protocolValue == value }
+                ?: error("Unknown value ${value.hex()} for parameter $pedalType ${parameter.id}")
         }
     }
 }
