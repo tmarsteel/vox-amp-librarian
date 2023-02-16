@@ -9,8 +9,8 @@ import csstype.ClassName
 import csstype.Display
 import csstype.TextAlign
 import csstype.VerticalAlign
-import emotion.react.css
 import csstype.rem
+import emotion.react.css
 import react.ChildrenBuilder
 import react.FC
 import react.Props
@@ -30,7 +30,11 @@ val ContinuousDialComponent = FC<ContinuousDialComponentProps> { props ->
         RotarySliderComponent {
             range = props.descriptor.valueRange.start.intValue .. props.descriptor.valueRange.endInclusive.intValue
             value = props.value.intValue
-            onChange = { props.descriptor.constructValue(it).let(props.onValueChanged) }
+            onChange = { newValueInt ->
+                val newValue = props.descriptor.constructValue(newValueInt)
+                console.log(newValue)
+                props.onValueChanged(newValue)
+            }
             size = 4.rem
         }
         div {
