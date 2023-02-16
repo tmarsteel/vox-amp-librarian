@@ -4,8 +4,8 @@ import com.github.tmarsteel.voxamplibrarian.BinaryInput
 import kotlin.reflect.KClass
 
 interface MidiProtocolMessage {
-    interface Factory<T : MidiProtocolMessage> {
-        val type: KClass<T>
+    interface Factory<out T : MidiProtocolMessage> {
+        val type: KClass<out T>
 
         /**
          * @throws MessageParseException

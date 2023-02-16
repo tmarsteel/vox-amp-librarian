@@ -10,16 +10,7 @@ import com.github.tmarsteel.voxamplibrarian.protocol.message.RequestCurrentModeM
 import com.github.tmarsteel.voxamplibrarian.protocol.message.RequestCurrentProgramMessage
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.consumeAsFlow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.runningFold
-import kotlinx.coroutines.flow.shareIn
-import kotlinx.coroutines.flow.single
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.*
 
 class VoxVtxAmpConnection(
     midiDevice: MidiDevice,

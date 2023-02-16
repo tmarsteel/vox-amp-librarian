@@ -1,12 +1,15 @@
 package com.github.tmarsteel.voxamplibrarian.protocol
 
 import com.github.tmarsteel.voxamplibrarian.BinaryInput
-import com.github.tmarsteel.voxamplibrarian.computeIfAbsent
+import com.github.tmarsteel.voxamplibrarian.CoroutineLock
+import com.github.tmarsteel.voxamplibrarian.logging.LoggerFactory
 import com.github.tmarsteel.voxamplibrarian.protocol.message.*
-import com.github.tmarsteel.voxamplibrarian.putIfAbsent
+import kotlinx.atomicfu.AtomicRef
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -14,38 +17,47 @@ import kotlin.time.Duration.Companion.seconds
 class VoxVtxAmplifierClient(
     val midiDevice: MidiDevice,
     listener: (suspend (MessageToHost) -> Unit)? = null,
-    messageFactories: List<MidiProtocolMessage.Factory<out MessageToHost>> = DEFAULT_MESSAGE_FACTORIES,
+    private val messageFactories: List<MidiProtocolMessage.Factory<MessageToHost>> = DEFAULT_MESSAGE_FACTORIES,
 ) {
-    private val messageFactories: MutableSet<MidiProtocolMessage.Factory<out MessageToHost>> = HashSet(messageFactories)
-    /**
-     * maps [KClass.simpleName] of the awaited response to the coroutine to handle it
-     */
-    private val pendingExchanges = mutableMapOf<String, Continuation<MessageToHost>>()
+    private val logger = LoggerFactory["protocol-mgmt"]
 
-    /**
-     * When an exchange is initiated while another exchange with the same response type is already
-     * underway ([pendingExchanges]), it gets queued here. The continuation does work of sending and
-     * registering in [pendingExchanges].
-     */
-    private val queuedExchanges = mutableMapOf<String, ArrayDeque<Continuation<Unit>>>()
-    private val listeners = mutableListOf<suspend (MessageToHost) -> Unit>()
-    init {
-        listener?.let(listeners::add)
-
-        midiDevice.incomingSysExMessageHandler = { manufacturerId, payload ->
-            GlobalScope.launch {
-                this@VoxVtxAmplifierClient.onSysExMessageReceived(manufacturerId, payload)
-            }
-        }
-    }
-
-    private suspend fun send(message: MessageToAmp<*>) {
-        midiDevice.sendSysExMessage(MANUFACTURER_ID, message::writeTo)
-    }
+    private val currentExchange: AtomicRef<ExchangeData<MessageToHost>?> = atomic(null)
+    private val exchangeLock = CoroutineLock("vox-vtx-exchange")
 
     private suspend fun onSysExMessageReceived(manufacturerId: Byte, payload: BinaryInput) {
         if (manufacturerId != MANUFACTURER_ID) {
             return
+        }
+
+        val initialCurrentExchange = currentExchange.value
+        if (initialCurrentExchange != null) {
+            try {
+                val exchangeResponse = initialCurrentExchange.messageFactory.parse(payload)
+                if (currentExchange.compareAndSet(initialCurrentExchange, null)) {
+                    GlobalScope.launch {
+                        initialCurrentExchange.continuation.resume(exchangeResponse)
+                    }
+                } else {
+                    logger.warn("Ignoring possible exchange response (${exchangeResponse::class.simpleName}) because there has been a race condition in consuming the response.")
+                }
+                return
+            }
+            catch (ex: MessageParseException.PrefixNotRecognized) {
+                // message not related to exchange, parse as event
+            }
+            catch (ex: MessageParseException) {
+                if (currentExchange.compareAndSet(initialCurrentExchange, null)) {
+                    GlobalScope.launch {
+                        initialCurrentExchange.continuation.resumeWithException(ex)
+                    }
+                } else {
+                    logger.warn("Ignoring possible exchange failure because there has been a race condition in consuming the response.", ex)
+                }
+                return
+            }
+            finally {
+                payload.seekToStart()
+            }
         }
 
         var parsedMessage: MessageToHost? = null
@@ -68,63 +80,61 @@ class VoxVtxAmplifierClient(
             throw UnrecognizedMessageException(payload)
         }
 
-        val messageType = parsedMessage::class.simpleName!!
-        val exchangeContinuation = pendingExchanges[messageType]
-        if (exchangeContinuation != null) {
-            pendingExchanges.remove(messageType)
-            GlobalScope.launch {
-                scheduleNextExchange(messageType)
-            }
-            exchangeContinuation.resume(parsedMessage)
-            return
-        }
-
         listeners.forEach { it.invoke(parsedMessage) }
     }
 
-    private fun scheduleNextExchange(responseType: String) {
-        val scheduler = queuedExchanges[responseType]?.firstOrNull()
-            ?: return
+    suspend fun <Response : MessageToHost> exchange(request: MessageToAmp<Response>, timeout: Duration = DEFAULT_TIMEOUT): Response {
+        return exchangeLock.withLock {
+            val onResponseReceivedSubroutine = GlobalScope.async(start = CoroutineStart.DEFAULT) {
+                return@async suspendCoroutine<MessageToHost> { responseAvailable ->
+                    val exchangeData = ExchangeData(request.responseFactory, responseAvailable) as ExchangeData<MessageToHost>
+                    check(currentExchange.compareAndSet(null, exchangeData)) {
+                        "currentExchange is set while lock was not held"
+                    }
+                }
+            }
 
-        scheduler.resume(Unit)
+            try {
+                send(request)
+                val response = withTimeout(timeout) {
+                    @Suppress("UNCHECKED_CAST")
+                    onResponseReceivedSubroutine.await() as Response
+                }
+                return@withLock response
+            }
+            finally {
+                currentExchange.value = null
+            }
+        }
     }
 
+    private suspend fun send(message: MessageToAmp<*>) {
+        midiDevice.sendSysExMessage(MANUFACTURER_ID, message::writeTo)
+    }
+
+    private val listeners = mutableListOf<suspend (MessageToHost) -> Unit>()
+    init {
+        listener?.let(listeners::add)
+
+        midiDevice.incomingSysExMessageHandler = { manufacturerId, payload ->
+            GlobalScope.launch {
+                onSysExMessageReceived(manufacturerId, payload)
+            }
+        }
+    }
     fun addListener(listener: (MessageToHost) -> Unit) {
         listeners.add(listener)
     }
 
-    suspend fun <Response : MessageToHost> exchange(request: MessageToAmp<Response>, timeout: Duration = DEFAULT_TIMEOUT): Response {
-        messageFactories.add(request.responseFactory)
-
-        val responseType = request.responseFactory.type.simpleName!!
-        // assure only one exchange per response type is in-flight at any given time
-        if (responseType in pendingExchanges) {
-            suspendCoroutine<Unit> { responseTypeFree ->
-                val queue = queuedExchanges.computeIfAbsent(responseType) { _ -> ArrayDeque() }
-                queue.addLast(responseTypeFree)
-            }
-        }
-
-        val onResponseReceivedSubroutine = GlobalScope.async(start = CoroutineStart.DEFAULT) {
-            return@async suspendCoroutine<MessageToHost> { responseAvailable ->
-                check(pendingExchanges.putIfAbsent(responseType, responseAvailable)) {
-                    "The response type is occupied by another exchange. This race condition should have been prevented."
-                }
-            }
-        }
-        send(request)
-        val response = withTimeout(timeout) {
-            onResponseReceivedSubroutine.await()
-        }
-
-        @Suppress("UNCHECKED_CAST")
-        return response as Response
-    }
+    private class ExchangeData<Response : MessageToHost>(
+        val messageFactory: MidiProtocolMessage.Factory<Response>,
+        val continuation: Continuation<Response>,
+    )
 
     companion object {
         val DEFAULT_TIMEOUT = 1.seconds
         const val MANUFACTURER_ID: Byte = 0x42
-        val DEFAULT_MESSAGE_FACTORIES = listOf<MidiProtocolMessage.Factory<out MessageToHost>>(
+        val DEFAULT_MESSAGE_FACTORIES = listOf<MidiProtocolMessage.Factory<MessageToHost>>(
             AmpDialTurnedMessage.Companion,
             EffectDialTurnedMessage.Companion,
             NoiseReductionSensitivityChangedMessage.Companion,
