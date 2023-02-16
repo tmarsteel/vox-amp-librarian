@@ -5,52 +5,39 @@ import com.github.tmarsteel.voxamplibrarian.appmodel.ContinuousRangeParameter
 import com.github.tmarsteel.voxamplibrarian.appmodel.Duration
 import com.github.tmarsteel.voxamplibrarian.appmodel.Frequency
 import com.github.tmarsteel.voxamplibrarian.appmodel.UnitlessSingleDecimalPrecision
-import com.github.tmarsteel.voxamplibrarian.logging.LoggerFactory
+import csstype.ClassName
 import csstype.Display
 import csstype.TextAlign
 import csstype.VerticalAlign
-import csstype.Width
-import csstype.rem
 import emotion.react.css
+import csstype.rem
 import react.ChildrenBuilder
 import react.FC
 import react.Props
-import react.dom.html.InputType
 import react.dom.html.ReactHTML
 import react.dom.html.ReactHTML.div
-import react.dom.html.ReactHTML.input
 import react.dom.html.ReactHTML.span
 
 external interface ContinuousDialComponentProps : Props {
     var descriptor: ContinuousRangeParameter<*>
     var value: Continuous<*>
-    var onValueChanged: ((Continuous<*>) -> Unit)?
+    var onValueChanged: ((Continuous<*>) -> Unit)
 }
 
 val ContinuousDialComponent = FC<ContinuousDialComponentProps> { props ->
     div {
-        input {
-            css {
-                display = Display.inlineBlock
-                width = "calc(100% - 5rem)".unsafeCast<Width>()
-            }
-            type = InputType.range
-            min = props.descriptor.valueRange.start.intValue.toDouble()
-            max = props.descriptor.valueRange.endInclusive.intValue.toDouble()
-            step = 1.0
-            value = props.value.intValue.toString(10)
-            onChange = { e ->
-                props.onValueChanged?.invoke(
-                    props.descriptor.constructValue(e.target.valueAsNumber.toInt())
-                )
-            }
+        className = ClassName("continuous-dial")
+        RotarySliderComponent {
+            range = props.descriptor.valueRange.start.intValue .. props.descriptor.valueRange.endInclusive.intValue
+            value = props.value.intValue
+            onChange = { props.descriptor.constructValue(it).let(props.onValueChanged) }
+            size = 4.rem
         }
         div {
             css {
-                textAlign = TextAlign.left
+                textAlign = TextAlign.center
                 display = Display.inlineBlock
-                width = 4.5.rem
-                paddingLeft = 0.5.rem
+                width = 4.rem
                 verticalAlign = VerticalAlign.top
             }
             renderContinuousValue(props.value)
