@@ -1,26 +1,31 @@
 package com.github.tmarsteel.voxamplibrarian.reactapp
 
+import com.github.tmarsteel.voxamplibrarian.logging.LoggerFactory
 import kotlinx.browser.window
+import org.w3c.dom.HTMLElement
 import org.w3c.dom.events.Event
 import org.w3c.dom.events.MouseEvent
 import react.dom.DOMAttributes
 
 object GlobalMouseMoveAssist {
+    private val logger = LoggerFactory["global-mousemove"]
     private var currentInteraction: Interaction? = null
 
-    fun DOMAttributes<*>.registerGlobalDragHandler(
+    fun DOMAttributes<out HTMLElement>.registerGlobalDragHandler(
         onDragStart: (MouseEvent) -> Unit,
         onDrag: (MouseEvent) -> Unit,
         onDragEnd: (MouseEvent) -> Unit,
     ) {
         onMouseDown = { event ->
-            console.log("foo")
-            check(currentInteraction == null) { "got a two mousedowns without a mouseup" }
+            if (currentInteraction != null) {
+                logger.warn("got two mousedowns without a mouseup")
+            } else {
+                register()
+            }
 
-            register()
             onDragStart(event.nativeEvent)
-            console.log("bar")
             currentInteraction = Interaction(onDrag, onDragEnd)
+            undefined
         }
     }
 

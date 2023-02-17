@@ -1,15 +1,7 @@
 package com.github.tmarsteel.voxamplibrarian.reactapp.components
 
-import com.github.tmarsteel.voxamplibrarian.appmodel.Continuous
-import com.github.tmarsteel.voxamplibrarian.appmodel.ContinuousRangeParameter
-import com.github.tmarsteel.voxamplibrarian.appmodel.Duration
-import com.github.tmarsteel.voxamplibrarian.appmodel.Frequency
-import com.github.tmarsteel.voxamplibrarian.appmodel.UnitlessSingleDecimalPrecision
-import csstype.ClassName
-import csstype.Display
-import csstype.TextAlign
-import csstype.VerticalAlign
-import csstype.rem
+import com.github.tmarsteel.voxamplibrarian.appmodel.*
+import csstype.*
 import emotion.react.css
 import react.ChildrenBuilder
 import react.FC
@@ -32,7 +24,6 @@ val ContinuousDialComponent = FC<ContinuousDialComponentProps> { props ->
             value = props.value.intValue
             onChange = { newValueInt ->
                 val newValue = props.descriptor.constructValue(newValueInt)
-                console.log(newValue)
                 props.onValueChanged(newValue)
             }
             size = 4.rem

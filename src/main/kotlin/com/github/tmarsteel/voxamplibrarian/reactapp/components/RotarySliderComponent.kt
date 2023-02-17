@@ -1,22 +1,14 @@
 package com.github.tmarsteel.voxamplibrarian.reactapp.components
 
 import com.github.tmarsteel.voxamplibrarian.reactapp.GlobalMouseMoveAssist.registerGlobalDragHandler
-import csstype.Border
-import csstype.ClassName
-import csstype.Color
-import csstype.Length
-import csstype.LineStyle
-import csstype.Margin
-import csstype.Transform
-import csstype.Width
-import csstype.pct
-import csstype.rem
+import csstype.*
 import emotion.react.css
 import org.w3c.dom.events.MouseEvent
 import react.FC
+import react.MutableRefObject
 import react.Props
 import react.dom.html.ReactHTML.div
-import react.useState
+import react.useRef
 
 /** size of the area around the bottom center of the circle where the slider cannot move */
 private const val CUTOUT_DEGREES: Int = 80
@@ -47,14 +39,12 @@ private sealed class Modification {
 
         fun onMouseMoved(event: MouseEvent) {
             currentScreenY = event.screenY
-            console.log("move", startScreenY, currentScreenY)
         }
     }
 }
 
 val RotarySliderComponent = FC<RotarySliderComponentProps> { props ->
-    var mode: Modification by useState(Modification.Inactive)
-    var displayValue by useState(props.value)
+    val mode: MutableRefObject<Modification> = useRef(Modification.Inactive)
 
     div {
         css {
@@ -63,19 +53,16 @@ val RotarySliderComponent = FC<RotarySliderComponentProps> { props ->
         }
         registerGlobalDragHandler(
             onDragStart = {
-                mode = Modification.Dragging(it)
+                mode.current = Modification.Dragging(it)
             },
             onDrag = { event ->
-                console.log(event, mode)
-                (mode as? Modification.Dragging)?.onMouseMoved(event)
-                console.log(mode)
-                displayValue = props.value + mode.pendingChange
+                (mode.current as? Modification.Dragging)?.onMouseMoved(event)
+                props.onChange(props.value + (mode.current?.pendingChange ?: 0))
             },
             onDragEnd = {
-                val finalValue = props.value + mode.pendingChange
-                displayValue = finalValue
+                val finalValue = props.value + (mode.current?.pendingChange ?: 0)
                 props.onChange(finalValue)
-                mode = Modification.Inactive
+                mode.current = Modification.Inactive
             },
         )
         div {
@@ -117,7 +104,7 @@ val RotarySliderComponent = FC<RotarySliderComponentProps> { props ->
                 borderWidth = 0.1.rem
                 borderRadius = 50.pct
                 val x =
-                    ROTATE_DEGREES_MIN + (displayValue * (360 - CUTOUT_DEGREES) / (props.range.last - props.range.first))
+                    ROTATE_DEGREES_MIN + (props.value * (360 - CUTOUT_DEGREES) / (props.range.last - props.range.first))
                 transform = "rotate(${x}deg)".unsafeCast<Transform>()
             }
 
