@@ -11,14 +11,9 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
-import react.FC
-import react.Fragment
-import react.Props
-import react.create
+import react.*
 import react.dom.client.createRoot
 import react.dom.html.ReactHTML.div
-import react.useEffect
-import react.useState
 
 private val startupCode = mutableListOf<() -> Unit>()
 private var appInitStarted = false
@@ -31,7 +26,7 @@ fun appInit(block: () -> Unit) {
 }
 
 val AppComponent = FC<Props> {
-    var ampState: VtxAmpState? by useState(null)
+    var ampState: VtxAmpState? by useState(VtxAmpState.PresetMode(0, SimulationConfiguration.DEFAULT))
 
     useEffect {
         GlobalScope.launch {
@@ -56,8 +51,14 @@ val AppComponent = FC<Props> {
             configuration = ampState?.configuration ?: SimulationConfiguration.DEFAULT
             onConfigurationChanged = { newConfig ->
                 ampState?.let { oldState ->
-                    GlobalScope.launch {
-                        VoxVtxAmpConnection.VOX_AMP.value?.setState(oldState.withConfiguration(newConfig))
+                    val newState = oldState.withConfiguration(newConfig)
+                    val ampConnection = VoxVtxAmpConnection.VOX_AMP.value
+                    if (ampConnection == null) {
+                        ampState = newState
+                    } else {
+                        GlobalScope.launch {
+                            ampConnection.setState(newState)
+                        }
                     }
                 }
             }
