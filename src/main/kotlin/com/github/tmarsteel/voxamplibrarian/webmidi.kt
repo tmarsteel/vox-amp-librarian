@@ -96,7 +96,7 @@ val VOX_AMP_MIDI_DEVICE: Flow<MidiDevice?> = midiState
             is MidiState.PermissionDenied,
             MidiState.NotSupported -> {
                 currentDevice?.close()
-                window.alert("Midi not available: ${currentMidiState::class.simpleName}")
+                //window.alert("Midi not available: ${currentMidiState::class.simpleName}")
                 return@runningFold null
             }
             is MidiState.Available -> {

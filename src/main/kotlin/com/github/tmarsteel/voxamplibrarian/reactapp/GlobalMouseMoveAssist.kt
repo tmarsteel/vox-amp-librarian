@@ -41,11 +41,13 @@ object GlobalMouseMoveAssist {
     }
 
     private fun register() {
+        window.document.body?.classList?.add("during-global-drag")
         window.addEventListener("mousemove", globalMoveHandler.unsafeCast<(Event) -> Unit>())
         window.addEventListener("mouseup", globalUpHandler.unsafeCast<(Event) -> Unit>())
     }
 
     private fun deregister() {
+        window.document.body?.classList?.remove("during-global-drag")
         window.removeEventListener("mousemove", globalMoveHandler.unsafeCast<(Event) -> Unit>())
         window.removeEventListener("mouseup", globalUpHandler.unsafeCast<(Event) -> Unit>())
     }

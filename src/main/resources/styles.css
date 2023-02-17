@@ -5,6 +5,6 @@ html, body {
     font-size: 14px;
 }
 
-.dial__marker {
-
+body.during-global-drag * {
+    user-select: none;
 }
