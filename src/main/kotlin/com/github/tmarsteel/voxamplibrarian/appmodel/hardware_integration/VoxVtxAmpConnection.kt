@@ -2,6 +2,7 @@ package com.github.tmarsteel.voxamplibrarian.appmodel.hardware_integration
 
 import com.github.tmarsteel.voxamplibrarian.VOX_AMP_MIDI_DEVICE
 import com.github.tmarsteel.voxamplibrarian.appmodel.VtxAmpState
+import com.github.tmarsteel.voxamplibrarian.logging.LoggerFactory
 import com.github.tmarsteel.voxamplibrarian.protocol.MidiDevice
 import com.github.tmarsteel.voxamplibrarian.protocol.VoxVtxAmplifierClient
 import com.github.tmarsteel.voxamplibrarian.protocol.message.CurrentModeResponse
@@ -9,8 +10,12 @@ import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageToHost
 import com.github.tmarsteel.voxamplibrarian.protocol.message.RequestCurrentModeMessage
 import com.github.tmarsteel.voxamplibrarian.protocol.message.RequestCurrentProgramMessage
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+
+private val logger = LoggerFactory["app-amp-connection"]
 
 class VoxVtxAmpConnection(
     midiDevice: MidiDevice,
@@ -24,7 +29,7 @@ class VoxVtxAmpConnection(
         ampStateEvents.consumeAsFlow()
             .runningFold(state) { previousState, event ->
                 when (event) {
-                    is AmpStateEvent.NewStateAcked -> event.state
+                    is AmpStateEvent.NewState -> event.state
                     is AmpStateEvent.Message -> try {
                         previousState.plus(event.message)
                     }
@@ -35,6 +40,21 @@ class VoxVtxAmpConnection(
             }
             .collect { emit(it) }
     }.shareIn(GlobalScope, SharingStarted.Lazily, 1)
+
+    private val setAmpStateRequests = Channel<VtxAmpState>(Channel.BUFFERED)
+    private val requestStatePusher: Job = GlobalScope.launch {
+        while (true) {
+            val nextState = setAmpStateRequests.receive()
+            val superseders = setAmpStateRequests.allAvailable()
+            val stateToApply = superseders.lastOrNull() ?: nextState
+            logger.debug("Applying new amp state (${superseders.size} states were superseded)", stateToApply)
+
+            val currentState = ampState.take(1).single()
+            for (updateMessage in currentState.diffTo(stateToApply)) {
+                client.exchange(updateMessage)
+            }
+        }
+    }
 
     private suspend fun onMessage(message: MessageToHost) {
         ampStateEvents.send(AmpStateEvent.Message(message))
@@ -56,16 +76,14 @@ class VoxVtxAmpConnection(
         }
     }
 
-    suspend fun setState(value: VtxAmpState) {
-        val currentState = ampState.take(1).single()
-        for (updateMessage in currentState.diffTo(value)) {
-            client.exchange(updateMessage)
-        }
-        ampStateEvents.send(AmpStateEvent.NewStateAcked(value))
+    suspend fun requestState(newState: VtxAmpState) {
+        logger.trace("Requesting new amp state", newState)
+        setAmpStateRequests.send(newState)
+        ampStateEvents.send(AmpStateEvent.NewState(newState))
     }
 
     fun close() {
-        TODO()
+        requestStatePusher.cancel()
     }
 
     companion object {
@@ -85,5 +103,18 @@ class VoxVtxAmpConnection(
 
 private sealed class AmpStateEvent {
     class Message(val message: MessageToHost) : AmpStateEvent()
-    class NewStateAcked(val state: VtxAmpState) : AmpStateEvent()
+    class NewState(val state: VtxAmpState) : AmpStateEvent()
+}
+
+private fun <T> Channel<T>.allAvailable(): List<T> {
+    val elements = mutableListOf<T>()
+    while (true) {
+        val receiveResult = tryReceive()
+        if (receiveResult.isSuccess) {
+            elements.add(receiveResult.getOrThrow())
+        }
+        if (receiveResult.isFailure || receiveResult.isClosed) {
+            return elements
+        }
+    }
 }

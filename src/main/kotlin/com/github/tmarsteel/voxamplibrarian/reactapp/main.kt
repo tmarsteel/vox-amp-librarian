@@ -57,7 +57,7 @@ val AppComponent = FC<Props> {
                         ampState = newState
                     } else {
                         GlobalScope.launch {
-                            ampConnection.setState(newState)
+                            ampConnection.requestState(newState)
                         }
                     }
                 }
