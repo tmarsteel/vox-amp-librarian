@@ -32,10 +32,11 @@ private sealed class Modification {
     object Inactive : Modification() {
         override val pendingChange = 0
     }
-    class Dragging(downEvent: MouseEvent) : Modification() {
+    class Dragging(downEvent: MouseEvent, private val sensitivityFactor: Double) : Modification() {
         private var startScreenY: Int = downEvent.screenY
         private var currentScreenY: Int = downEvent.screenY
-        override val pendingChange: Int get() = (startScreenY - currentScreenY) / 3
+        override val pendingChange: Int
+            get() = ((startScreenY - currentScreenY).toDouble() * sensitivityFactor).toInt()
 
         fun onMouseMoved(event: MouseEvent) {
             currentScreenY = event.screenY
@@ -46,6 +47,10 @@ private sealed class Modification {
 val RotarySliderComponent = FC<RotarySliderComponentProps> { props ->
     val mode: MutableRefObject<Modification> = useRef(Modification.Inactive)
 
+    fun getNewValueWithModification(): Int {
+        return (props.value + (mode.current?.pendingChange ?: 0)).coerceAtLeast(props.range.first).coerceAtMost(props.range.last)
+    }
+
     div {
         css {
             width = props.size
@@ -53,15 +58,14 @@ val RotarySliderComponent = FC<RotarySliderComponentProps> { props ->
         }
         registerGlobalDragHandler(
             onDragStart = {
-                mode.current = Modification.Dragging(it)
+                mode.current = Modification.Dragging(it, (props.range.last - props.range.first).toDouble() / 300.0)
             },
             onDrag = { event ->
                 (mode.current as? Modification.Dragging)?.onMouseMoved(event)
-                props.onChange(props.value + (mode.current?.pendingChange ?: 0))
+                props.onChange(getNewValueWithModification())
             },
             onDragEnd = {
-                val finalValue = props.value + (mode.current?.pendingChange ?: 0)
-                props.onChange(finalValue)
+                props.onChange(getNewValueWithModification())
                 mode.current = Modification.Inactive
             },
         )
