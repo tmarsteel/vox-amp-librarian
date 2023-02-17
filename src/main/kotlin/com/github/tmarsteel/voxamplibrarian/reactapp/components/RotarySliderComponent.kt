@@ -1,7 +1,10 @@
 package com.github.tmarsteel.voxamplibrarian.reactapp.components
 
 import com.github.tmarsteel.voxamplibrarian.reactapp.GlobalMouseMoveAssist.registerGlobalDragHandler
-import csstype.*
+import csstype.ClassName
+import csstype.Length
+import csstype.Transform
+import csstype.pct
 import emotion.react.css
 import org.w3c.dom.events.MouseEvent
 import react.FC
@@ -52,7 +55,7 @@ val RotarySliderComponent = FC<RotarySliderComponentProps> { props ->
     }
 
     div {
-        css {
+        css(ClassName("rotary-slider")) {
             width = props.size
             height = props.size
         }
@@ -70,54 +73,30 @@ val RotarySliderComponent = FC<RotarySliderComponentProps> { props ->
             },
         )
         div {
-            css {
-                width = 100.pct
-                height = 100.pct
+            css(ClassName("rotary-slider__marker-container")) {
                 transform = "rotate(${ROTATE_DEGREES_MIN}deg)".unsafeCast<Transform>()
             }
             div {
-                css(ClassName("rotary-slider__marker rotary-slider__marker--min")) {
-                    width = "calc(50% - 0.05rem)".unsafeCast<Width>()
-                    height = 10.pct
-                    borderRight = Border(width = 0.1.rem, style = LineStyle.solid, color = Color("black"))
-                }
+                className = ClassName("rotary-slider__marker rotary-slider__marker--min")
             }
         }
         div {
-            css {
+            css(ClassName("rotary-slider__marker-container")) {
                 marginTop = (-100).pct
-                width = 100.pct
-                height = 100.pct
                 transform = "rotate(${ROTATE_DEGREES_MAX}deg)".unsafeCast<Transform>()
             }
             div {
-                css(ClassName("rotary-slider__marker rotary-slider__marker--max")) {
-                    width = "calc(50% - 0.05rem)".unsafeCast<Width>()
-                    height = 10.pct
-                    borderRight = Border(width = 0.1.rem, style = LineStyle.solid, color = Color("black"))
-                }
+                className = ClassName("rotary-slider__marker rotary-slider__marker--max")
             }
         }
         div {
-            css {
-                width = 80.pct
-                height = 80.pct
-                margin = Margin(top = (-90).pct, left = 10.pct, right = 10.pct, bottom = 10.pct)
-                borderColor = Color("black")
-                borderStyle = LineStyle.solid
-                borderWidth = 0.1.rem
-                borderRadius = 50.pct
-                val x =
-                    ROTATE_DEGREES_MIN + (props.value * (360 - CUTOUT_DEGREES) / (props.range.last - props.range.first))
-                transform = "rotate(${x}deg)".unsafeCast<Transform>()
+            css(ClassName("rotary-slider__knob")) {
+                val nDegrees = ROTATE_DEGREES_MIN + (props.value * (360 - CUTOUT_DEGREES) / (props.range.last - props.range.first))
+                transform = "rotate(${nDegrees}deg)".unsafeCast<Transform>()
             }
 
             div {
-                css {
-                    width = "calc(50% - 0.05rem)".unsafeCast<Width>()
-                    height = 11.11.pct
-                    borderRight = Border(width = 0.1.rem, style = LineStyle.solid, color = Color("black"))
-                }
+                className = ClassName("rotary-slider__marker")
             }
         }
     }

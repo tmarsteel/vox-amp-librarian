@@ -8,3 +8,28 @@ html, body {
 body.during-global-drag * {
     user-select: none;
 }
+
+.rotary-slider__marker-container {
+    width: 100%;
+    height: 100%;
+}
+
+.rotary-slider__marker {
+    width: calc(50% - 0.05rem);
+    height: 10%;
+    border-right: 0.1rem solid black;
+}
+
+.rotary-slider__knob {
+    width: 80%;
+    height: 80%;
+    margin: -90% 10% 10% 10%;
+    border: 0.1rem solid black;
+    border-radius: 50%;
+}
+
+.rotary-slider__knob .rotary-slider__marker {
+    width: calc(50% - 0.05rem);
+    height: 11.11%;
+    border-right: 0.1rem solid black;
+}
