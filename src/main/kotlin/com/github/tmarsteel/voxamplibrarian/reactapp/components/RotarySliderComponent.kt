@@ -6,7 +6,7 @@ import csstype.Length
 import csstype.Transform
 import csstype.pct
 import emotion.react.css
-import org.w3c.dom.events.MouseEvent
+import kotlinx.browser.window
 import react.FC
 import react.MutableRefObject
 import react.Props
@@ -29,29 +29,17 @@ external interface RotarySliderComponentProps : Props {
     var size: Length
 }
 
-private sealed class Modification {
-    abstract val pendingChange: Int
-
-    object Inactive : Modification() {
-        override val pendingChange = 0
-    }
-    class Dragging(downEvent: MouseEvent, private val sensitivityFactor: Double) : Modification() {
-        private var startScreenY: Int = downEvent.screenY
-        private var currentScreenY: Int = downEvent.screenY
-        override val pendingChange: Int
-            get() = ((startScreenY - currentScreenY).toDouble() * sensitivityFactor).toInt()
-
-        fun onMouseMoved(event: MouseEvent) {
-            currentScreenY = event.screenY
-        }
-    }
-}
-
 val RotarySliderComponent = FC<RotarySliderComponentProps> { props ->
-    val mode: MutableRefObject<Modification> = useRef(Modification.Inactive)
+    val dragSensitivityFactor: Double = (props.range.last - props.range.first).toDouble() / 300.0
+    val currentDragStartScreenY: MutableRefObject<Int> = useRef(null)
 
-    fun getNewValueWithModification(): Int {
-        return (props.value + (mode.current?.pendingChange ?: 0)).coerceAtLeast(props.range.first).coerceAtMost(props.range.last)
+    fun publishNewValue(delta: Int) {
+        if (delta == 0) {
+            return
+        }
+
+        val newValue = (props.value + delta).coerceIn(props.range)
+        props.onChange(newValue)
     }
 
     div {
@@ -62,17 +50,36 @@ val RotarySliderComponent = FC<RotarySliderComponentProps> { props ->
         tabIndex = 0
         registerGlobalDragHandler(
             onDragStart = {
-                mode.current = Modification.Dragging(it, (props.range.last - props.range.first).toDouble() / 300.0)
+               currentDragStartScreenY.current = it.screenY
             },
             onDrag = { event ->
-                (mode.current as? Modification.Dragging)?.onMouseMoved(event)
-                props.onChange(getNewValueWithModification())
+                currentDragStartScreenY.current?.let { startY ->
+                    val delta = ((startY - event.screenY).toDouble() * dragSensitivityFactor).toInt()
+                    publishNewValue(delta)
+                }
             },
             onDragEnd = {
-                props.onChange(getNewValueWithModification())
-                mode.current = Modification.Inactive
+                currentDragStartScreenY.current = null
             },
         )
+        onKeyDown = keydown@ { event ->
+            if (window.document.activeElement !== event.target) {
+                return@keydown
+            }
+
+            var delta = 0
+            when (event.code) {
+                "ArrowUp", "ArrowRight" -> {
+                    delta++
+                    event.preventDefault()
+                }
+                "ArrowDown", "ArrowLeft" -> {
+                    delta--
+                    event.preventDefault()
+                }
+            }
+            publishNewValue(delta)
+        }
         div {
             css(ClassName("rotary-slider__marker-container")) {
                 transform = "rotate(${ROTATE_DEGREES_MIN}deg)".unsafeCast<Transform>()
