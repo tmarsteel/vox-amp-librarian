@@ -1,5 +1,7 @@
 package com.github.tmarsteel.voxamplibrarian.reactapp.components
 
+import com.github.tmarsteel.voxamplibrarian.logging.LoggerFactory
+import com.github.tmarsteel.voxamplibrarian.reactapp.FullyConsumedWheelEventAssist.registerFullyConsumingWheelEventListener
 import com.github.tmarsteel.voxamplibrarian.reactapp.GlobalMouseMoveAssist.registerGlobalDragHandler
 import csstype.ClassName
 import csstype.Length
@@ -7,11 +9,11 @@ import csstype.Transform
 import csstype.pct
 import emotion.react.css
 import kotlinx.browser.window
-import react.FC
-import react.MutableRefObject
-import react.Props
+import org.w3c.dom.HTMLElement
+import react.*
 import react.dom.html.ReactHTML.div
-import react.useRef
+import kotlin.math.absoluteValue
+import kotlin.math.sign
 
 /** size of the area around the bottom center of the circle where the slider cannot move */
 private const val CUTOUT_DEGREES: Int = 80
@@ -29,9 +31,12 @@ external interface RotarySliderComponentProps : Props {
     var size: Length
 }
 
+private val logger = LoggerFactory["rotary-dial"]
+
 val RotarySliderComponent = FC<RotarySliderComponentProps> { props ->
     val dragSensitivityFactor: Double = (props.range.last - props.range.first).toDouble() / 300.0
     val currentDragStartScreenY: MutableRefObject<Int> = useRef(null)
+    var focusedThroughMouseEnter by useState(false)
 
     fun publishNewValue(delta: Int) {
         if (delta == 0) {
@@ -80,6 +85,28 @@ val RotarySliderComponent = FC<RotarySliderComponentProps> { props ->
             }
             publishNewValue(delta)
         }
+        registerFullyConsumingWheelEventListener(
+            onMouseEnter = {
+                if (window.document.activeElement !== it.target) {
+                    focusedThroughMouseEnter = true
+                    (it.target as HTMLElement).focus()
+                }
+            },
+            onMouseLeave = {
+                if (focusedThroughMouseEnter) {
+                    focusedThroughMouseEnter = false
+                    (it.target as HTMLElement).blur()
+                }
+            },
+            onWheelCapture = { event ->
+                val delta = (-event.deltaY.sign * (props.range.last - props.range.first).toDouble() / 25.0).toInt()
+                    .coerceAbsoluteAtLeast(1)
+                event.preventDefault()
+                event.stopPropagation()
+
+                publishNewValue(delta)
+            },
+        )
         div {
             css(ClassName("rotary-slider__marker-container")) {
                 transform = "rotate(${ROTATE_DEGREES_MIN}deg)".unsafeCast<Transform>()
@@ -108,4 +135,13 @@ val RotarySliderComponent = FC<RotarySliderComponentProps> { props ->
             }
         }
     }
+}
+
+private fun Int.coerceAbsoluteAtLeast(minAbsValue: Int): Int {
+    val actualAbs = this.absoluteValue
+    if (actualAbs >= minAbsValue) {
+        return this
+    }
+
+    return sign * minAbsValue
 }
