@@ -3,6 +3,7 @@ package com.github.tmarsteel.voxamplibrarian.appmodel.hardware_integration
 import com.github.tmarsteel.voxamplibrarian.VOX_AMP_MIDI_DEVICE
 import com.github.tmarsteel.voxamplibrarian.appmodel.VtxAmpState
 import com.github.tmarsteel.voxamplibrarian.logging.LoggerFactory
+import com.github.tmarsteel.voxamplibrarian.protocol.MessageNotAcknowledgedException
 import com.github.tmarsteel.voxamplibrarian.protocol.MidiDevice
 import com.github.tmarsteel.voxamplibrarian.protocol.VoxVtxAmplifierClient
 import com.github.tmarsteel.voxamplibrarian.protocol.message.CurrentModeResponse
@@ -50,8 +51,15 @@ class VoxVtxAmpConnection(
             logger.debug("Applying new amp state (${superseders.size} states were superseded)", stateToApply)
 
             val currentState = ampState.take(1).single()
-            for (updateMessage in currentState.diffTo(stateToApply)) {
-                client.exchange(updateMessage)
+            diffs@for (updateMessage in currentState.diffTo(stateToApply)) {
+                try {
+                    client.exchange(updateMessage)
+                }
+                catch (ex: MessageNotAcknowledgedException) {
+                    ampStateEvents.send(AmpStateEvent.NewState(fetchCurrentState()))
+                    logger.error("Failed to apply state. Resetting.", stateToApply, ex)
+                    break@diffs
+                }
             }
         }
     }
