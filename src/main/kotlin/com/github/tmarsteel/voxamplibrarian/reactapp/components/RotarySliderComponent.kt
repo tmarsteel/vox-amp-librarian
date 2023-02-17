@@ -9,7 +9,6 @@ import csstype.Transform
 import csstype.pct
 import emotion.react.css
 import kotlinx.browser.window
-import org.w3c.dom.HTMLElement
 import react.*
 import react.dom.html.ReactHTML.div
 import kotlin.math.absoluteValue
@@ -85,28 +84,14 @@ val RotarySliderComponent = FC<RotarySliderComponentProps> { props ->
             }
             publishNewValue(delta)
         }
-        registerFullyConsumingWheelEventListener(
-            onMouseEnter = {
-                if (window.document.activeElement !== it.target) {
-                    focusedThroughMouseEnter = true
-                    (it.target as HTMLElement).focus()
-                }
-            },
-            onMouseLeave = {
-                if (focusedThroughMouseEnter) {
-                    focusedThroughMouseEnter = false
-                    (it.target as HTMLElement).blur()
-                }
-            },
-            onWheelCapture = { event ->
-                val delta = (-event.deltaY.sign * (props.range.last - props.range.first).toDouble() / 25.0).toInt()
-                    .coerceAbsoluteAtLeast(1)
-                event.preventDefault()
-                event.stopPropagation()
+        registerFullyConsumingWheelEventListener { event ->
+            val delta = (-event.deltaY.sign * (props.range.last - props.range.first).toDouble() / 25.0).toInt()
+                .coerceAbsoluteAtLeast(1)
+            event.preventDefault()
+            event.stopPropagation()
 
-                publishNewValue(delta)
-            },
-        )
+            publishNewValue(delta)
+        }
         div {
             css(ClassName("rotary-slider__marker-container")) {
                 transform = "rotate(${ROTATE_DEGREES_MIN}deg)".unsafeCast<Transform>()
