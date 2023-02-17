@@ -59,6 +59,7 @@ val RotarySliderComponent = FC<RotarySliderComponentProps> { props ->
             width = props.size
             height = props.size
         }
+        tabIndex = 0
         registerGlobalDragHandler(
             onDragStart = {
                 mode.current = Modification.Dragging(it, (props.range.last - props.range.first).toDouble() / 300.0)

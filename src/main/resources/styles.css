@@ -9,6 +9,14 @@ body.during-global-drag * {
     user-select: none;
 }
 
+.rotary-slider:focus {
+    outline: 0 none;
+}
+
+.rotary-slider:focus .rotary-slider__knob {
+    box-shadow: #6596e2 0 0 0.5rem, inset #6596e2 0 0 0.5rem;
+}
+
 .rotary-slider__marker-container {
     width: 100%;
     height: 100%;
