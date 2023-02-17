@@ -43,7 +43,24 @@ class VoxVtxAmplifierClient(
                 return
             }
             catch (ex: MessageParseException.PrefixNotRecognized) {
-                // message not related to exchange, parse as event
+                payload.seekToStart()
+                try {
+                    val error = ErrorMessage.parse(payload)
+                    logger.error("Received error response from device: $error")
+                    if (currentExchange.compareAndSet(initialCurrentExchange, null)) {
+                        GlobalScope.launch {
+                            initialCurrentExchange.continuation.resumeWithException(
+                                MessageNotAcknowledgedException(initialCurrentExchange.request, error)
+                            )
+                        }
+                    } else {
+                        logger.warn("Ignoring error exchange response because there has been a race condition in consuming the response.")
+                    }
+                    return
+                }
+                catch (ex: MessageParseException.PrefixNotRecognized) {
+                    // message not related to exchange, parse as event
+                }
             }
             catch (ex: MessageParseException) {
                 if (currentExchange.compareAndSet(initialCurrentExchange, null)) {
@@ -87,7 +104,7 @@ class VoxVtxAmplifierClient(
         return exchangeLock.withLock {
             val onResponseReceivedSubroutine = GlobalScope.async(start = CoroutineStart.DEFAULT) {
                 return@async suspendCoroutine<MessageToHost> { responseAvailable ->
-                    val exchangeData = ExchangeData(request.responseFactory, responseAvailable) as ExchangeData<MessageToHost>
+                    val exchangeData = ExchangeData(request, request.responseFactory, responseAvailable) as ExchangeData<MessageToHost>
                     check(currentExchange.compareAndSet(null, exchangeData)) {
                         "currentExchange is set while lock was not held"
                     }
@@ -127,6 +144,7 @@ class VoxVtxAmplifierClient(
     }
 
     private class ExchangeData<Response : MessageToHost>(
+        val request: MessageToAmp<Response>,
         val messageFactory: MidiProtocolMessage.Factory<Response>,
         val continuation: Continuation<Response>,
     )
