@@ -35,7 +35,7 @@ private sealed class Modification {
     class Dragging(downEvent: MouseEvent) : Modification() {
         private var startScreenY: Int = downEvent.screenY
         private var currentScreenY: Int = downEvent.screenY
-        override val pendingChange: Int get() = currentScreenY - startScreenY
+        override val pendingChange: Int get() = (startScreenY - currentScreenY) / 3
 
         fun onMouseMoved(event: MouseEvent) {
             currentScreenY = event.screenY
