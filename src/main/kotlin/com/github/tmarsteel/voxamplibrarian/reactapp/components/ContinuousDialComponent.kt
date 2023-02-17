@@ -9,6 +9,7 @@ import react.Props
 import react.dom.html.ReactHTML
 import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.span
+import kotlin.math.absoluteValue
 
 external interface ContinuousDialComponentProps : Props {
     var descriptor: ContinuousRangeParameter<*>
@@ -49,9 +50,9 @@ val ContinuousDialComponent = FC<ContinuousDialComponentProps> { props ->
 
 private fun ChildrenBuilder.renderContinuousValue(value: Continuous<*>) {
     val text = when(value) {
-        is UnitlessSingleDecimalPrecision -> (value.intValue / 10).toString() + "," + (value.intValue % 10).toString()
+        is UnitlessSingleDecimalPrecision -> (if (value.intValue < 0) "-" else "") + (value.intValue.absoluteValue / 10).toString() + "," + (value.intValue.absoluteValue % 10).toString()
         is Duration -> "${value.milliseconds} ms"
-        is Frequency -> (value.millihertz / 1000).toString() + "," + (value.millihertz % 1000).toString().padStart(3, '0') + " Hz"
+        is Frequency -> (if (value.millihertz < 0) "-" else "") + (value.millihertz.absoluteValue / 1000).toString() + "," + (value.millihertz.absoluteValue % 1000).toString().padStart(3, '0') + " Hz"
     }
     ReactHTML.span {
         +text
