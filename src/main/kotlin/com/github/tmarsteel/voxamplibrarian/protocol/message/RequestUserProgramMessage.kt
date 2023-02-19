@@ -2,11 +2,12 @@ package com.github.tmarsteel.voxamplibrarian.protocol.message
 
 import com.github.tmarsteel.voxamplibrarian.BinaryOutput
 import com.github.tmarsteel.voxamplibrarian.protocol.ProgramSlot
+import com.github.tmarsteel.voxamplibrarian.protocol.message.ResponseHandler.Companion.singleMessage
 
 data class RequestUserProgramMessage(
     val slot: ProgramSlot,
 ) : MessageToAmp<UserProgramResponse> {
-    override val responseFactory = UserProgramResponse
+    override fun createResponseHandler() = singleMessage(UserProgramResponse)
 
     override fun writeTo(out: BinaryOutput) {
         out.write(byteArrayOf(

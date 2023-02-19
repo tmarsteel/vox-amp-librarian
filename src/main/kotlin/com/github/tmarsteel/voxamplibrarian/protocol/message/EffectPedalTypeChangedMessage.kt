@@ -5,8 +5,27 @@ import com.github.tmarsteel.voxamplibrarian.protocol.*
 
 class EffectPedalTypeChangedMessage(
     val type: PedalType,
-) : MessageToHost, MessageToAmp<GenericAcknowledgement> {
-    override val responseFactory = GenericAcknowledgement
+) : MessageToHost, MessageToAmp<EffectPedalTypeChangedMessage.Response> {
+    override fun createResponseHandler() = object : ResponseHandler<Response> {
+        private var ack: GenericAcknowledgement? = null
+        private val dialUpdates = mutableListOf<EffectDialTurnedMessage>()
+        override fun onMessage(payload: BinaryInput): ResponseHandler.MessageResult<Response> {
+            if (ack == null) {
+                ack = GenericAcknowledgement.parse(payload)
+                return ResponseHandler.MessageResult.MoreMessagesNeeded
+            }
+
+            dialUpdates.add(EffectDialTurnedMessage.parse(payload))
+            if (dialUpdates.size < 6) {
+                return ResponseHandler.MessageResult.MoreMessagesNeeded
+            }
+
+            return ResponseHandler.MessageResult.ResponseComplete(Response(
+                ack!!,
+                dialUpdates,
+            ))
+        }
+    }
 
     override fun writeTo(out: BinaryOutput) {
         out.write(PREFIX)
@@ -51,4 +70,9 @@ class EffectPedalTypeChangedMessage(
             return EffectPedalTypeChangedMessage(pedalType)
         }
     }
+
+    class Response(
+        val acknowledgement: GenericAcknowledgement,
+        val dialUpdates: List<EffectDialTurnedMessage>
+    )
 }
