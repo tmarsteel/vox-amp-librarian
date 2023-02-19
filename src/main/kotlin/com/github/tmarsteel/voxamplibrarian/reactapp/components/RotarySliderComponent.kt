@@ -87,7 +87,6 @@ val RotarySliderComponent = FC<RotarySliderComponentProps> { props ->
         registerFullyConsumingWheelEventListener { event ->
             val delta = (-event.deltaY.sign * (props.range.last - props.range.first).toDouble() / 25.0).toInt()
                 .coerceAbsoluteAtLeast(1)
-            event.preventDefault()
             event.stopPropagation()
 
             publishNewValue(delta)
