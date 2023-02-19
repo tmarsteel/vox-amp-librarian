@@ -1,22 +1,8 @@
 package com.github.tmarsteel.voxamplibrarian.appmodel.hardware_integration
 
-import com.github.tmarsteel.voxamplibrarian.appmodel.DeviceConfiguration
-import com.github.tmarsteel.voxamplibrarian.appmodel.DeviceDescriptor
-import com.github.tmarsteel.voxamplibrarian.appmodel.DeviceParameter
-import com.github.tmarsteel.voxamplibrarian.appmodel.SimulationConfiguration
-import com.github.tmarsteel.voxamplibrarian.appmodel.VtxAmpState
+import com.github.tmarsteel.voxamplibrarian.appmodel.*
 import com.github.tmarsteel.voxamplibrarian.logging.LoggerFactory
-import com.github.tmarsteel.voxamplibrarian.protocol.AmpClass
-import com.github.tmarsteel.voxamplibrarian.protocol.AmpModel
-import com.github.tmarsteel.voxamplibrarian.protocol.Program
-import com.github.tmarsteel.voxamplibrarian.protocol.ProgramImpl
-import com.github.tmarsteel.voxamplibrarian.protocol.ProgramName
-import com.github.tmarsteel.voxamplibrarian.protocol.ReverbPedalType
-import com.github.tmarsteel.voxamplibrarian.protocol.Slot1PedalType
-import com.github.tmarsteel.voxamplibrarian.protocol.Slot2PedalType
-import com.github.tmarsteel.voxamplibrarian.protocol.TubeBias
-import com.github.tmarsteel.voxamplibrarian.protocol.TwoByteDial
-import com.github.tmarsteel.voxamplibrarian.protocol.ZeroToTenDial
+import com.github.tmarsteel.voxamplibrarian.protocol.*
 import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageToAmp
 import com.github.tmarsteel.voxamplibrarian.protocol.message.ProgramSlotChangedMessage
 import com.github.tmarsteel.voxamplibrarian.protocol.message.WriteUserProgramMessage
@@ -99,8 +85,13 @@ sealed class ConfigurationDiff {
     }
 }
 
-fun VtxAmpState.diffTo(newState: VtxAmpState): List<MessageToAmp<*>> = diff(this, newState)
-private fun diff(old: VtxAmpState, new: VtxAmpState): List<MessageToAmp<*>> {
+sealed class AmpStateUpdate {
+    class Differential(val updates: List<ConfigurationDiff>) : AmpStateUpdate()
+    class FullApply(val messagesToApply: List<MessageToAmp<*>>) : AmpStateUpdate()
+}
+
+fun VtxAmpState.diffTo(newState: VtxAmpState): AmpStateUpdate = diff(this, newState)
+private fun diff(old: VtxAmpState, new: VtxAmpState): AmpStateUpdate {
     return when(old) {
         is VtxAmpState.ProgramSlotSelected -> {
             if (new !is VtxAmpState.ProgramSlotSelected) {
@@ -108,16 +99,12 @@ private fun diff(old: VtxAmpState, new: VtxAmpState): List<MessageToAmp<*>> {
             }
 
             if (old.slot == new.slot) {
-                diff(old.configuration, new.configuration)
-                    .onEach {
-                        logger.debug("Differential update: $it")
-                    }
-                    .map { it.toUpdateMessage() }
+                AmpStateUpdate.Differential(diff(old.configuration, new.configuration))
             } else {
-                listOf(
+                AmpStateUpdate.FullApply(listOf(
                     ProgramSlotChangedMessage(new.slot),
                     WriteUserProgramMessage(new.slot, new.configuration.toProtocolDataModel()),
-                )
+                ))
             }
         }
         else -> TODO()

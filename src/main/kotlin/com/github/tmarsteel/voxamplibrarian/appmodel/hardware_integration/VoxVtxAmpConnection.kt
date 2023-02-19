@@ -51,15 +51,25 @@ class VoxVtxAmpConnection(
             logger.debug("Applying new amp state (${superseders.size} states were superseded)", stateToApply)
 
             val currentState = ampState.take(1).single()
-            diffs@for (updateMessage in currentState.diffTo(stateToApply)) {
-                try {
-                    client.exchange(updateMessage)
+            val stateUpdate = currentState.diffTo(stateToApply)
+            try {
+                when (stateUpdate) {
+                    is AmpStateUpdate.Differential -> {
+                        diffs@ for (update in stateUpdate.updates) {
+                            logger.info("Differential update: $update")
+                            client.exchange(update.toUpdateMessage())
+                        }
+                    }
+                    is AmpStateUpdate.FullApply -> {
+                        logger.info("Writing full program to update amp state")
+                        messages@ for (message in stateUpdate.messagesToApply) {
+                            client.exchange(message)
+                        }
+                    }
                 }
-                catch (ex: MessageNotAcknowledgedException) {
-                    ampStateEvents.send(AmpStateEvent.NewState(fetchCurrentState()))
-                    logger.error("Failed to apply state. Resetting.", stateToApply, ex)
-                    break@diffs
-                }
+            } catch (ex: MessageNotAcknowledgedException) {
+                logger.error("Failed to apply state. Resetting.", stateToApply, ex)
+                ampStateEvents.send(AmpStateEvent.NewState(fetchCurrentState()))
             }
         }
     }
