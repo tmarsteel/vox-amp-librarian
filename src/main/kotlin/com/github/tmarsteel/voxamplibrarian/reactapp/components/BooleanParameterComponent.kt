@@ -1,19 +1,17 @@
 package com.github.tmarsteel.voxamplibrarian.reactapp.components
 
 import com.github.tmarsteel.voxamplibrarian.appmodel.BooleanParameter
+import com.github.tmarsteel.voxamplibrarian.reactapp.label
 import csstype.Auto
-import csstype.AutoLength
-import csstype.ClassName
 import csstype.Display
-import csstype.Margin
 import csstype.TextAlign
+import csstype.rem
 import emotion.react.css
 import react.FC
 import react.Props
 import react.dom.html.InputType
 import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.input
-import csstype.rem
 import react.dom.html.ReactHTML.span
 
 external interface BooleanParameterComponentProps : Props {
@@ -42,7 +40,7 @@ val BooleanParameterComponent = FC<BooleanParameterComponentProps> { props ->
             css {
                 display = Display.block
             }
-            +props.descriptor.id.name
+            +props.descriptor.id.label
         }
     }
 }

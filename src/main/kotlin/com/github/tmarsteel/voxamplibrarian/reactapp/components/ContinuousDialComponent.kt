@@ -1,6 +1,7 @@
 package com.github.tmarsteel.voxamplibrarian.reactapp.components
 
 import com.github.tmarsteel.voxamplibrarian.appmodel.*
+import com.github.tmarsteel.voxamplibrarian.reactapp.label
 import csstype.*
 import emotion.react.css
 import react.ChildrenBuilder
@@ -43,7 +44,7 @@ val ContinuousDialComponent = FC<ContinuousDialComponentProps> { props ->
                 display = Display.block
                 textAlign = TextAlign.center
             }
-            +props.descriptor.id.name
+            +props.descriptor.id.label
         }
     }
 }

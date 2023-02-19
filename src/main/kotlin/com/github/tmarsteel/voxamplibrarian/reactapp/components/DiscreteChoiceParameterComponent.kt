@@ -1,7 +1,7 @@
 package com.github.tmarsteel.voxamplibrarian.reactapp.components
 
 import com.github.tmarsteel.voxamplibrarian.appmodel.DiscreteChoiceParameter
-import com.github.tmarsteel.voxamplibrarian.protocol.SingleByteProtocolSerializable
+import com.github.tmarsteel.voxamplibrarian.reactapp.label
 import csstype.Display
 import csstype.TextAlign
 import csstype.pct
@@ -55,6 +55,6 @@ val DiscreteChoiceParameterComponent = FC<DiscreteChoiceParameterComponentProps>
             display = Display.inlineBlock
             width = 100.pct
         }
-        +props.descriptor.id.name
+        +props.descriptor.id.label
     }
 }
