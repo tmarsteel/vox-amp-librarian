@@ -1,19 +1,8 @@
 package com.github.tmarsteel.voxamplibrarian.appmodel
 
 import com.github.tmarsteel.voxamplibrarian.hex
-import com.github.tmarsteel.voxamplibrarian.protocol.MutableProgram
-import com.github.tmarsteel.voxamplibrarian.protocol.PedalSlot
-import com.github.tmarsteel.voxamplibrarian.protocol.Program
-import com.github.tmarsteel.voxamplibrarian.protocol.SingleByteProtocolSerializable
-import com.github.tmarsteel.voxamplibrarian.protocol.TubeBias
-import com.github.tmarsteel.voxamplibrarian.protocol.TwoByteDial
-import com.github.tmarsteel.voxamplibrarian.protocol.ZeroToTenDial
-import com.github.tmarsteel.voxamplibrarian.protocol.message.AmpDialTurnedMessage
-import com.github.tmarsteel.voxamplibrarian.protocol.message.EffectDialTurnedMessage
-import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageToAmp
-import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageToHost
-import com.github.tmarsteel.voxamplibrarian.protocol.message.NoiseReductionSensitivityChangedMessage
-import com.github.tmarsteel.voxamplibrarian.protocol.message.PedalActiveStateChangedMessage
+import com.github.tmarsteel.voxamplibrarian.protocol.*
+import com.github.tmarsteel.voxamplibrarian.protocol.message.*
 import kotlin.math.roundToInt
 import kotlin.reflect.KMutableProperty1
 import com.github.tmarsteel.voxamplibrarian.protocol.AmpClass as ProtocolAmpClass
@@ -21,6 +10,12 @@ import com.github.tmarsteel.voxamplibrarian.protocol.AmpClass as ProtocolAmpClas
 sealed interface DeviceParameter<Value : Any> {
     val id: Id<Value>
     val default: Value
+
+    /**
+     * @return a valid value for this parameter that is as close to the given
+     * [value] as possible.
+     */
+    fun coerceValid(value: Value): Value
 
     /**
      * Builds a message that sets this parameter to the given [value] on the amp.
@@ -123,6 +118,8 @@ class ContinuousRangeParameter<V : Continuous<V>>(
         check(value in valueRange)
     }
 
+    override fun coerceValid(value: V): V = value.coerceIn(valueRange)
+
     override fun buildUpdateMessage(value: V) = protocolAdapter.buildUpdateMessage(this, value)
     override fun applyToProgram(program: MutableProgram, value: V) = protocolAdapter.applyToProgram(program, this, value)
     override fun getValueFrom(program: Program): V = protocolAdapter.getValueFrom(program, this)
@@ -163,6 +160,8 @@ class DiscreteChoiceParameter<Value : SingleByteProtocolSerializable>(
         check(value in choices)
     }
 
+    override fun coerceValid(value: Value): Value = if (value in choices) value else choices.first()
+
     override fun buildUpdateMessage(value: Value) = protocolAdapter.buildUpdateMessage(this, value)
     override fun applyToProgram(program: MutableProgram, value: Value) = protocolAdapter.applyToProgram(program, this, value)
     override fun getValueFrom(program: Program): Value = protocolAdapter.getValueFrom(program, this)
@@ -188,6 +187,8 @@ class BooleanParameter(
     override fun rejectInvalidValue(value: Boolean) {
         // nothing to do
     }
+
+    override fun coerceValid(value: Boolean) = value
 
     override fun buildUpdateMessage(value: Boolean) = protocolAdapter.buildUpdateMessage(this, value)
     override fun applyToProgram(program: MutableProgram, value: Boolean) = protocolAdapter.applyToProgram(program, this, value)

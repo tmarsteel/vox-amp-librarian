@@ -42,8 +42,15 @@ class DeviceConfiguration<out D : DeviceDescriptor<*>> private constructor(
     }
 
     fun <ND : DeviceDescriptor<*>> withDescriptor(newDescriptor: ND): DeviceConfiguration<ND> {
-        val newValues = newDescriptor.parameters
-            .associate { it.id to (values[it.id] ?: it.default) }
+        val newValues: Map<DeviceParameter.Id<*>, Any> = newDescriptor.parameters
+            .associate { newParameter ->
+                @Suppress("UNCHECKED_CAST")
+                newParameter as DeviceParameter<Any>
+                val newValue = (values[newParameter.id] ?: newParameter.default)
+                    .let(newParameter::coerceValid)
+
+                newParameter.id to newValue
+            }
 
         return DeviceConfiguration(newDescriptor, newValues)
     }
