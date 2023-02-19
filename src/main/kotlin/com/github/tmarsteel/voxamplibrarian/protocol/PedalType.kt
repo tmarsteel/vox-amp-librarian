@@ -8,11 +8,12 @@ import kotlin.reflect.KMutableProperty1
 
 enum class PedalSlot(
     private val protocolIdentifier: Byte,
+    val identifierForEffectDialTurned: Byte,
     val programEnabledField: KMutableProperty1<in MutableProgram, Boolean>,
 ) : ProtocolSerializable {
-    PEDAL1(0x01, MutableProgram::pedal1Enabled),
-    PEDAL2(0x02, MutableProgram::pedal2Enabled),
-    REVERB(0x04, MutableProgram::reverbPedalEnabled),
+    PEDAL1(0x01, 0x05, MutableProgram::pedal1Enabled),
+    PEDAL2(0x02, 0x06, MutableProgram::pedal2Enabled),
+    REVERB(0x04, 0x08, MutableProgram::reverbPedalEnabled),
     ;
 
     override fun writeTo(out: BinaryOutput) {

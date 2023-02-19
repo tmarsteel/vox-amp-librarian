@@ -13,7 +13,7 @@ data class EffectDialTurnedMessage(
 ) : CommandWithoutResponse, MessageToHost {
     override fun writeTo(out: BinaryOutput) {
         out.write(PREFIX)
-        out.write(pedalSlot)
+        out.write(pedalSlot.identifierForEffectDialTurned)
         out.write(dialIndex)
         out.write(value)
     }
@@ -24,12 +24,10 @@ data class EffectDialTurnedMessage(
         override val type = EffectDialTurnedMessage::class
         override fun parse(fullMessage: BinaryInput): EffectDialTurnedMessage {
             requirePrefix(fullMessage, PREFIX, EffectDialTurnedMessage::class)
-            val slot = when(val slotId = fullMessage.nextByte().toInt()) {
-                0x05 -> PedalSlot.PEDAL1
-                0x06 -> PedalSlot.PEDAL2
-                0x08 -> PedalSlot.REVERB
-                else -> throw MessageParseException.PrefixNotRecognized(EffectDialTurnedMessage::class)
-            }
+            val slotId = fullMessage.nextByte()
+            val slot = PedalSlot.values().find { it.identifierForEffectDialTurned == slotId }
+                ?: throw MessageParseException.PrefixNotRecognized(EffectDialTurnedMessage::class)
+
             return EffectDialTurnedMessage(
                 slot,
                 fullMessage.nextByte(),
