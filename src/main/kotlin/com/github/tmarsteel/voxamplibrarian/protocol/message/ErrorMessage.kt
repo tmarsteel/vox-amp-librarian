@@ -7,7 +7,10 @@ import com.github.tmarsteel.voxamplibrarian.requirePrefix
 abstract class ErrorMessage(
     val message: String,
 ) : MessageToHost {
-    class GeneralError : ErrorMessage("Unknown error")
+    /** The amp did not recognize the command (or couldn't parse the message as the command it thinks its supposed to be) */
+    class InvalidCommand : ErrorMessage("The command is not known / is encoded incorrectly")
+
+    /** the amp could parse the command but one of the values in the command is invalid (out of range) */
     class InvalidValue : ErrorMessage("Invalid value")
 
     override fun toString() = message
@@ -19,7 +22,7 @@ abstract class ErrorMessage(
             requirePrefix(fullMessage, PREFIX, ErrorMessage::class)
             val indicator = fullMessage.nextByte()
             val error = when (indicator.toInt()) {
-                0x26 -> GeneralError()
+                0x26 -> InvalidCommand()
                 0x24 -> InvalidValue()
                 else -> throw MessageParseException.PrefixNotRecognized(ErrorMessage::class)
             }
