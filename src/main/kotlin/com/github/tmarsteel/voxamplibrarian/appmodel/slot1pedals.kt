@@ -146,12 +146,12 @@ sealed class OverdrivePedalDescriptor(
         ),
         ContinuousRangeParameter.zeroToTenUnitless(
             DeviceParameter.Id.EqMiddle,
-            unitlessPedalDial(0x05, MutableProgram::pedal1Dial5),
+            unitlessPedalDial(0x04, MutableProgram::pedal1Dial5),
             5.0,
         ),
         ContinuousRangeParameter.zeroToTenUnitless(
             DeviceParameter.Id.EqBass,
-            unitlessPedalDial(0x06, MutableProgram::pedal1Dial6),
+            unitlessPedalDial(0x05, MutableProgram::pedal1Dial6),
             5.0,
         ),
     )
