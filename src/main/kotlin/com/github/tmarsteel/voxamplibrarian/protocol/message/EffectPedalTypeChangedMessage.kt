@@ -5,8 +5,8 @@ import com.github.tmarsteel.voxamplibrarian.protocol.*
 
 class EffectPedalTypeChangedMessage(
     val type: PedalType,
-) : MessageToHost, MessageToAmp<EffectDialTurnedMessage> {
-    override val responseFactory = EffectDialTurnedMessage
+) : MessageToHost, MessageToAmp<GenericAcknowledgement> {
+    override val responseFactory = GenericAcknowledgement
 
     override fun writeTo(out: BinaryOutput) {
         out.write(PREFIX)
@@ -25,6 +25,8 @@ class EffectPedalTypeChangedMessage(
                 out.write(type.protocolValue)
             }
         }
+
+        out.write(0x00)
     }
 
     companion object : MidiProtocolMessage.Factory<EffectPedalTypeChangedMessage> {

@@ -325,10 +325,6 @@ Where `XX` is the sensitivity level (from 00 left to 64 right)
 | PEDAL 2 | `02`                  |
 | REVERB  | `04`                  |
 
-### Host to Amp
-
-The amp responds with an effect dial value (see "Effect Dial Turned")
-
 # Host to AMP
 
 ## Request Current Mode
