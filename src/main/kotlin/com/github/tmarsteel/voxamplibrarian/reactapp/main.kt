@@ -7,7 +7,6 @@ import com.github.tmarsteel.voxamplibrarian.appmodel.VtxAmpState
 import com.github.tmarsteel.voxamplibrarian.appmodel.hardware_integration.VoxVtxAmpConnection
 import com.github.tmarsteel.voxamplibrarian.parseHexStream
 import com.github.tmarsteel.voxamplibrarian.protocol.TwoByteDial
-import com.github.tmarsteel.voxamplibrarian.protocol.message.UserProgramResponse
 import com.github.tmarsteel.voxamplibrarian.reactapp.components.LogLevelComponent
 import com.github.tmarsteel.voxamplibrarian.reactapp.components.SimulationConfigurationComponent
 import csstype.ClassName
@@ -74,10 +73,6 @@ fun main() {
         return@bsd TwoByteDial.readFrom(input).semanticValue.toInt()
     }
 
-    val program = UserProgramResponse.parse(ByteArrayBinaryInput(
-        "300001344c000600416c697665202000202020202020200020204312125820002216490052000000000201082a00252045323232001507001c0a0101060000000000000000000100173a00100900".parseHexStream()
-    ))
-    console.log(program)
     val rootElement = document.getElementById("root") ?: error("Couldn't find root container!")
     createRoot(rootElement).render(Fragment.create {
         AppComponent {
