@@ -4,6 +4,7 @@ import com.github.tmarsteel.voxamplibrarian.protocol.AmpModel
 import com.github.tmarsteel.voxamplibrarian.protocol.ReverbPedalType
 import com.github.tmarsteel.voxamplibrarian.protocol.Slot1PedalType
 import com.github.tmarsteel.voxamplibrarian.protocol.Slot2PedalType
+import com.github.tmarsteel.voxamplibrarian.protocol.message.EffectDialTurnedMessage
 import com.github.tmarsteel.voxamplibrarian.protocol.message.EffectPedalTypeChangedMessage
 import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageToHost
 import com.github.tmarsteel.voxamplibrarian.protocol.message.SimulatedAmpModelChangedMessage
@@ -41,7 +42,11 @@ data class SimulationConfiguration(
 
                 val affectedDevices = listOfNotNull(newAmp, newPedalOne, newPedalTwo, newReverbPedal)
                 if (affectedDevices.isEmpty()) {
-                    console.error("Unimplemented message ${diff::class.simpleName}", diff)
+                    if (canIgnoreUnimplemented(diff)) {
+                        console.info("Ignoring update message from AMP because it should not have an effect on the semantics of the configuration", diff)
+                    } else {
+                        console.error("Unimplemented message ${diff::class.simpleName}", diff)
+                    }
                     return this
                 }
 
@@ -57,6 +62,14 @@ data class SimulationConfiguration(
                 )
             }
         }
+    }
+
+    private fun canIgnoreUnimplemented(diff: MessageToHost): Boolean {
+        if (diff is EffectDialTurnedMessage && diff.dialIndex in 0..5) {
+            return true
+        }
+
+        return false
     }
 
     companion object {
