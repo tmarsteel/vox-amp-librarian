@@ -5,6 +5,7 @@ import com.github.tmarsteel.voxamplibrarian.reactapp.label
 import csstype.Display
 import csstype.TextAlign
 import csstype.pct
+import csstype.rem
 import emotion.react.css
 import react.FC
 import react.Props
@@ -32,6 +33,7 @@ val DiscreteChoiceParameterComponent = FC<DiscreteChoiceParameterComponentProps>
         div {
             css {
                 display = Display.block
+                textAlign = TextAlign.center
             }
             input {
                 type = InputType.radio
@@ -44,6 +46,9 @@ val DiscreteChoiceParameterComponent = FC<DiscreteChoiceParameterComponentProps>
                 }
             }
             label {
+                css {
+                    marginLeft = 0.5.rem
+                }
                 htmlFor = "discrete-choice-parameter-$radioId-$choiceIndex"
                 +choice.toString()
             }

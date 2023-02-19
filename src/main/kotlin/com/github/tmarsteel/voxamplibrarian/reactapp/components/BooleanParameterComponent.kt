@@ -29,8 +29,8 @@ val BooleanParameterComponent = FC<BooleanParameterComponentProps> { props ->
 
         input {
             css {
-                width = 1.5.rem
-                height = 1.5.rem
+                width = 4.rem
+                height = 4.rem
             }
             type = InputType.checkbox
             checked = props.value

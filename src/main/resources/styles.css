@@ -9,6 +9,10 @@ body.during-global-drag * {
     user-select: none;
 }
 
+.continuous-dial .rotary-slider {
+    margin: 0 auto;
+}
+
 .rotary-slider:focus {
     outline: 0 none;
 }

@@ -34,7 +34,7 @@ val ContinuousDialComponent = FC<ContinuousDialComponentProps> { props ->
             css {
                 textAlign = TextAlign.center
                 display = Display.inlineBlock
-                width = 4.rem
+                width = 100.pct
                 verticalAlign = VerticalAlign.top
             }
             renderContinuousValue(props.value)
@@ -43,6 +43,7 @@ val ContinuousDialComponent = FC<ContinuousDialComponentProps> { props ->
             css {
                 display = Display.block
                 textAlign = TextAlign.center
+                width = 100.pct
             }
             +props.descriptor.id.label
         }
