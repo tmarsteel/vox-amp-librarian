@@ -1,7 +1,7 @@
 package com.github.tmarsteel.voxamplibrarian.protocol
 
-import com.github.tmarsteel.voxamplibrarian.BinaryInput
-import com.github.tmarsteel.voxamplibrarian.BinaryOutput
+import com.github.tmarsteel.voxamplibrarian.*
+import kotlinx.browser.window
 
 data class TwoByteDial(val semanticValue: UShort) : ProtocolSerializable {
     init {
@@ -32,6 +32,19 @@ data class TwoByteDial(val semanticValue: UShort) : ProtocolSerializable {
             val protocolValue = data.nextByte().toLong() or (data.nextByte().toLong() shl 8)
             val millihertzOrMilliseconds = protocolValue - (protocolValue / 0x100L) * 0x80
             return TwoByteDial(millihertzOrMilliseconds.toUShort())
+        }
+
+        init {
+            window.asDynamic().bullshitEncoder = bse@ { semantic: Int ->
+                val out = BufferedBinaryOutput()
+                TwoByteDial(semantic.toUShort()).writeTo(out)
+                val input = out.copyToInput()
+                return@bse input.nextByte().hex() + " " + input.nextByte().hex()
+            }
+            window.asDynamic().bullshitDecoder = bsd@ { protocol: String ->
+                val input = ByteArrayBinaryInput(protocol.parseHexStream())
+                return@bsd readFrom(input).semanticValue.toInt()
+            }
         }
     }
 }
