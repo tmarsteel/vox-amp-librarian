@@ -1,12 +1,18 @@
 package com.github.tmarsteel.voxamplibrarian.reactapp
 
+import com.github.tmarsteel.voxamplibrarian.BufferedBinaryOutput
+import com.github.tmarsteel.voxamplibrarian.ByteArrayBinaryInput
 import com.github.tmarsteel.voxamplibrarian.appmodel.SimulationConfiguration
 import com.github.tmarsteel.voxamplibrarian.appmodel.VtxAmpState
 import com.github.tmarsteel.voxamplibrarian.appmodel.hardware_integration.VoxVtxAmpConnection
+import com.github.tmarsteel.voxamplibrarian.parseHexStream
+import com.github.tmarsteel.voxamplibrarian.protocol.TwoByteDial
+import com.github.tmarsteel.voxamplibrarian.protocol.message.UserProgramResponse
 import com.github.tmarsteel.voxamplibrarian.reactapp.components.LogLevelComponent
 import com.github.tmarsteel.voxamplibrarian.reactapp.components.SimulationConfigurationComponent
 import csstype.ClassName
 import kotlinx.browser.document
+import kotlinx.browser.window
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -14,16 +20,6 @@ import kotlinx.coroutines.launch
 import react.*
 import react.dom.client.createRoot
 import react.dom.html.ReactHTML.div
-
-private val startupCode = mutableListOf<() -> Unit>()
-private var appInitStarted = false
-fun appInit(block: () -> Unit) {
-    if (appInitStarted) {
-        block()
-    } else {
-        startupCode.add(block)
-    }
-}
 
 val AppComponent = FC<Props> {
     var ampState: VtxAmpState? by useState(VtxAmpState.PresetMode(0, SimulationConfiguration.DEFAULT))
@@ -67,11 +63,21 @@ val AppComponent = FC<Props> {
 }
 
 fun main() {
-    appInitStarted = true
-    startupCode.forEach {
-        it.invoke()
+    window.asDynamic().bullshitEncoder = bse@ { semantic: Int ->
+        val out = BufferedBinaryOutput()
+        TwoByteDial(semantic.toUShort()).writeTo(out)
+        val input = out.copyToInput()
+        return@bse input.nextByte().toString(16).padStart(2, '0') + " " + input.nextByte().toString(16).padStart(2, '0')
+    }
+    window.asDynamic().bullshitDecoder = bsd@ { protocol: String ->
+        val input = ByteArrayBinaryInput(protocol.parseHexStream())
+        return@bsd TwoByteDial.readFrom(input).semanticValue.toInt()
     }
 
+    val program = UserProgramResponse.parse(ByteArrayBinaryInput(
+        "300001344c000600416c697665202000202020202020200020204312125820002216490052000000000201082a00252045323232001507001c0a0101060000000000000000000100173a00100900".parseHexStream()
+    ))
+    console.log(program)
     val rootElement = document.getElementById("root") ?: error("Couldn't find root container!")
     createRoot(rootElement).render(Fragment.create {
         AppComponent {
