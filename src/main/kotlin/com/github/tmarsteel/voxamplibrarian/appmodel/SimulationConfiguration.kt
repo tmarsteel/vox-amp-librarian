@@ -65,7 +65,9 @@ data class SimulationConfiguration(
     }
 
     private fun canIgnoreUnimplemented(diff: MessageToHost): Boolean {
-        if (diff is EffectDialTurnedMessage && diff.dialIndex in 0..5) {
+        // when the effect type is changed, the amp sends effect-dial-turned messages. If the new type only has
+        // 4 semantic dials, the amp will still send effect-dial-turned messages for dials 5 and 6 (with value 0).
+        if (diff is EffectDialTurnedMessage && diff.dialIndex in 0..5 && diff.value.semanticValue.toInt() == 0) {
             return true
         }
 
