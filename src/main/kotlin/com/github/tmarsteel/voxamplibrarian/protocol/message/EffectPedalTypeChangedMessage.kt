@@ -16,7 +16,7 @@ class EffectPedalTypeChangedMessage(
             }
 
             dialUpdates.add(EffectDialTurnedMessage.parse(payload))
-            if (dialUpdates.size < 6) {
+            if (dialUpdates.size < type.slot.nDials) {
                 return ResponseHandler.MessageResult.MoreMessagesNeeded
             }
 
@@ -24,6 +24,11 @@ class EffectPedalTypeChangedMessage(
                 ack!!,
                 dialUpdates,
             ))
+        }
+
+        override fun cancel() {
+            ack = null
+            dialUpdates.clear()
         }
     }
 

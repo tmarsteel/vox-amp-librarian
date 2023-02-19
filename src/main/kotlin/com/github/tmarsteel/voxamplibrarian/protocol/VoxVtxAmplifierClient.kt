@@ -4,7 +4,6 @@ import com.github.tmarsteel.voxamplibrarian.BinaryInput
 import com.github.tmarsteel.voxamplibrarian.logging.LoggerFactory
 import com.github.tmarsteel.voxamplibrarian.protocol.message.*
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import kotlin.coroutines.Continuation
@@ -48,15 +47,10 @@ class VoxVtxAmplifierClient(
     }
 
     suspend fun <Response> exchange(request: MessageToAmp<Response>, timeout: Duration = DEFAULT_TIMEOUT): Response {
-        return try {
-            withTimeout(timeout) {
-                suspendCoroutine<Response> { responseAvailable ->
-                    exchangeState = exchangeState.doExchange(request, responseAvailable)
-                }
+        return withTimeout(timeout) {
+            suspendCoroutine<Response> { responseAvailable ->
+                exchangeState = exchangeState.doExchange(request, responseAvailable)
             }
-        } catch (ex: TimeoutCancellationException) {
-            exchangeState = exchangeState.cancel()
-            throw ex
         }
     }
 
@@ -143,6 +137,19 @@ class VoxVtxAmplifierClient(
         override suspend fun onSysExMessageReceived(payload: BinaryInput): ExchangeState {
             if (responseAvailableResumed) {
                 return this@VoxVtxAmplifierClient.noneExchangeState
+            }
+
+            try {
+                val error = ErrorMessage.parse(payload)
+                responseAvailableResumed = true
+                responseAvailable.resumeWithException(MessageNotAcknowledgedException(request, error))
+                return getNextExchangeState()
+            }
+            catch (ex: MessageParseException.PrefixNotRecognized) {
+                // not an error, great
+            }
+            finally {
+                payload.seekToStart()
             }
 
             when (val handlingResult = responseHandler.onMessage(payload)) {

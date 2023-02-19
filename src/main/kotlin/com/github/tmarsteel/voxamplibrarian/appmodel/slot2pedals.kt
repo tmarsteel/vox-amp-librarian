@@ -181,17 +181,17 @@ sealed class DelayPedalDescriptor(
         ),
         ContinuousRangeParameter.zeroToTenUnitless(
             DeviceParameter.Id.EqTone,
-            unitlessPedalDial(0x04, MutableProgram::pedal2Dial4),
+            unitlessPedalDial(0x03, MutableProgram::pedal2Dial4),
             5.0
         ),
         ContinuousRangeParameter.zeroToTenUnitless(
             DeviceParameter.Id.DelayModulationSpeed,
-            unitlessPedalDial(0x05, MutableProgram::pedal2Dial5),
+            unitlessPedalDial(0x04, MutableProgram::pedal2Dial5),
             0.1
         ),
         ContinuousRangeParameter.zeroToTenUnitless(
             DeviceParameter.Id.ModulationDepth,
-            unitlessPedalDial(0x06, MutableProgram::pedal2Dial6),
+            unitlessPedalDial(0x05, MutableProgram::pedal2Dial6),
             0.0
         ),
     )

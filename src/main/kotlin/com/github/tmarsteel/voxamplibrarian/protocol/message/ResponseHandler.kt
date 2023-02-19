@@ -9,6 +9,11 @@ interface ResponseHandler<R> {
      */
     fun onMessage(payload: BinaryInput): MessageResult<R>
 
+    /**
+     * Called when reading the response is aborted
+     */
+    fun cancel()
+
     sealed class MessageResult<out R> {
         object MoreMessagesNeeded : MessageResult<Nothing>()
         class ResponseComplete<R>(val response: R) : MessageResult<R>()
@@ -22,5 +27,7 @@ interface ResponseHandler<R> {
         override fun onMessage(payload: BinaryInput): MessageResult<T> {
             return MessageResult.ResponseComplete(factory.parse(payload))
         }
+
+        override fun cancel() {}
     }
 }
