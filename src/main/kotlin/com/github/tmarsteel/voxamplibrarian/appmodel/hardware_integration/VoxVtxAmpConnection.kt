@@ -50,20 +50,29 @@ class VoxVtxAmpConnection(
             val stateToApply = superseders.lastOrNull() ?: nextState
             logger.debug("Applying new amp state (${superseders.size} states were superseded)", stateToApply)
 
-            val currentState = ampState.take(1).single()
-            val stateUpdate = currentState.diffTo(stateToApply)
+            var baseState = ampState.take(1).single()
             try {
-                when (stateUpdate) {
-                    is AmpStateUpdate.Differential -> {
-                        diffs@ for (update in stateUpdate.updates) {
-                            logger.info("Differential update: $update")
-                            client.exchange(update.toUpdateMessage())
+                rebase@while (true) {
+                    when (val stateUpdate = baseState.diffTo(stateToApply)) {
+                        is AmpStateUpdate.Differential -> {
+                            diffs@ for (update in stateUpdate.updates) {
+                                logger.info("Differential update: $update")
+                                val additionalChanges = update.applyTo(client)
+                                baseState = update.applyTo(baseState)
+                                if (additionalChanges.isNotEmpty()) {
+                                    baseState = additionalChanges.fold(baseState, VtxAmpState::plus)
+                                    continue@rebase
+                                }
+                            }
+                            break@rebase
                         }
-                    }
-                    is AmpStateUpdate.FullApply -> {
-                        logger.info("Writing full program to update amp state")
-                        messages@ for (message in stateUpdate.messagesToApply) {
-                            client.exchange(message)
+
+                        is AmpStateUpdate.FullApply -> {
+                            logger.info("Writing full program to update amp state")
+                            messages@ for (message in stateUpdate.messagesToApply) {
+                                client.exchange(message)
+                            }
+                            break@rebase
                         }
                     }
                 }

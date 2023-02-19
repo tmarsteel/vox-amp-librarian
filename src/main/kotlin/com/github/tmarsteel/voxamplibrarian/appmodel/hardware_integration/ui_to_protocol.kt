@@ -3,9 +3,7 @@ package com.github.tmarsteel.voxamplibrarian.appmodel.hardware_integration
 import com.github.tmarsteel.voxamplibrarian.appmodel.*
 import com.github.tmarsteel.voxamplibrarian.logging.LoggerFactory
 import com.github.tmarsteel.voxamplibrarian.protocol.*
-import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageToAmp
-import com.github.tmarsteel.voxamplibrarian.protocol.message.ProgramSlotChangedMessage
-import com.github.tmarsteel.voxamplibrarian.protocol.message.WriteUserProgramMessage
+import com.github.tmarsteel.voxamplibrarian.protocol.message.*
 
 private val logger = LoggerFactory["host-to-amp-diff"]
 
@@ -61,15 +59,34 @@ internal fun SimulationConfiguration.toProtocolDataModel(): Program {
 }
 
 sealed class ConfigurationDiff {
-    abstract fun toUpdateMessage(): MessageToAmp<*>
+    /**
+     * Applies this diff to the given amp.
+     * @return updates to incorporate into the base state before applying more differential updates
+     */
+    abstract suspend fun applyTo(ampClient: VoxVtxAmplifierClient): List<MessageToHost>
+
+    fun applyTo(ampState: VtxAmpState): VtxAmpState = ampState.withConfiguration(applyTo(ampState.configuration))
+    abstract fun applyTo(config: SimulationConfiguration): SimulationConfiguration
 
     class Parameter<V : Any>(
         val device: DeviceDescriptor<*>,
         val parameterId: DeviceParameter.Id<V>,
         val newValue: V,
     ): ConfigurationDiff() {
-        override fun toUpdateMessage(): MessageToAmp<*> {
-            return device.getParameter(parameterId).buildUpdateMessage(newValue)
+        override suspend fun applyTo(client: VoxVtxAmplifierClient): List<MessageToHost> {
+            client.exchange(
+                device.getParameter(parameterId).buildUpdateMessage(newValue)
+            )
+            return emptyList()
+        }
+
+        override fun applyTo(config: SimulationConfiguration): SimulationConfiguration {
+            return config.copy(
+                amplifier = if (device is AmplifierDescriptor) config.amplifier.withValue(parameterId, newValue) else config.amplifier,
+                pedalOne = if (device is SlotOnePedalDescriptor) config.pedalOne.withValue(parameterId, newValue) else config.pedalOne,
+                pedalTwo = if (device is SlotTwoPedalDescriptor) config.pedalTwo.withValue(parameterId, newValue) else config.pedalTwo,
+                reverbPedal = if (device is ReverbPedalDescriptor) config.reverbPedal.withValue(parameterId, newValue) else config.reverbPedal,
+            )
         }
 
         override fun toString() = "${device.name} $parameterId = $newValue"
@@ -79,7 +96,24 @@ sealed class ConfigurationDiff {
         val oldType: DeviceDescriptor<*>,
         val newType: DeviceDescriptor<*>,
     ) : ConfigurationDiff() {
-        override fun toUpdateMessage() = newType.typeChangedMessage
+        override suspend fun applyTo(ampClient: VoxVtxAmplifierClient): List<MessageToHost> {
+            val updateMessage = newType.typeChangedMessage
+            if (updateMessage is EffectPedalTypeChangedMessage) {
+                return ampClient.exchange(updateMessage).dialUpdates
+            } else {
+                ampClient.exchange(updateMessage)
+                return emptyList()
+            }
+        }
+
+        override fun applyTo(config: SimulationConfiguration): SimulationConfiguration {
+            return config.copy(
+                amplifier = if (newType is AmplifierDescriptor) config.amplifier.withDescriptor(newType) else config.amplifier,
+                pedalOne = if (newType is SlotOnePedalDescriptor) config.pedalOne.withDescriptor(newType) else config.pedalOne,
+                pedalTwo = if (newType is SlotTwoPedalDescriptor) config.pedalTwo.withDescriptor(newType) else config.pedalTwo,
+                reverbPedal = if (newType is ReverbPedalDescriptor) config.reverbPedal.withDescriptor(newType) else config.reverbPedal,
+            )
+        }
 
         override fun toString() = "exchanging ${oldType.name} for ${newType.name}"
     }
