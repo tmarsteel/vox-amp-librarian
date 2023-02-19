@@ -41,12 +41,12 @@ data class SimulationConfiguration(
 
                 val affectedDevices = listOfNotNull(newAmp, newPedalOne, newPedalTwo, newReverbPedal)
                 if (affectedDevices.isEmpty()) {
-                    console.error("Unimplemented message ${diff::class.simpleName}")
+                    console.error("Unimplemented message ${diff::class.simpleName}", diff)
                     return this
                 }
 
                 if (affectedDevices.size > 1) {
-                    console.error("Multiple devices affected by ${diff::class.simpleName}: ")
+                    console.error("Multiple devices affected by ${diff::class.simpleName}: ${affectedDevices.joinToString(transform = { it.descriptor.name })}", diff)
                 }
 
                 return copy(
