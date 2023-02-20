@@ -5,11 +5,9 @@ import com.github.tmarsteel.voxamplibrarian.appmodel.VtxAmpState
 import com.github.tmarsteel.voxamplibrarian.logging.LoggerFactory
 import com.github.tmarsteel.voxamplibrarian.protocol.MessageNotAcknowledgedException
 import com.github.tmarsteel.voxamplibrarian.protocol.MidiDevice
+import com.github.tmarsteel.voxamplibrarian.protocol.ProgramSlot
 import com.github.tmarsteel.voxamplibrarian.protocol.VoxVtxAmplifierClient
-import com.github.tmarsteel.voxamplibrarian.protocol.message.CurrentModeResponse
-import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageToHost
-import com.github.tmarsteel.voxamplibrarian.protocol.message.RequestCurrentModeMessage
-import com.github.tmarsteel.voxamplibrarian.protocol.message.RequestCurrentProgramMessage
+import com.github.tmarsteel.voxamplibrarian.protocol.message.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -89,16 +87,17 @@ class VoxVtxAmpConnection(
 
     private suspend fun fetchCurrentState(): VtxAmpState {
         val currentModeResponse = client.exchange(RequestCurrentModeMessage())
-        val currentConfig = client.exchange(RequestCurrentProgramMessage()).program.toUiDataModel()
+        val activeConfiguration = client.exchange(RequestCurrentProgramMessage()).program.toUiDataModel()
+        val userPrograms = ProgramSlot.values().associateWith { client.exchange(RequestUserProgramMessage(it)).program.toUiDataModel() }
         return when(currentModeResponse.mode) {
             CurrentModeResponse.Mode.PROGRAM_SLOT -> {
-                VtxAmpState.ProgramSlotSelected(currentModeResponse.slot!!, currentConfig)
+                VtxAmpState.ProgramSlotSelected(userPrograms, activeConfiguration, currentModeResponse.slot!!)
             }
             CurrentModeResponse.Mode.PRESET -> {
-                VtxAmpState.PresetMode(currentModeResponse.presetIdentifier!!, currentConfig)
+                VtxAmpState.PresetMode(userPrograms, activeConfiguration, currentModeResponse.presetIdentifier!!)
             }
             CurrentModeResponse.Mode.MANUAL -> {
-                VtxAmpState.ManualMode(currentConfig)
+                VtxAmpState.ManualMode(userPrograms, activeConfiguration)
             }
         }
     }

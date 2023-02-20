@@ -1,12 +1,6 @@
 package com.github.tmarsteel.voxamplibrarian.appmodel.hardware_integration
 
-import com.github.tmarsteel.voxamplibrarian.appmodel.AmplifierDescriptor
-import com.github.tmarsteel.voxamplibrarian.appmodel.DeviceConfiguration
-import com.github.tmarsteel.voxamplibrarian.appmodel.ReverbPedalDescriptor
-import com.github.tmarsteel.voxamplibrarian.appmodel.SimulationConfiguration
-import com.github.tmarsteel.voxamplibrarian.appmodel.SlotOnePedalDescriptor
-import com.github.tmarsteel.voxamplibrarian.appmodel.SlotTwoPedalDescriptor
-import com.github.tmarsteel.voxamplibrarian.appmodel.VtxAmpState
+import com.github.tmarsteel.voxamplibrarian.appmodel.*
 import com.github.tmarsteel.voxamplibrarian.protocol.Program
 import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageToHost
 import com.github.tmarsteel.voxamplibrarian.protocol.message.ProgramSlotChangedMessage
@@ -27,7 +21,7 @@ fun VtxAmpState.plus(diff: MessageToHost): VtxAmpState {
             throw DifferentialUpdateNotSupportedException()
         }
         else -> {
-            return this.withConfiguration(this.configuration.plus(diff))
+            return this.withActiveConfiguration(this.activeConfiguration.plus(diff))
         }
     }
 }

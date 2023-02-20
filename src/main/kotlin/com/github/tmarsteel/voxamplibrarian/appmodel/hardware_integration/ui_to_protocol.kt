@@ -65,7 +65,7 @@ sealed class ConfigurationDiff {
      */
     abstract suspend fun applyTo(ampClient: VoxVtxAmplifierClient): List<MessageToHost>
 
-    fun applyTo(ampState: VtxAmpState): VtxAmpState = ampState.withConfiguration(applyTo(ampState.configuration))
+    fun applyTo(ampState: VtxAmpState): VtxAmpState = ampState.withActiveConfiguration(applyTo(ampState.activeConfiguration))
     abstract fun applyTo(config: SimulationConfiguration): SimulationConfiguration
 
     class Parameter<V : Any>(
@@ -133,11 +133,11 @@ private fun diff(old: VtxAmpState, new: VtxAmpState): AmpStateUpdate {
             }
 
             if (old.slot == new.slot) {
-                AmpStateUpdate.Differential(diff(old.configuration, new.configuration))
+                AmpStateUpdate.Differential(diff(old.activeConfiguration, new.activeConfiguration))
             } else {
                 AmpStateUpdate.FullApply(listOf(
                     ProgramSlotChangedMessage(new.slot),
-                    WriteUserProgramMessage(new.slot, new.configuration.toProtocolDataModel()),
+                    WriteUserProgramMessage(new.slot, new.activeConfiguration.toProtocolDataModel()),
                 ))
             }
         }

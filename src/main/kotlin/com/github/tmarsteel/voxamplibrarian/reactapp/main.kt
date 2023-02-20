@@ -7,7 +7,7 @@ import com.github.tmarsteel.voxamplibrarian.appmodel.VtxAmpState
 import com.github.tmarsteel.voxamplibrarian.appmodel.hardware_integration.VoxVtxAmpConnection
 import com.github.tmarsteel.voxamplibrarian.parseHexStream
 import com.github.tmarsteel.voxamplibrarian.protocol.TwoByteDial
-import com.github.tmarsteel.voxamplibrarian.reactapp.components.LogLevelComponent
+import com.github.tmarsteel.voxamplibrarian.reactapp.components.SidebarComponent
 import com.github.tmarsteel.voxamplibrarian.reactapp.components.SimulationConfigurationComponent
 import csstype.ClassName
 import kotlinx.browser.document
@@ -21,7 +21,7 @@ import react.dom.client.createRoot
 import react.dom.html.ReactHTML.div
 
 val AppComponent = FC<Props> {
-    var ampState: VtxAmpState? by useState(VtxAmpState.PresetMode(0, SimulationConfiguration.DEFAULT))
+    var ampState: VtxAmpState? by useState(VtxAmpState.DEFAULT)
 
     useEffect {
         GlobalScope.launch {
@@ -34,19 +34,24 @@ val AppComponent = FC<Props> {
     }
 
     div {
-        className = ClassName("container")
-        div {
-            className = ClassName("row justify-content-end")
-            div {
-                className = ClassName("col-2")
-                LogLevelComponent {}
+        className = ClassName("sidebar")
+
+        SidebarComponent {
+            vtxAmpState = ampState
+            onProgramSlotSelected = {
+                console.log("selected $it")
             }
         }
+    }
+
+    div {
+        className = ClassName("container")
+
         SimulationConfigurationComponent {
-            configuration = ampState?.configuration ?: SimulationConfiguration.DEFAULT
+            configuration = ampState?.activeConfiguration ?: SimulationConfiguration.DEFAULT
             onConfigurationChanged = { newConfig ->
                 ampState?.let { oldState ->
-                    val newState = oldState.withConfiguration(newConfig)
+                    val newState = oldState.withActiveConfiguration(newConfig)
                     val ampConnection = VoxVtxAmpConnection.VOX_AMP.value
                     if (ampConnection == null) {
                         ampState = newState
