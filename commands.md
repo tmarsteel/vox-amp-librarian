@@ -2,7 +2,7 @@
 
 ## About this document
 
-_All numbers hex unless stated otherwise, e.g. as 256<sub>10</sub>._
+_All numbers are hexadecimal unless stated otherwise (like so: 256<sub>10</sub>)._
 
 I gathered all of this information using my own VT20X and this software:
 
@@ -168,13 +168,13 @@ Both host program and the amp can send a full program to each other. It always u
 | 23     | 1      |         | Pedal 1 Type (see pedal identifiers)                                                    |
 | 24     | 2      |         | Pedal 1 Dial 1, little endian byte order<br>**!! Hz value, see above for the encoding** |
 | 26     | 1      |         | Pedal 1 Dial 2                                                                          |
-| 27     | 1      |         | ? (sometimes 00, sometimes 20)                                                          |
+| 27     | 1      |         | offset for Pedal 2 dial 1                                                               |
 | 28     | 1      |         | Pedal 1 Dial 3                                                                          |
 | 29     | 1      |         | Pedal 1 Dial 4                                                                          |
 | 2A     | 1      |         | Pedal 1 Dial 5                                                                          |
 | 2B     | 1      |         | Pedal 1 Dial 6                                                                          |
 | 2C     | 1      |         | Pedal 2 Type (see pedal identifiers)                                                    |
-| 2D     | 2      |         | Pedal 2 Dial 1, little endian byte order<br>**!! Hz value, see above for the encoding** |
+| 2D     | 2      |         | Pedal 2 Dial 1 <b>!! Attention, see below!</b>                                          |
 | 2F     | 1      |         | ? (00, 8th byte)                                                                        |
 | 30     | 1      |         | Pedal 2 Dial 2                                                                          |
 | 31     | 1      |         | Pedal 2 Dial 3                                                                          |
@@ -190,6 +190,26 @@ Both host program and the amp can send a full program to each other. It always u
 | 43     | 1      |         | Pedal 3 Dial 4                                                                          |
 | 44     | 1      |         | Pedal 3 Dial 5                                                                          |
 | 45     | 1      |         | ? (probably always 0)                                                                   |
+
+### Pedal 2 Dial 1
+
+The value for this dial is encoded into three bytes. The two bytes at 2D and 2E form one integer with little endian
+encoding. Byte at 27 indicates an offset for this value: if 00, the value from 2D and 2E is the actual value for the
+dial (in milliseconds or millihertz). If 20, you need to add 80 to the value obtained from 2D and 2E to get the actual
+dial value:
+
+```
+pedal2Dial1Value = littleEndian(bytes at 2D and 2E) + (if (byte at 27 == 20) 80 else 0)
+```
+
+So for example
+
+| Bytes at 2D and 2E | as big endian     | byte at 27 | offset           | actual value         |
+|--------------------|-------------------|------------|------------------|----------------------|
+| 0001<sub>16</sub>  | 256<sub>10</sub>  | 00         | 0                | 0.256<sub>10</sub>Hz |
+| 3C10<sub>16</sub>  | 4156<sub>10</sub> | 00         | 0                | 4.156<sub>10</sub>Hz |
+| 1408<sub>16</sub>  | 2068<sub>10</sub> | 20         | 128<sub>10</sub> | 2.196<sub>10</sub>Hz |
+| 7E00<sub>16</sub>  | 126<sub>10</sub>  | 20         | 128<sub>10</sub> | 0.254<sub>10</sub>Hz |
 
 # Bidirectional Commands
 

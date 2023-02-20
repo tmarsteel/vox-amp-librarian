@@ -15,6 +15,11 @@ interface BinaryOutput {
         write(bytes)
     }
 
+    fun write(short: UShort) {
+        write((short.toInt() and 0xFF).toByte())
+        write(((short.toInt() shr 8) and 0xFF).toByte())
+    }
+
     fun write(bytes: Pair<Byte, Byte>) {
         write(bytes.first)
         write(bytes.second)

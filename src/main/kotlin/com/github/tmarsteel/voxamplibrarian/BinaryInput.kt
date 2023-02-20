@@ -8,6 +8,15 @@ interface BinaryInput {
      */
     fun nextByte(): Byte
 
+    /**
+     * reads two bytes and interprets them as little endian
+     */
+    fun nextUShort(): UShort {
+        val buffer = ByteArray(2)
+        nextBytes(buffer)
+        return ((buffer[1].toInt() shl 8) or buffer[0].toInt()).toUShort()
+    }
+
     fun nextBytes(target: ByteArray, offset: Int = 0, length: Int = target.size) {
         if (offset !in target.indices) {
             throw RuntimeException("Array index out of bounds: the starting offset $offset is not in the bounds of the target (total size ${target.size})")
