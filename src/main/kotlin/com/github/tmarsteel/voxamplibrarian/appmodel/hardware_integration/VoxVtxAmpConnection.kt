@@ -1,12 +1,10 @@
 package com.github.tmarsteel.voxamplibrarian.appmodel.hardware_integration
 
 import com.github.tmarsteel.voxamplibrarian.VOX_AMP_MIDI_DEVICE
+import com.github.tmarsteel.voxamplibrarian.appmodel.SimulationConfiguration
 import com.github.tmarsteel.voxamplibrarian.appmodel.VtxAmpState
 import com.github.tmarsteel.voxamplibrarian.logging.LoggerFactory
-import com.github.tmarsteel.voxamplibrarian.protocol.MessageNotAcknowledgedException
-import com.github.tmarsteel.voxamplibrarian.protocol.MidiDevice
-import com.github.tmarsteel.voxamplibrarian.protocol.ProgramSlot
-import com.github.tmarsteel.voxamplibrarian.protocol.VoxVtxAmplifierClient
+import com.github.tmarsteel.voxamplibrarian.protocol.*
 import com.github.tmarsteel.voxamplibrarian.protocol.message.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
@@ -45,6 +43,13 @@ class VoxVtxAmpConnection(
                             previousState.storedUserPrograms.getValue(event.slot),
                             event.slot
                         )
+                    }
+                    is AmpStateEvent.PersistConfiguration -> {
+                        client.exchange(Exchange.of(
+                            WriteUserProgramMessage(event.slot, event.config.toProtocolDataModel()),
+                            PersistUserProgramMessage(event.slot)
+                        ) { _, _ -> })
+                        previousState.withStoredUserProgram(event.slot, event.config)
                     }
                 }
             }
@@ -85,7 +90,7 @@ class VoxVtxAmpConnection(
                         }
                     }
                 }
-            } catch (ex: MessageNotAcknowledgedException) {
+            } catch (ex: ExchangeNotAcknowledgedException) {
                 logger.error("Failed to apply state. Resetting.", stateToApply, ex)
                 ampStateEvents.send(AmpStateEvent.NewState(fetchCurrentState()))
             }
@@ -113,14 +118,18 @@ class VoxVtxAmpConnection(
         }
     }
 
-    suspend fun requestState(newState: VtxAmpState) {
+    fun requestState(newState: VtxAmpState) {
         logger.trace("Requesting new amp state", newState)
-        setAmpStateRequests.send(newState)
-        ampStateEvents.send(AmpStateEvent.NewState(newState))
+        setAmpStateRequests.forceSyncSend(newState)
+        ampStateEvents.forceSyncSend(AmpStateEvent.NewState(newState))
     }
 
-    suspend fun selectUserProgramSlot(slot: ProgramSlot) {
-        ampStateEvents.send(AmpStateEvent.SelectProgramSlot(slot))
+    fun selectUserProgramSlot(slot: ProgramSlot) {
+        ampStateEvents.forceSyncSend(AmpStateEvent.SelectProgramSlot(slot))
+    }
+
+    fun persistConfigurationToSlot(configuration: SimulationConfiguration, slot: ProgramSlot) {
+        ampStateEvents.forceSyncSend(AmpStateEvent.PersistConfiguration(configuration, slot))
     }
 
     fun close() {
@@ -146,6 +155,7 @@ private sealed class AmpStateEvent {
     class Message(val message: MessageToHost) : AmpStateEvent()
     class NewState(val state: VtxAmpState) : AmpStateEvent()
     class SelectProgramSlot(val slot: ProgramSlot) : AmpStateEvent()
+    class PersistConfiguration(val config: SimulationConfiguration, val slot: ProgramSlot) : AmpStateEvent()
 }
 
 private fun <T> Channel<T>.allAvailable(): List<T> {
@@ -159,4 +169,8 @@ private fun <T> Channel<T>.allAvailable(): List<T> {
             return elements
         }
     }
+}
+
+private fun <T> Channel<T>.forceSyncSend(item: T) {
+    check(trySend(item).isSuccess)
 }

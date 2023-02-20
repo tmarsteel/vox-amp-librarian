@@ -47,9 +47,13 @@ class VoxVtxAmplifierClient(
     }
 
     suspend fun <Response> exchange(request: MessageToAmp<Response>, timeout: Duration = DEFAULT_TIMEOUT): Response {
+        return exchange(Exchange.of(request), timeout)
+    }
+
+    suspend fun <Response> exchange(exchange: Exchange<Response>, timeout: Duration = DEFAULT_TIMEOUT): Response {
         return withTimeout(timeout) {
             suspendCoroutine<Response> { responseAvailable ->
-                exchangeState = exchangeState.doExchange(request, responseAvailable)
+                exchangeState = exchangeState.doExchange(exchange, responseAvailable)
             }
         }
     }
@@ -71,7 +75,7 @@ class VoxVtxAmplifierClient(
 
     private abstract inner class ExchangeState {
         abstract suspend fun onSysExMessageReceived(payload: BinaryInput): ExchangeState
-        abstract fun <R> doExchange(request: MessageToAmp<R>, responseAvailable: Continuation<R>): ExchangeState
+        abstract fun <R> doExchange(exchange: Exchange<R>, responseAvailable: Continuation<R>): ExchangeState
         abstract fun cancel(): ExchangeState
     }
 
@@ -101,30 +105,32 @@ class VoxVtxAmplifierClient(
             return this
         }
 
-        override fun <R> doExchange(request: MessageToAmp<R>, responseAvailable: Continuation<R>): ExchangeState {
-            return OngoingExchangeState(request, responseAvailable)
+        override fun <R> doExchange(exchange: Exchange<R>, responseAvailable: Continuation<R>): ExchangeState {
+            return OngoingExchangeState(exchange, responseAvailable)
         }
 
         override fun cancel() = this
     }
 
     private inner class OngoingExchangeState<R>(
-        val request: MessageToAmp<R>,
+        val exchange: Exchange<R>,
         private val responseAvailable: Continuation<R>,
         queuedExchanges: List<QueuedExchange<*>> = listOf(),
     ): VoxVtxAmplifierClient.ExchangeState() {
         constructor(nextExchange: QueuedExchange<R>, queuedExchanges: List<QueuedExchange<*>>) : this(
-            nextExchange.request,
+            nextExchange.exchange,
             nextExchange.responseAvailable,
             queuedExchanges,
         )
 
-        private val responseHandler: ResponseHandler<R> = request.createResponseHandler()
+        private val responseHandler: ResponseHandler<R> = exchange.createResponseHandler()
         private var responseAvailableResumed = false
         private var queuedExchanges = queuedExchanges.toMutableList()
         private val sendJob = GlobalScope.launch {
             try {
-                send(request)
+                for (message in exchange.messagesToSend) {
+                    send(message)
+                }
             }
             catch (ex: Throwable) {
                 if (!responseAvailableResumed) {
@@ -142,7 +148,7 @@ class VoxVtxAmplifierClient(
             try {
                 val error = ErrorMessage.parse(payload)
                 responseAvailableResumed = true
-                responseAvailable.resumeWithException(MessageNotAcknowledgedException(request, error))
+                responseAvailable.resumeWithException(ExchangeNotAcknowledgedException(exchange, error))
                 return getNextExchangeState()
             }
             catch (ex: MessageParseException.PrefixNotRecognized) {
@@ -164,8 +170,8 @@ class VoxVtxAmplifierClient(
             }
         }
 
-        override fun <R> doExchange(request: MessageToAmp<R>, responseAvailable: Continuation<R>): ExchangeState {
-            queuedExchanges.add(QueuedExchange(request, responseAvailable))
+        override fun <R> doExchange(exchange: Exchange<R>, responseAvailable: Continuation<R>): ExchangeState {
+            queuedExchanges.add(QueuedExchange(exchange, responseAvailable))
             return this
         }
 
@@ -186,7 +192,7 @@ class VoxVtxAmplifierClient(
     }
 
     private class QueuedExchange<R>(
-        val request: MessageToAmp<R>,
+        val exchange: Exchange<R>,
         val responseAvailable: Continuation<R>,
     )
 

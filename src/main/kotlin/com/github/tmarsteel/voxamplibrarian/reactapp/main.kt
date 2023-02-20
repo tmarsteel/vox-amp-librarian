@@ -14,10 +14,8 @@ import com.github.tmarsteel.voxamplibrarian.useEffectCoroutine
 import csstype.ClassName
 import kotlinx.browser.document
 import kotlinx.browser.window
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.launch
 import react.*
 import react.dom.client.createRoot
 import react.dom.html.ReactHTML.div
@@ -51,15 +49,11 @@ val AppComponent = FC<Props> {
             this.ampConnected = ampConnected
             vtxAmpState = ampState
             onProgramSlotSelected = {
-                GlobalScope.launch {
-                    VoxVtxAmpConnection.VOX_AMP.value?.selectUserProgramSlot(it)
-                }
+                VoxVtxAmpConnection.VOX_AMP.value?.selectUserProgramSlot(it)
             }
-            onSaveConfiguration = {
-                val localAmpState = ampState
-                GlobalScope.launch {
-
-                }
+            onSaveConfiguration = save@{ toSlot ->
+                val localAmpState = ampState ?: return@save
+                VoxVtxAmpConnection.VOX_AMP.value?.persistConfigurationToSlot(localAmpState.activeConfiguration, toSlot)
             }
         }
     }
@@ -76,9 +70,7 @@ val AppComponent = FC<Props> {
                     if (ampConnection == null) {
                         ampState = newState
                     } else {
-                        GlobalScope.launch {
-                            ampConnection.requestState(newState)
-                        }
+                        ampConnection.requestState(newState)
                     }
                 }
             }

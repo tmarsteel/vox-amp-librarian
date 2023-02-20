@@ -14,8 +14,8 @@ external interface SidebarComponentProps : Props {
     var ampConnected: Boolean
     var vtxAmpState: VtxAmpState?
     var onProgramSlotSelected: (ProgramSlot) -> Unit
-    var onSaveConfiguration: () -> Unit
-    var onLoadConfiguration: () -> Unit
+    var onSaveConfiguration: (ProgramSlot) -> Unit
+    var onLoadConfiguration: (ProgramSlot) -> Unit
 }
 
 val SidebarComponent = FC<SidebarComponentProps> { props ->
@@ -57,14 +57,30 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
                 }
 
                 div {
-                    className = ClassName("sidebar-tree-entry-action")
+                    className = classes(
+                        "sidebar-tree-entry-action",
+                        "disabled".takeIf { localAmpState == null },
+                    )
 
                     icon("upload", "Load this program")
+                    onClick = {
+                        if (localAmpState != null) {
+                            props.onLoadConfiguration(programSlot)
+                        }
+                    }
                 }
                 div {
-                    className = ClassName("sidebar-tree-entry-action")
+                    className = classes(
+                        "sidebar-tree-entry-action",
+                        "disabled".takeIf { localAmpState == null },
+                    )
 
                     icon("download", "Save the current configuration to this place")
+                    onClick = {
+                        if (localAmpState != null) {
+                            props.onSaveConfiguration(programSlot)
+                        }
+                    }
                 }
             }
         }
