@@ -22,11 +22,20 @@ import react.dom.html.ReactHTML.div
 
 val AppComponent = FC<Props> {
     var ampState: VtxAmpState? by useState(VtxAmpState.DEFAULT)
+    var ampConnected: Boolean by useState(false)
 
     useEffect {
         GlobalScope.launch {
             VoxVtxAmpConnection.VOX_AMP
-                .flatMapLatest { it?.ampState ?: emptyFlow() }
+                .flatMapLatest {
+                    if (it != null) {
+                        ampConnected = true
+                        it.ampState
+                    } else {
+                        ampConnected = false
+                        emptyFlow()
+                    }
+                }
                 .collect { stateUpdate ->
                     ampState = stateUpdate
                 }
@@ -37,6 +46,7 @@ val AppComponent = FC<Props> {
         className = ClassName("sidebar")
 
         SidebarComponent {
+            this.ampConnected = ampConnected
             vtxAmpState = ampState
             onProgramSlotSelected = {
                 console.log("selected $it")

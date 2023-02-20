@@ -9,12 +9,13 @@ import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.span
 
 external interface SidebarComponentProps : Props {
+    var ampConnected: Boolean
     var vtxAmpState: VtxAmpState?
     var onProgramSlotSelected: (ProgramSlot) -> Unit
 }
 
 val SidebarComponent = FC<SidebarComponentProps> { props ->
-    val localAmpState = props.vtxAmpState
+    val localAmpState = props.vtxAmpState?.takeIf { props.ampConnected }
 
     div {
         className = classes("sidebar__inner")
@@ -23,12 +24,12 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
             className = classes("sidebar-tree-entry", "sidebar-tree-entry--level-0")
 
             ConnectivityIndicatorComponent {
-                isActive = props.vtxAmpState != null
+                isActive = props.ampConnected
             }
 
             span {
                 className = classes("sidebar-tree-entry__label")
-                +"VT20X/40X/100X Amplifier (${if (props.vtxAmpState == null) "not " else ""}connected)"
+                +"VT20X/40X/100X Amplifier (${if (!props.ampConnected) "not " else ""}connected)"
             }
         }
 
@@ -37,8 +38,8 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
                 className = classes(
                     "sidebar-tree-entry",
                     "sidebar-tree-entry--level-1",
-                    "sidebar-tree-entry--clickable".takeIf { props.vtxAmpState != null },
-                    "sidebar-tree-entry--active".takeIf { localAmpState != null && localAmpState is VtxAmpState.ProgramSlotSelected && localAmpState.slot == programSlot }
+                    "sidebar-tree-entry--clickable".takeIf { props.ampConnected },
+                    "sidebar-tree-entry--active".takeIf { props.ampConnected && localAmpState != null && localAmpState is VtxAmpState.ProgramSlotSelected && localAmpState.slot == programSlot }
                 )
 
                 onClick = {
@@ -49,7 +50,7 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
 
                 span {
                     className = ClassName("sidebar-tree-entry__label")
-                    +"${programSlot.name}: ${props.vtxAmpState?.storedUserPrograms?.get(programSlot)?.programName ?: "<empty>"}"
+                    +"${programSlot.name}: ${localAmpState?.storedUserPrograms?.get(programSlot)?.programName ?: "<empty>"}"
                 }
             }
         }
