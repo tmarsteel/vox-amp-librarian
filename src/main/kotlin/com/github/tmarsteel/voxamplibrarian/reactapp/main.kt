@@ -5,6 +5,7 @@ import com.github.tmarsteel.voxamplibrarian.ByteArrayBinaryInput
 import com.github.tmarsteel.voxamplibrarian.appmodel.SimulationConfiguration
 import com.github.tmarsteel.voxamplibrarian.appmodel.VtxAmpState
 import com.github.tmarsteel.voxamplibrarian.appmodel.hardware_integration.VoxVtxAmpConnection
+import com.github.tmarsteel.voxamplibrarian.logging.LoggerFactory
 import com.github.tmarsteel.voxamplibrarian.parseHexStream
 import com.github.tmarsteel.voxamplibrarian.protocol.TwoByteDial
 import com.github.tmarsteel.voxamplibrarian.reactapp.components.SidebarComponent
@@ -20,6 +21,8 @@ import kotlinx.coroutines.launch
 import react.*
 import react.dom.client.createRoot
 import react.dom.html.ReactHTML.div
+
+private val logger = LoggerFactory["main"]
 
 val AppComponent = FC<Props> {
     var ampState: VtxAmpState? by useState(VtxAmpState.DEFAULT)
@@ -50,6 +53,12 @@ val AppComponent = FC<Props> {
             onProgramSlotSelected = {
                 GlobalScope.launch {
                     VoxVtxAmpConnection.VOX_AMP.value?.selectUserProgramSlot(it)
+                }
+            }
+            onSaveConfiguration = {
+                val localAmpState = ampState
+                GlobalScope.launch {
+
                 }
             }
         }

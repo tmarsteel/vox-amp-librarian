@@ -3,15 +3,19 @@ package com.github.tmarsteel.voxamplibrarian.reactapp.components
 import com.github.tmarsteel.voxamplibrarian.appmodel.VtxAmpState
 import com.github.tmarsteel.voxamplibrarian.protocol.ProgramSlot
 import csstype.ClassName
+import react.ChildrenBuilder
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML.div
+import react.dom.html.ReactHTML.img
 import react.dom.html.ReactHTML.span
 
 external interface SidebarComponentProps : Props {
     var ampConnected: Boolean
     var vtxAmpState: VtxAmpState?
     var onProgramSlotSelected: (ProgramSlot) -> Unit
+    var onSaveConfiguration: () -> Unit
+    var onLoadConfiguration: () -> Unit
 }
 
 val SidebarComponent = FC<SidebarComponentProps> { props ->
@@ -42,15 +46,25 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
                     "sidebar-tree-entry--active".takeIf { props.ampConnected && localAmpState != null && localAmpState is VtxAmpState.ProgramSlotSelected && localAmpState.slot == programSlot }
                 )
 
-                onClick = {
-                    if (props.vtxAmpState != null) {
-                        props.onProgramSlotSelected(programSlot)
-                    }
-                }
-
                 span {
                     className = ClassName("sidebar-tree-entry__label")
                     +"${programSlot.name}: ${localAmpState?.storedUserPrograms?.get(programSlot)?.programName ?: "<empty>"}"
+                    onClick = {
+                        if (props.vtxAmpState != null) {
+                            props.onProgramSlotSelected(programSlot)
+                        }
+                    }
+                }
+
+                div {
+                    className = ClassName("sidebar-tree-entry-action")
+
+                    icon("upload", "Load this program")
+                }
+                div {
+                    className = ClassName("sidebar-tree-entry-action")
+
+                    icon("download", "Save the current configuration to this place")
                 }
             }
         }
@@ -61,30 +75,15 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
 
         LogLevelComponent {}
     }
-
-    div {
-        className = classes("sidebar__actions")
-
-        div {
-            className = classes("sidebar-action", "sidebar-action--save")
-            title = "Save current settings to the selected place"
-
-            span {
-                className = classes("sidebar-action__label")
-                +"<"
-            }
-        }
-
-        div {
-            className = classes("sidebar-action", "sidebar-action--load")
-            title = "Load settings from the selected place"
-
-            span {
-                className = classes("sidebar-action__label")
-                +">"
-            }
-        }
-    }
 }
 
 fun classes(vararg names: String?): ClassName = names.filterNotNull().joinToString(separator = " ").unsafeCast<ClassName>()
+
+fun ChildrenBuilder.icon(name: String, alt: String, vararg classes: String) {
+    img {
+        className = classes("icon", *classes)
+        src = "/icons/$name.svg"
+        this.alt = alt
+        title = alt
+    }
+}
