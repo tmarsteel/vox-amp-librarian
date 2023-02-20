@@ -35,6 +35,17 @@ class VoxVtxAmpConnection(
                     catch (ex: DifferentialUpdateNotSupportedException) {
                         fetchCurrentState()
                     }
+                    is AmpStateEvent.SelectProgramSlot -> {
+                        if (previousState is VtxAmpState.ProgramSlotSelected && previousState.slot == event.slot) {
+                            return@runningFold previousState
+                        }
+                        client.exchange(ProgramSlotChangedMessage(event.slot))
+                        VtxAmpState.ProgramSlotSelected(
+                            previousState.storedUserPrograms,
+                            previousState.storedUserPrograms.getValue(event.slot),
+                            event.slot
+                        )
+                    }
                 }
             }
             .collect { emit(it) }
@@ -108,6 +119,10 @@ class VoxVtxAmpConnection(
         ampStateEvents.send(AmpStateEvent.NewState(newState))
     }
 
+    suspend fun selectUserProgramSlot(slot: ProgramSlot) {
+        ampStateEvents.send(AmpStateEvent.SelectProgramSlot(slot))
+    }
+
     fun close() {
         requestStatePusher.cancel()
     }
@@ -130,6 +145,7 @@ class VoxVtxAmpConnection(
 private sealed class AmpStateEvent {
     class Message(val message: MessageToHost) : AmpStateEvent()
     class NewState(val state: VtxAmpState) : AmpStateEvent()
+    class SelectProgramSlot(val slot: ProgramSlot) : AmpStateEvent()
 }
 
 private fun <T> Channel<T>.allAvailable(): List<T> {

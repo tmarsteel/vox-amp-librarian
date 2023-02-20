@@ -2,7 +2,11 @@ package com.github.tmarsteel.voxamplibrarian
 
 import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageParseException
 import com.github.tmarsteel.voxamplibrarian.protocol.message.MidiProtocolMessage
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import react.useEffect
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.js.Promise
@@ -79,3 +83,15 @@ fun String.parseHexStream(): ByteArray = this
     .windowed(size = 2, step = 2)
     .map { it.toInt(16).toByte() }
     .toByteArray()
+
+fun useEffectCoroutine(block: suspend () -> Unit) {
+    useEffect {
+        val job = GlobalScope.launch(start = CoroutineStart.LAZY) {
+            block()
+        }
+        cleanup {
+            job.cancel()
+        }
+        job.start()
+    }
+}

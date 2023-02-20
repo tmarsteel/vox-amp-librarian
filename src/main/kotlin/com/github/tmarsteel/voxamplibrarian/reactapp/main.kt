@@ -9,6 +9,7 @@ import com.github.tmarsteel.voxamplibrarian.parseHexStream
 import com.github.tmarsteel.voxamplibrarian.protocol.TwoByteDial
 import com.github.tmarsteel.voxamplibrarian.reactapp.components.SidebarComponent
 import com.github.tmarsteel.voxamplibrarian.reactapp.components.SimulationConfigurationComponent
+import com.github.tmarsteel.voxamplibrarian.useEffectCoroutine
 import csstype.ClassName
 import kotlinx.browser.document
 import kotlinx.browser.window
@@ -24,22 +25,20 @@ val AppComponent = FC<Props> {
     var ampState: VtxAmpState? by useState(VtxAmpState.DEFAULT)
     var ampConnected: Boolean by useState(false)
 
-    useEffect {
-        GlobalScope.launch {
-            VoxVtxAmpConnection.VOX_AMP
-                .flatMapLatest {
-                    if (it != null) {
-                        ampConnected = true
-                        it.ampState
-                    } else {
-                        ampConnected = false
-                        emptyFlow()
-                    }
+    useEffectCoroutine {
+        VoxVtxAmpConnection.VOX_AMP
+            .flatMapLatest {
+                if (it != null) {
+                    ampConnected = true
+                    it.ampState
+                } else {
+                    ampConnected = false
+                    emptyFlow()
                 }
-                .collect { stateUpdate ->
-                    ampState = stateUpdate
-                }
-        }
+            }
+            .collect { stateUpdate ->
+                ampState = stateUpdate
+            }
     }
 
     div {
@@ -49,7 +48,9 @@ val AppComponent = FC<Props> {
             this.ampConnected = ampConnected
             vtxAmpState = ampState
             onProgramSlotSelected = {
-                console.log("selected $it")
+                GlobalScope.launch {
+                    VoxVtxAmpConnection.VOX_AMP.value?.selectUserProgramSlot(it)
+                }
             }
         }
     }
