@@ -7,7 +7,7 @@ import react.ChildrenBuilder
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML.div
-import react.dom.html.ReactHTML.img
+import react.dom.html.ReactHTML.i
 import react.dom.html.ReactHTML.span
 
 external interface SidebarComponentProps : Props {
@@ -95,11 +95,9 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
 
 fun classes(vararg names: String?): ClassName = names.filterNotNull().joinToString(separator = " ").unsafeCast<ClassName>()
 
-fun ChildrenBuilder.icon(name: String, alt: String, vararg classes: String) {
-    img {
-        className = classes("icon", *classes)
-        src = "/icons/$name.svg"
-        this.alt = alt
-        title = alt
+fun ChildrenBuilder.icon(name: String, title: String, vararg classes: String) {
+    i {
+        className = classes("bi bi-$name", *classes)
+        this.title = title
     }
 }
