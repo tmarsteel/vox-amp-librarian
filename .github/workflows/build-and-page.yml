@@ -16,7 +16,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: gradle:7.4.2-jdk17-alpine
+    container: ghcr.io/tmarsteel/vox-amp-librarian-builder-image
     steps:
       - name: Checkout
         uses: actions/checkout@v3
