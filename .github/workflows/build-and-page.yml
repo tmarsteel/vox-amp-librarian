@@ -23,7 +23,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: gradle build
-        run: gradle clean build -x browserTest --info
+        run: ./gradlew clean build -x browserTest --info
 
   deploy:
     needs: build
