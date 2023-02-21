@@ -1,0 +1,30 @@
+name: builder image
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/builder.dockerfile'
+
+env:
+  IMAGE_NAME: vox-amp-librarian-builder-image
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build Image
+        run: docker build . --file .github/workflows/builder.dockerfile --tag $IMAGE_NAME
+      - name: Log in to registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+      - name: Push to registry
+        run: |
+          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          VERSION="${{ github.sha }}"
+          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
