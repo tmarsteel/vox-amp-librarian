@@ -90,6 +90,7 @@ interface Program : ProtocolSerializable {
         out.write(pedal1Dial6)
         out.write(pedal2Type.protocolValue)
         out.write(pedal2Dial1.semanticValue)
+        out.write(0x00)
         out.write(pedal2Dial2)
         out.write(pedal2Dial3)
         out.write(pedal2Dial4)
@@ -98,7 +99,7 @@ interface Program : ProtocolSerializable {
         out.write(
             0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00
+            0x00
         )
         out.write(reverbPedalType.protocolValue)
         out.write(0x00)
