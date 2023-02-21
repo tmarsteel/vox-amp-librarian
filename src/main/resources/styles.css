@@ -12,14 +12,22 @@ html, body {
     height: 100vh;
     width: 24rem;
     box-sizing: border-box;
-    padding: 1rem 0 1rem 1rem;
     border-right: 0.1rem solid #2a2a2a;
+    background: white;
+    z-index: 1000;
+}
+
+.sidebar-close {
+    float: right;
+    margin-right: 1rem;
 }
 
 .sidebar__inner {
+    clear: both;
     width: 100%;
     height: 100%;
     box-sizing: border-box;
+    padding: 0rem 0 1rem 1rem;
 }
 
 .sidebar-tree-entry {
@@ -132,4 +140,29 @@ body.during-global-drag * {
     width: calc(50% - 0.05rem);
     height: 11.11%;
     border-right: 0.1rem solid black;
+}
+
+.topbar {
+    border-bottom: 0.1rem solid #2a2a2a;
+}
+
+.simulation-config {
+    z-index: 500;
+}
+
+@media(max-width: 2000px) {
+    .sidebar {
+        left: -24rem;
+        transition: ease-in 0.25s;
+    }
+
+    .sidebar.open {
+        left: 0;
+    }
+}
+
+@media(min-width: 2001px) {
+    .sidebar-open, .sidebar-close {
+        display: none;
+    }
 }

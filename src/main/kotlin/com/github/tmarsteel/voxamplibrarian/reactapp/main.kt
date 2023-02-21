@@ -12,6 +12,9 @@ import com.github.tmarsteel.voxamplibrarian.reactapp.components.SidebarComponent
 import com.github.tmarsteel.voxamplibrarian.reactapp.components.SimulationConfigurationComponent
 import com.github.tmarsteel.voxamplibrarian.useEffectCoroutine
 import csstype.ClassName
+import csstype.Cursor
+import csstype.rem
+import emotion.react.css
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.flow.emptyFlow
@@ -25,6 +28,8 @@ private val logger = LoggerFactory["main"]
 val AppComponent = FC<Props> {
     var ampState: VtxAmpState? by useState(VtxAmpState.DEFAULT)
     var ampConnected: Boolean by useState(false)
+
+    var sidebarExplicitlyOpen: Boolean by useState(false)
 
     useEffectCoroutine {
         VoxVtxAmpConnection.VOX_AMP
@@ -43,7 +48,36 @@ val AppComponent = FC<Props> {
     }
 
     div {
-        className = ClassName("sidebar")
+        className = classes("topbar")
+
+        div {
+            className = classes("container")
+
+            div {
+                className = classes("row")
+
+                div {
+                    className = classes("col-12")
+
+                    icon("list", "open menu") {
+                        css(ClassName("sidebar-open")) {
+                            fontSize = 2.rem
+                            cursor = Cursor.pointer
+                        }
+                        onClick = {
+                            sidebarExplicitlyOpen = !sidebarExplicitlyOpen
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    div {
+        className = classes(
+            "sidebar",
+            "open".takeIf { sidebarExplicitlyOpen },
+        )
 
         SidebarComponent {
             this.ampConnected = ampConnected
@@ -55,11 +89,14 @@ val AppComponent = FC<Props> {
                 val localAmpState = ampState ?: return@save
                 VoxVtxAmpConnection.VOX_AMP.value?.persistConfigurationToSlot(localAmpState.activeConfiguration, toSlot)
             }
+            onClose = {
+                sidebarExplicitlyOpen = false
+            }
         }
     }
 
     div {
-        className = ClassName("container")
+        className = classes("container", "simulation-config")
 
         SimulationConfigurationComponent {
             configuration = ampState?.activeConfiguration ?: SimulationConfiguration.DEFAULT

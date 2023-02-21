@@ -18,7 +18,7 @@ val DeviceComponent = FC<DeviceComponentProps> { props ->
         className = ClassName("row")
         for (parameter in props.configuration.descriptor.parameters.sortedWith(ParameterOrder)) {
             div {
-                className = ClassName("col-xs-12 col-sm-6 col-lg-4 col-xl-1 mt-4")
+                className = ClassName("col-6 col-sm-3 col-md-2 col-lg-1")
                 ParameterComponent {
                     this.parameter = parameter
                     value = props.configuration.getValue(parameter.id)

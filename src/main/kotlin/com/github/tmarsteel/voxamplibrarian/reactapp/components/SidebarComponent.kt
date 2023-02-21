@@ -5,6 +5,9 @@ import com.github.tmarsteel.voxamplibrarian.protocol.ProgramSlot
 import com.github.tmarsteel.voxamplibrarian.reactapp.classes
 import com.github.tmarsteel.voxamplibrarian.reactapp.icon
 import csstype.ClassName
+import csstype.Cursor
+import csstype.rem
+import emotion.react.css
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML.div
@@ -16,10 +19,19 @@ external interface SidebarComponentProps : Props {
     var onProgramSlotSelected: (ProgramSlot) -> Unit
     var onSaveConfiguration: (ProgramSlot) -> Unit
     var onLoadConfiguration: (ProgramSlot) -> Unit
+    var onClose: () -> Unit
 }
 
 val SidebarComponent = FC<SidebarComponentProps> { props ->
     val localAmpState = props.vtxAmpState?.takeIf { props.ampConnected }
+
+    icon("x", "close side menu") {
+        css(ClassName("sidebar-close")) {
+            fontSize = 2.rem
+            cursor = Cursor.pointer
+        }
+        onClick = { props.onClose() }
+    }
 
     div {
         className = classes("sidebar__inner")
