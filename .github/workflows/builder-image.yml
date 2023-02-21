@@ -5,6 +5,7 @@ on:
       - main
     paths:
       - '.github/workflows/builder.dockerfile'
+  workflow_dispatch:
 
 env:
   IMAGE_NAME: vox-amp-librarian-builder-image
