@@ -25,29 +25,29 @@ sealed class ReverbPedalDescriptor(
         ),
         ContinuousRangeParameter.zeroToTenUnitless(
             DeviceParameter.Id.PedalMix,
-            unitlessPedalDial(0x00, MutableProgram::pedal2Dial1),
+            unitlessPedalDial(0x00, MutableProgram::reverbPedalDial1),
             7.5
         ),
         ContinuousRangeParameter.zeroToTenUnitless(
             DeviceParameter.Id.ReverbTime,
-            unitlessPedalDial(0x01, MutableProgram::pedal2Dial2),
+            unitlessPedalDial(0x01, MutableProgram::reverbPedalDial2),
             4.5
         ),
         ContinuousRangeParameter(
             id = DeviceParameter.Id.ReverbPreDelay,
-            protocolAdapter = durationPedalDial(0x02, MutableProgram::pedal2Dial3),
+            protocolAdapter = durationPedalDial(0x02, MutableProgram::reverbPedalDial3),
             valueRange = 0.ms .. 70.ms,
             default = 0.ms,
             valueFactory = ::Duration,
         ),
         ContinuousRangeParameter.zeroToTenUnitless(
             DeviceParameter.Id.ReverbLowDamp,
-            unitlessPedalDial(0x03, MutableProgram::pedal2Dial4),
+            unitlessPedalDial(0x03, MutableProgram::reverbPedalDial4),
             3.6
         ),
         ContinuousRangeParameter.zeroToTenUnitless(
             DeviceParameter.Id.ReverbHighDamp,
-            unitlessPedalDial(0x04, MutableProgram::pedal2Dial5),
+            unitlessPedalDial(0x04, MutableProgram::reverbPedalDial5),
             2.5
         ),
     )
