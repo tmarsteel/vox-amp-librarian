@@ -1,12 +1,19 @@
 package com.github.tmarsteel.voxamplibrarian.reactapp.components
 
 import com.github.tmarsteel.voxamplibrarian.appmodel.*
+import com.github.tmarsteel.voxamplibrarian.reactapp.icon
 import csstype.ClassName
+import csstype.Cursor
+import csstype.pct
+import csstype.rem
+import emotion.react.css
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.h2
 import react.dom.html.ReactHTML.h3
+import react.dom.html.ReactHTML.input
+import react.useState
 
 external interface SimulationConfigurationComponentProps : Props {
     var configuration: SimulationConfiguration
@@ -14,13 +21,55 @@ external interface SimulationConfigurationComponentProps : Props {
 }
 
 val SimulationConfigurationComponent = FC<SimulationConfigurationComponentProps> { props ->
+    var editName: Boolean by useState(false)
+    var programNameInEdit: String? by useState(null)
     div {
         className = ClassName("row")
         props.configuration.programName?.let { programName ->
             div {
                 className = ClassName("col-12")
-                h2 {
-                    +programName
+                if (editName) {
+                    input {
+                        css {
+                            fontSize = 200.pct
+                            height = 2.5.rem
+                            marginBottom = 0.5.rem
+                        }
+                        value = programNameInEdit ?: ""
+                        onChange = {
+                            programNameInEdit = it.target.value
+                        }
+                        maxLength = 16
+                    }
+                    icon("check-circle-fill", "apply") {
+                        css {
+                            fontSize = 1.5.rem
+                        }
+                        onClick = {
+                            editName = false
+                            props.onConfigurationChanged(props.configuration.copy(
+                                programName = programNameInEdit ?: ""
+                            ))
+                        }
+                    }
+                } else {
+                    h2 {
+                        css {
+                            cursor = Cursor.text
+                            height = 2.5.rem
+                        }
+                        +programName
+                        +" "
+                        icon("pencil-fill", "Edit name") {
+                            css {
+                                fontSize = 60.pct
+                            }
+                        }
+                        onClick = {
+                            editName = true
+                            programNameInEdit = props.configuration.programName ?: ""
+                        }
+                    }
                 }
             }
         }
