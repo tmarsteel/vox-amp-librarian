@@ -23,6 +23,11 @@ jobs:
         uses: actions/checkout@v3
       - name: gradle build
         run: ./gradlew clean build -x browserTest --info
+      - name: cache build artifacts
+        uses: actions/cache/save@v3
+        with:
+          path: build/distributions
+          key: gradle-build-distributions
 
   deploy:
     needs: build
@@ -32,6 +37,11 @@ jobs:
     steps:
       - name: Setup Pages
         uses: actions/configure-pages@v3
+      - name: get build artifacts
+        uses: actions/cache/restore@v3
+        with:
+          path: build/distributions
+          key: gradle-build-distributions
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
