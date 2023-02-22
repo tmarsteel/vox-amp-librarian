@@ -3,10 +3,7 @@ package com.github.tmarsteel.voxamplibrarian.reactapp.components
 import com.github.tmarsteel.voxamplibrarian.logging.LoggerFactory
 import com.github.tmarsteel.voxamplibrarian.reactapp.FullyConsumedWheelEventAssist.registerFullyConsumingWheelEventListener
 import com.github.tmarsteel.voxamplibrarian.reactapp.GlobalMouseMoveAssist.registerGlobalDragHandler
-import csstype.ClassName
-import csstype.Length
-import csstype.Transform
-import csstype.pct
+import csstype.*
 import emotion.react.css
 import kotlinx.browser.window
 import react.*
@@ -50,11 +47,12 @@ val RotarySliderComponent = FC<RotarySliderComponentProps> { props ->
         css(ClassName("rotary-slider")) {
             width = props.size
             height = props.size
+            touchAction = None.none
         }
         tabIndex = 0
         registerGlobalDragHandler(
             onDragStart = {
-               currentDragStartScreenY.current = it.screenY
+                currentDragStartScreenY.current = it.screenY
             },
             onDrag = { event ->
                 currentDragStartScreenY.current?.let { startY ->
