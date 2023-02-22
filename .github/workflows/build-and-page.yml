@@ -27,7 +27,7 @@ jobs:
         uses: actions/cache/save@v3
         with:
           path: build/distributions
-          key: gradle-build-distributions
+          key: gradle-build-distributions-${{ github.run_id }}
 
   deploy:
     needs: build
@@ -41,7 +41,7 @@ jobs:
         uses: actions/cache/restore@v3
         with:
           path: build/distributions
-          key: gradle-build-distributions
+          key: gradle-build-distributions-${{ github.run_id }}
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
