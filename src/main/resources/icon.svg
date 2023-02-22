@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" class="bi bi-window-fullscreen" viewBox="0 0 16 16">
+  <rect width="16" height="16" rx="3" fill="black" />
+  <g transform="scale(0.7) translate(3.25, 3.25)" fill="#ffff00">
+    <path d="M3 3.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0Zm1.5 0a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0Zm1 .5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1Z"/>
+    <path d="M.5 1a.5.5 0 0 0-.5.5v13a.5.5 0 0 0 .5.5h15a.5.5 0 0 0 .5-.5v-13a.5.5 0 0 0-.5-.5H.5ZM1 5V2h14v3H1Zm0 1h14v8H1V6Z"/>
+    <g stroke="#ffff00" stroke-width="0.5">
+      <path d="M0.5,11 L4.5,14.5Z" />
+      <path d="M0.5,8 L7.5,14.5Z" />
+      <path d="M1,5.5 L10.5,14.5Z" />
+      <path d="M4,5.5 L13.5,14.5Z" />
+      <path d="M7,5.5 L15.5,13.5Z" />
+      <path d="M10,5.5 L15.5,10.5Z" />
+      <path d="M13,5.5 L15.5,7.5Z" />
+    </g>
+  </g>
+</svg>

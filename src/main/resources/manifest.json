@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json.schemastore.org/web-manifest-combined.json",
+  "name": "VOX VTX Amp Control",
+  "short_name": "VTX AMP",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg"
+    },
+    {
+      "src": "/icon_16.svg",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon_32.svg",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon_64.svg",
+      "sizes": "64x64",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon_128.svg",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon_512.svg",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "launch_handler": "focus-existing",
+  "start_url": "/",
+  "theme_color": "#202020"
+}
