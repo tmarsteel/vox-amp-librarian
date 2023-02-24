@@ -28,6 +28,8 @@ html, body {
     height: 100%;
     box-sizing: border-box;
     padding: 0rem 0 1rem 1rem;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 .sidebar-tree-entry {
@@ -64,10 +66,18 @@ html, body {
 
 .sidebar-tree-entry-action {
     height: 100%;
-    aspect-ratio: 1;
+    aspect-ratio: 0.7;
     flex-grow: 0;
     display: flex;
     align-items: center;
+}
+
+.sidebar-tree-entry-action:not(.disabled) {
+    cursor: pointer;
+}
+
+.sidebar-tree-entry-action.disabled {
+    color: #ccc;
 }
 
 .sidebar-tree-entry-action .bi {
@@ -85,6 +95,7 @@ html, body {
     height: 4rem;
     padding: 1rem;
     box-sizing: border-box;
+    background: #ffffff;
 }
 
 .connectivity-indicator {

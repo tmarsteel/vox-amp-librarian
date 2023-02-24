@@ -1,5 +1,6 @@
 package com.github.tmarsteel.voxamplibrarian.reactapp.components
 
+import com.github.tmarsteel.voxamplibrarian.appmodel.SimulationConfiguration
 import com.github.tmarsteel.voxamplibrarian.appmodel.VtxAmpState
 import com.github.tmarsteel.voxamplibrarian.protocol.ProgramSlot
 import com.github.tmarsteel.voxamplibrarian.reactapp.classes
@@ -12,6 +13,7 @@ import react.FC
 import react.Props
 import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.span
+import react.useState
 
 external interface SidebarComponentProps : Props {
     var ampConnected: Boolean
@@ -22,8 +24,18 @@ external interface SidebarComponentProps : Props {
     var onClose: () -> Unit
 }
 
+private class LoadedFile(
+    val filename: String,
+    val configs: List<SimulationConfiguration>,
+) {
+    companion object {
+        val DEFAULT = LoadedFile("empty", SimulationConfiguration.DEFAULT.repeat(11))
+    }
+}
+
 val SidebarComponent = FC<SidebarComponentProps> { props ->
     val localAmpState = props.vtxAmpState?.takeIf { props.ampConnected }
+    val currentFile: LoadedFile by useState(LoadedFile.DEFAULT)
 
     icon("x", "close side menu") {
         css(ClassName("sidebar-close")) {
@@ -96,6 +108,78 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
                 }
             }
         }
+
+        div {
+            className = classes("sidebar-tree-entry", "sidebar-tree-entry--level-0")
+            icon("file-earmark", "Currently loaded file")
+            span {
+                className = classes("sidebar-tree-entry__label")
+                +if (currentFile == null) "<none>" else currentFile!!.filename
+            }
+
+            div {
+                className = classes("sidebar-tree-entry-action")
+                icon("folder2-open", "load a file")
+                onClick = {
+
+                }
+            }
+
+            div {
+                className = classes("sidebar-tree-entry-action")
+                icon("download", "export configurations")
+                onClick = {
+
+                }
+            }
+
+            div {
+                className = classes(
+                    "sidebar-tree-entry-action",
+                    "disabled".takeUnless { localAmpState != null }
+                )
+                icon("arrow-up", "Configure amplifier with the first 8 programs")
+                onClick = {
+
+                }
+            }
+        }
+
+        for (config in currentFile.configs) {
+            div {
+                className = classes("sidebar-tree-entry", "sidebar-tree-entry--level-1")
+
+                span {
+                    className = ClassName("sidebar-tree-entry__label")
+                    +(config.programName ?: "<no name>")
+                    onClick = {
+
+                    }
+                }
+
+                div {
+                    className = classes(
+                        "sidebar-tree-entry-action",
+                        "disabled".takeUnless { localAmpState != null }
+                    )
+                    icon("arrow-up", "Write this program to the currently selected slot on the amp")
+                    onClick = {
+
+                    }
+                }
+
+                div {
+                    className = classes(
+                        "sidebar-tree-entry-action",
+                        "disabled".takeUnless { localAmpState != null }
+                    )
+                    icon("arrow-down", "Write the current amp configuration to this slot.")
+                    onClick = {
+
+                    }
+                }
+            }
+        }
     }
 
     div {
@@ -103,4 +187,12 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
 
         LogLevelComponent {}
     }
+}
+
+private fun <T> T.repeat(times: Int): List<T> {
+    val list = ArrayList<T>(times)
+    repeat(times) {
+        list.add(this)
+    }
+    return list
 }
