@@ -6,6 +6,7 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import org.khronos.webgl.Uint8Array
 import react.useEffect
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -40,6 +41,9 @@ internal fun requireEOF(data: BinaryInput) {
         )
     }
 }
+
+@Suppress("NOTHING_TO_INLINE")
+internal inline operator fun Uint8Array.get(index: Int): Int = asDynamic()[index]
 
 internal fun Byte.hex(): String = "0x" + toString(16).padStart(2, '0')
 

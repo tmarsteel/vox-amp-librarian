@@ -1,19 +1,35 @@
 package com.github.tmarsteel.voxamplibrarian.reactapp.components
 
+import com.github.tmarsteel.voxamplibrarian.ArrayBufferBinaryInput
+import com.github.tmarsteel.voxamplibrarian.BinaryInput
 import com.github.tmarsteel.voxamplibrarian.appmodel.SimulationConfiguration
 import com.github.tmarsteel.voxamplibrarian.appmodel.VtxAmpState
+import com.github.tmarsteel.voxamplibrarian.appmodel.hardware_integration.toUiDataModel
 import com.github.tmarsteel.voxamplibrarian.protocol.ProgramSlot
 import com.github.tmarsteel.voxamplibrarian.reactapp.classes
 import com.github.tmarsteel.voxamplibrarian.reactapp.icon
+import com.github.tmarsteel.voxamplibrarian.vtxprog.VtxProgFile
 import csstype.ClassName
 import csstype.Cursor
+import csstype.None
 import csstype.rem
 import emotion.react.css
+import kotlinx.browser.window
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.khronos.webgl.ArrayBuffer
+import org.w3c.dom.HTMLInputElement
+import org.w3c.files.File
+import org.w3c.files.FileReader
 import react.FC
 import react.Props
+import react.createRef
+import react.dom.html.InputType
 import react.dom.html.ReactHTML.div
+import react.dom.html.ReactHTML.input
 import react.dom.html.ReactHTML.span
 import react.useState
+import kotlin.coroutines.suspendCoroutine
 
 external interface SidebarComponentProps : Props {
     var ampConnected: Boolean
@@ -24,10 +40,18 @@ external interface SidebarComponentProps : Props {
     var onClose: () -> Unit
 }
 
-private class LoadedFile(
+private data class LoadedFile(
     val filename: String,
     val configs: List<SimulationConfiguration>,
+    /** for change detection */
+    val originalConfigs: List<SimulationConfiguration> = configs,
 ) {
+    fun hasUnsavedChanges(): Boolean {
+        return configs.zip(originalConfigs).any { (currentConfig, originalConfig) -> currentConfig != originalConfig }
+    }
+
+    fun withChangesSaved(): LoadedFile = copy(filename, configs, configs)
+
     companion object {
         val DEFAULT = LoadedFile("empty", SimulationConfiguration.DEFAULT.repeat(11))
     }
@@ -35,7 +59,8 @@ private class LoadedFile(
 
 val SidebarComponent = FC<SidebarComponentProps> { props ->
     val localAmpState = props.vtxAmpState?.takeIf { props.ampConnected }
-    val currentFile: LoadedFile by useState(LoadedFile.DEFAULT)
+    var currentFile: LoadedFile by useState(LoadedFile.DEFAULT)
+    val hiddenFileInputRef = createRef<HTMLInputElement>()
 
     icon("x", "close side menu") {
         css(ClassName("sidebar-close")) {
@@ -114,14 +139,17 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
             icon("file-earmark", "Currently loaded file")
             span {
                 className = classes("sidebar-tree-entry__label")
-                +if (currentFile == null) "<none>" else currentFile!!.filename
+                +currentFile.filename
             }
 
             div {
                 className = classes("sidebar-tree-entry-action")
                 icon("folder2-open", "load a file")
-                onClick = {
-
+                onClick = loadFile@{
+                    if (currentFile.hasUnsavedChanges() && !window.confirm("You have unsaved changes, continue?")) {
+                        return@loadFile
+                    }
+                    hiddenFileInputRef.current!!.click()
                 }
             }
 
@@ -187,6 +215,31 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
 
         LogLevelComponent {}
     }
+
+    input {
+        css {
+            display = None.none
+        }
+        type = InputType.file
+        ref = hiddenFileInputRef
+        accept = ".vtxprog"
+        multiple = false
+        onChange = fileSelected@{
+            val file = it.target.files!!.item(0)!!
+            if (file.size.toLong() > 1024L * 10L) {
+                window.alert("This file is too big to possible be a VTXPROG file.")
+                return@fileSelected
+            }
+
+            GlobalScope.launch {
+                val vtxprogFile = VtxProgFile.readFromInVtxProgFormat(file.readAllBytes())
+                currentFile = LoadedFile(
+                    file.name,
+                    vtxprogFile.programs.map { it.toUiDataModel() },
+                )
+            }
+        }
+    }
 }
 
 private fun <T> T.repeat(times: Int): List<T> {
@@ -196,3 +249,21 @@ private fun <T> T.repeat(times: Int): List<T> {
     }
     return list
 }
+
+private suspend fun File.readAllBytes(): BinaryInput {
+    val reader = FileReader()
+    return suspendCoroutine { readerDone ->
+        reader.onload = {
+            readerDone.resumeWith(Result.success(
+                ArrayBufferBinaryInput(reader.result as ArrayBuffer)
+            ))
+        }
+        reader.onerror = {
+            readerDone.resumeWith(Result.failure(reader.error as? Throwable ?: FileReaderErrorException(reader.error)))
+        }
+
+        reader.readAsArrayBuffer(this)
+    }
+}
+
+private class FileReaderErrorException(val error: Any) : RuntimeException()

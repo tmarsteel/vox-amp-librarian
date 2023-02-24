@@ -87,6 +87,25 @@ class DeviceConfiguration<out D : DeviceDescriptor<*>> private constructor(
         }
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class.js != other::class.js) return false
+
+        other as DeviceConfiguration<*>
+
+        if (descriptor != other.descriptor) return false
+        if (values != other.values) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = descriptor.hashCode()
+        result = 31 * result + values.hashCode()
+        return result
+    }
+
+
     companion object {
         fun <D : DeviceDescriptor<*>> defaultOf(descriptor: D): DeviceConfiguration<D> = DeviceConfiguration(
             descriptor,

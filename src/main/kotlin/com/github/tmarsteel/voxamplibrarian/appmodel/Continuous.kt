@@ -5,7 +5,7 @@ sealed interface Continuous<Self : Continuous<Self>> : Comparable<Self> {
     override fun compareTo(other: Self): Int = this.intValue.compareTo(other.intValue)
 }
 
-class Frequency(val millihertz: Int) : Continuous<Frequency> {
+data class Frequency(val millihertz: Int) : Continuous<Frequency> {
     override val intValue get() = millihertz
 
     override fun toString() = "$millihertz mHz"
@@ -15,11 +15,11 @@ class Frequency(val millihertz: Int) : Continuous<Frequency> {
     }
 }
 
-class UnitlessSingleDecimalPrecision(override val intValue: Int) : Continuous<UnitlessSingleDecimalPrecision> {
+data class UnitlessSingleDecimalPrecision(override val intValue: Int) : Continuous<UnitlessSingleDecimalPrecision> {
     override fun toString() = intValue.toString()
 }
 
-class Duration(val milliseconds: Int) : Continuous<Duration> {
+data class Duration(val milliseconds: Int) : Continuous<Duration> {
     override val intValue get() = milliseconds
 
     override fun toString() = "$milliseconds ms"

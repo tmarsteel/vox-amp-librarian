@@ -199,9 +199,6 @@ private fun <K, V> JsMap<K, V>.toKotlinMap(): Map<K, V> {
     return map
 }
 
-@Suppress("NOTHING_TO_INLINE")
-private inline operator fun Uint8Array.get(index: Int): Int = asDynamic()[index]
-
 private fun Uint8Array.toByteArray(): ByteArray {
     return ByteArray(length) { (this[it] as Number).toByte() }
 }
