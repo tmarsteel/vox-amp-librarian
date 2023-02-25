@@ -28,6 +28,7 @@ private val logger = LoggerFactory["main"]
 val AppComponent = FC<Props> {
     var ampState: VtxAmpState? by useState(VtxAmpState.DEFAULT)
     var ampConnected: Boolean by useState(false)
+    var nonAmpConfigForViewing: SimulationConfiguration? by useState(null)
 
     var sidebarExplicitlyOpen: Boolean by useState(false)
 
@@ -84,10 +85,14 @@ val AppComponent = FC<Props> {
             vtxAmpState = ampState
             onProgramSlotSelected = {
                 VoxVtxAmpConnection.VOX_AMP.value?.selectUserProgramSlot(it)
+                nonAmpConfigForViewing = null
             }
             onSaveConfiguration = save@{ toSlot ->
                 val localAmpState = ampState ?: return@save
                 VoxVtxAmpConnection.VOX_AMP.value?.persistConfigurationToSlot(localAmpState.activeConfiguration, toSlot)
+            }
+            onViewNonAmpConfiguration = {
+                nonAmpConfigForViewing = it
             }
             onClose = {
                 sidebarExplicitlyOpen = false
@@ -99,8 +104,13 @@ val AppComponent = FC<Props> {
         className = classes("container", "simulation-config")
 
         SimulationConfigurationComponent {
-            configuration = ampState?.activeConfiguration ?: SimulationConfiguration.DEFAULT
-            onConfigurationChanged = { newConfig ->
+            configuration = nonAmpConfigForViewing ?: ampState?.activeConfiguration ?: SimulationConfiguration.DEFAULT
+            readOnly = nonAmpConfigForViewing != null || ampState?.activeConfiguration == null
+            onConfigurationChanged = configChanged@{ newConfig ->
+                if (nonAmpConfigForViewing != null) {
+                    return@configChanged
+                }
+
                 ampState?.let { oldState ->
                     val newState = oldState.withActiveConfiguration(newConfig)
                     val ampConnection = VoxVtxAmpConnection.VOX_AMP.value

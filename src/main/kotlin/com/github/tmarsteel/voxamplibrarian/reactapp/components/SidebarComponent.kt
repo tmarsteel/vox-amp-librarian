@@ -34,6 +34,7 @@ external interface SidebarComponentProps : Props {
     var onProgramSlotSelected: (ProgramSlot) -> Unit
     var onSaveConfiguration: (ProgramSlot) -> Unit
     var onLoadConfiguration: (ProgramSlot) -> Unit
+    var onViewNonAmpConfiguration: (SimulationConfiguration) -> Unit
     var onClose: () -> Unit
 }
 
@@ -181,6 +182,15 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
                     +(config.programName ?: "<no name>")
                     onClick = {
 
+                    }
+                }
+
+                div {
+                    className = classes("sidebar-tree-entry-action")
+
+                    icon("eye", "View this configuration")
+                    onClick = {
+                        props.onViewNonAmpConfiguration(config)
                     }
                 }
 

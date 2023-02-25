@@ -18,6 +18,7 @@ import react.useState
 external interface SimulationConfigurationComponentProps : Props {
     var configuration: SimulationConfiguration
     var onConfigurationChanged: (SimulationConfiguration) -> Unit
+    var readOnly: Boolean
 }
 
 val SimulationConfigurationComponent = FC<SimulationConfigurationComponentProps> { props ->
