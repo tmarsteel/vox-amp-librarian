@@ -29,11 +29,16 @@ internal fun requirePrefix(data: BinaryInput, prefix: ByteArray, targetType: KCl
     }
 }
 
-internal fun requireNextByteEquals(data: BinaryInput, expected: Byte) {
+internal fun requireNextByteEquals(data: BinaryInput, vararg expected: Byte) {
     val actual = data.nextByte()
-    if (actual != expected) {
+    if (actual !in expected) {
+        val expectedDescription = if (expected.size == 1) expected.single().hex() else expected.joinToString(
+            separator = ", ",
+            prefix = "either of: ",
+            transform = { it.hex() },
+        )
         throw MessageParseException.InvalidMessage(
-            "Unexpected ${actual.hex()}, expected ${expected.hex()} at offset ${(data.position - 1).hex()}"
+            "Unexpected ${actual.hex()}, expected $expectedDescription at offset ${(data.position - 1).hex()}"
         )
     }
 }

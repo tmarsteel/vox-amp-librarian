@@ -138,7 +138,7 @@ interface Program : ProtocolSerializable {
             val resonance = ZeroToTenDial.readFrom(input)
             val brightCap = input.nextByte().toBoolean()
             val lowCut = input.nextByte().toBoolean()
-            requireNextByteEquals(input, 0x00)
+            requireNextByteEquals(input, 0x00, 0x10)
             val midBoost = input.nextByte().toBoolean()
             val tubeBias = TubeBias.readFrom(input)
             val ampClass = AmpClass.readFrom(input)

@@ -161,7 +161,7 @@ Both host program and the amp can send a full program to each other. It always u
 | 1C     | 1      |         | Resonance                                                                               |
 | 1D     | 1      |         | Bright Cap                                                                              |
 | 1E     | 1      |         | Low Cut                                                                                 |
-| 1F     | 1      |         | ? (00, 8th byte)                                                                        |
+| 1F     | 1      |         | ? (00, sometimes 10, 8th byte)                                                          |
 | 20     | 1      |         | Mid Boost                                                                               |
 | 21     | 1      |         | Tube Bias Shift                                                                         |
 | 22     | 1      |         | Amp Class                                                                               |
