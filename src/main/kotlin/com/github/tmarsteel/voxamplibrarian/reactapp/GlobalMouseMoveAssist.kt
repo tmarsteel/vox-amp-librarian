@@ -32,6 +32,7 @@ object GlobalMouseMoveAssist {
         }
         onMouseDown = { reactEvent -> startHandler(MouseOrSingleFingerTouchEvent(reactEvent.nativeEvent)) }
         onTouchStart = touchStart@{ reactEvent ->
+            reactEvent.target.asDynamic().focus()
             MouseOrSingleFingerTouchEvent.from(reactEvent.nativeEvent)?.let(startHandler)
         }
     }
