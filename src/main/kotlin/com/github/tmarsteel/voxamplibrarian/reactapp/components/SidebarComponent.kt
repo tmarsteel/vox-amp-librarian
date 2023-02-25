@@ -39,7 +39,7 @@ external interface SidebarComponentProps : Props {
     var onSaveConfiguration: (ProgramSlot) -> Unit
     var onLoadConfiguration: (ProgramSlot) -> Unit
     var onViewNonAmpConfiguration: (SimulationConfiguration) -> Unit
-    var onWriteProgramToCurrentAmpSlot: (SimulationConfiguration, ProgramSlot) -> Unit
+    var onWriteConfigurationToAmpSlot: (SimulationConfiguration, ProgramSlot) -> Unit
     var onClose: () -> Unit
 }
 
@@ -192,9 +192,16 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
                     "sidebar-tree-entry-action",
                     "disabled".takeUnless { localAmpState != null }
                 )
-                icon("arrow-up", "Configure amplifier with the first 8 programs")
+                icon("arrow-up", "Configure amplifier with the first ${ProgramSlot.values().size} programs")
                 onClick = {
+                    currentFile.configs
+                        .take(ProgramSlot.values().size)
+                        .zip(ProgramSlot.values())
+                        .forEach { (config, slot) ->
+                            props.onWriteConfigurationToAmpSlot(config, slot)
+                        }
 
+                    props.onProgramSlotSelected(ProgramSlot.A1)
                 }
             }
         }
@@ -228,7 +235,7 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
                         val selectedSlot = (localAmpState as? VtxAmpState.ProgramSlotSelected)?.slot
                             ?: return@storeFileProgramToAmp
 
-                        props.onWriteProgramToCurrentAmpSlot(config, selectedSlot)
+                        props.onWriteConfigurationToAmpSlot(config, selectedSlot)
                     }
                 }
 
