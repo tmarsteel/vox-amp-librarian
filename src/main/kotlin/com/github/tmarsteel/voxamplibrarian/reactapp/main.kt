@@ -105,7 +105,6 @@ val AppComponent = FC<Props> {
 
         SimulationConfigurationComponent {
             configuration = nonAmpConfigForViewing ?: ampState?.activeConfiguration ?: SimulationConfiguration.DEFAULT
-            readOnly = nonAmpConfigForViewing != null || ampState?.activeConfiguration == null
             onConfigurationChanged = configChanged@{ newConfig ->
                 if (nonAmpConfigForViewing != null) {
                     return@configChanged
