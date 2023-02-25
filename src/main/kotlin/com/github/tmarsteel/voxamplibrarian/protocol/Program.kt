@@ -58,11 +58,7 @@ interface Program : ProtocolSerializable {
             flags = flags or Program.FLAG_REVERB_PEDAL_ENABLED
         }
 
-        val (pedal2Dial1Value, pedal2Dial1Offset) = if (pedal2Dial1.semanticValue > 0x80u) {
-            Pair((pedal2Dial1.semanticValue - 0x80u).toUShort(), 0x20.toByte())
-        } else {
-            Pair(pedal2Dial1.semanticValue, 0x20.toByte())
-        }
+        val (pedal2Dial1Offset, pedal2Dial1Value) = offsetEncode(pedal2Dial1)
 
         out.write(programName.encoded, 0x00, 0x7)
         out.write(0x00)
@@ -151,17 +147,13 @@ interface Program : ProtocolSerializable {
             val pedal1Type = Slot1PedalType.ofProtocolValue(input.nextByte())
             val pedal1Dial1 = TwoByteDial.readFrom(input)
             val pedal1Dial2 = input.nextByte()
-            val pedal2Dial1Offset: UShort = when(val indicator = input.nextByte().toInt()) {
-                0x00 -> 0u
-                0x20 -> 128u
-                else -> throw MessageParseException.InvalidMessage("Unrecognized offset indicator for pedal 2 dial 1: expected 0x00 or 0x20, got $indicator")
-            }
+            val pedal2Dial1Offset = input.nextByte()
             val pedal1Dial3 = input.nextByte()
             val pedal1Dial4 = input.nextByte()
             val pedal1Dial5 = input.nextByte()
             val pedal1Dial6 = input.nextByte()
             val pedal2Type = Slot2PedalType.ofProtocolValue(input.nextByte())
-            val pedal2Dial1 = TwoByteDial((input.nextUShort() + pedal2Dial1Offset).toUShort())
+            val pedal2Dial1 = offsetDecode(pedal2Dial1Offset, input.nextByte(), input.nextByte())
             requireNextByteEquals(input, 0x00)
             val pedal2Dial2 = input.nextByte()
             val pedal2Dial3 = input.nextByte()
@@ -303,3 +295,28 @@ class ProgramImpl(
     override var reverbPedalDial4: ZeroToTenDial,
     override var reverbPedalDial5: ZeroToTenDial,
 ) : MutableProgram
+
+private fun offsetDecode(offset: Byte, firstByte: Byte, secondByte: Byte): TwoByteDial {
+    val offsetValue: Int = when(offset) {
+        0x00.toByte() -> 0x00
+        0x20.toByte() -> 0x80
+        else -> throw MessageParseException.InvalidMessage("Unrecognized offset indicator for pedal 2 dial 1: expected 0x00 or 0x20, got $offset")
+    }
+
+    val valueWithoutOffset = firstByte.toUByte().toInt() or (secondByte.toUByte().toInt() shl 8)
+    return TwoByteDial((valueWithoutOffset + offsetValue).toUShort())
+}
+
+private fun offsetEncode(value: TwoByteDial): Pair<Byte, UShort> {
+    var simpleLeastSignificant = (value.semanticValue.toInt() and 0xFF).toUByte()
+    val simpleMostSignificant = (value.semanticValue.toInt() shr 8).toUByte()
+    var offset: Byte = 0x00
+    if (simpleLeastSignificant >= 0x80u) {
+        offset = 0x20
+        simpleLeastSignificant = (simpleLeastSignificant - 0x80u).toUByte()
+    }
+
+    val recombined = (simpleLeastSignificant.toInt() or (simpleMostSignificant.toInt() shl 8)).toUShort()
+    return Pair(offset, recombined)
+}
+
