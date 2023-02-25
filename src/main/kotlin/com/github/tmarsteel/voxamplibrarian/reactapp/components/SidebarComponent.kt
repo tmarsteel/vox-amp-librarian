@@ -1,14 +1,17 @@
 package com.github.tmarsteel.voxamplibrarian.reactapp.components
 
 import com.github.tmarsteel.voxamplibrarian.BlobBinaryInput
+import com.github.tmarsteel.voxamplibrarian.BlobBinaryOutput.Companion.writeToBlob
 import com.github.tmarsteel.voxamplibrarian.appmodel.SimulationConfiguration
 import com.github.tmarsteel.voxamplibrarian.appmodel.VtxAmpState
+import com.github.tmarsteel.voxamplibrarian.appmodel.hardware_integration.toProtocolDataModel
 import com.github.tmarsteel.voxamplibrarian.appmodel.hardware_integration.toUiDataModel
 import com.github.tmarsteel.voxamplibrarian.logging.LoggerFactory
 import com.github.tmarsteel.voxamplibrarian.protocol.ProgramSlot
 import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageParseException
 import com.github.tmarsteel.voxamplibrarian.reactapp.classes
 import com.github.tmarsteel.voxamplibrarian.reactapp.icon
+import com.github.tmarsteel.voxamplibrarian.startDownload
 import com.github.tmarsteel.voxamplibrarian.vtxprog.VtxProgFile
 import csstype.ClassName
 import csstype.Cursor
@@ -27,6 +30,7 @@ import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.input
 import react.dom.html.ReactHTML.span
 import react.useState
+import kotlin.js.Date
 
 external interface SidebarComponentProps : Props {
     var ampConnected: Boolean
@@ -41,7 +45,7 @@ external interface SidebarComponentProps : Props {
 private val logger = LoggerFactory["sidebar"]
 
 private data class LoadedFile(
-    val filename: String,
+    val filename: String?,
     val configs: List<SimulationConfiguration>,
     /** for change detection */
     val originalConfigs: List<SimulationConfiguration> = configs,
@@ -50,7 +54,7 @@ private data class LoadedFile(
         return configs.zip(originalConfigs).any { (currentConfig, originalConfig) -> currentConfig != originalConfig }
     }
 
-    fun withChangesSaved(): LoadedFile = copy(filename, configs, configs)
+    fun withChangesSaved(asFilename: String): LoadedFile = copy(asFilename, configs, configs)
 
     companion object {
         val DEFAULT = LoadedFile("empty", SimulationConfiguration.DEFAULT.repeat(11))
@@ -139,7 +143,7 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
             icon("file-earmark", "Currently loaded file")
             span {
                 className = classes("sidebar-tree-entry__label")
-                +currentFile.filename
+                +(currentFile.filename ?: "<no filename>")
             }
 
             div {
@@ -157,7 +161,17 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
                 className = classes("sidebar-tree-entry-action")
                 icon("download", "export configurations")
                 onClick = {
+                    val newVtxProgFile = VtxProgFile(currentFile.configs.map { it.toProtocolDataModel() })
+                    val blob = writeToBlob { binaryOut ->
+                        newVtxProgFile.writeToInVtxProgFormat(binaryOut)
+                    }
 
+                    val filename = currentFile.filename ?: run {
+                        val now = Date()
+                        "unknown-${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}.vtxporg"
+                    }
+                    startDownload(blob, filename)
+                    currentFile = currentFile.withChangesSaved(filename)
                 }
             }
 

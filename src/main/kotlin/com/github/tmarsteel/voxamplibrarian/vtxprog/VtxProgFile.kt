@@ -36,6 +36,7 @@ data class VtxProgFile(
         output.write(middle)
         output.write(bass)
         output.write(volume)
+        output.write(presence)
         output.write(resonance)
         output.write(brightCap)
         output.write(lowCut)

@@ -2,11 +2,15 @@ package com.github.tmarsteel.voxamplibrarian
 
 import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageParseException
 import com.github.tmarsteel.voxamplibrarian.protocol.message.MidiProtocolMessage
+import kotlinx.browser.window
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.khronos.webgl.Uint8Array
+import org.w3c.dom.HTMLAnchorElement
+import org.w3c.dom.url.URL
+import org.w3c.files.Blob
 import react.useEffect
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -99,4 +103,24 @@ fun useEffectCoroutine(block: suspend () -> Unit) {
         }
         job.start()
     }
+}
+
+fun startDownload(data: Blob, filename: String) {
+    val downloadTriggerLink: HTMLAnchorElement = window.document.getElementById("download-trigger-link") as HTMLAnchorElement?
+        ?: run {
+            val anchor = window.document.createElement("a") as HTMLAnchorElement
+            anchor.id = "download-trigger-link"
+            anchor.style.display = "none"
+            window.document.body!!.appendChild(anchor)
+            anchor
+        }
+
+    val blobUrl = URL.createObjectURL(data)
+    downloadTriggerLink.download = filename
+    downloadTriggerLink.href = blobUrl
+    downloadTriggerLink.click()
+
+    window.setTimeout({
+        URL.revokeObjectURL(blobUrl)
+    }, 1)
 }
