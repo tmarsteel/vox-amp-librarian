@@ -5,32 +5,32 @@
   "display": "standalone",
   "icons": [
     {
-      "src": "/vox-amp-librarian/icon.svg",
+      "src": "icon.svg",
       "sizes": "any",
       "type": "image/svg"
     },
     {
-      "src": "/vox-amp-librarian/icon_16.svg",
+      "src": "icon_16.png",
       "sizes": "16x16",
       "type": "image/png"
     },
     {
-      "src": "/vox-amp-librarian/icon_32.svg",
+      "src": "icon_32.png",
       "sizes": "32x32",
       "type": "image/png"
     },
     {
-      "src": "/vox-amp-librarian/icon_64.svg",
+      "src": "icon_64.png",
       "sizes": "64x64",
       "type": "image/png"
     },
     {
-      "src": "/vox-amp-librarian/icon_128.svg",
+      "src": "icon_128.png",
       "sizes": "128x128",
       "type": "image/png"
     },
     {
-      "src": "/vox-amp-librarian/icon_512.svg",
+      "src": "icon_512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
