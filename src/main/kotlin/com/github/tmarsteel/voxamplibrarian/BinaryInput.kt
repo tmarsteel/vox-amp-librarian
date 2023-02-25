@@ -14,7 +14,7 @@ interface BinaryInput {
     fun nextUShort(): UShort {
         val buffer = ByteArray(2)
         nextBytes(buffer)
-        return ((buffer[1].toInt() shl 8) or buffer[0].toInt()).toUShort()
+        return ((buffer[1].toUByte().toInt() shl 8) or buffer[0].toUByte().toInt()).toUShort()
     }
 
     fun nextBytes(target: ByteArray, offset: Int = 0, length: Int = target.size) {
