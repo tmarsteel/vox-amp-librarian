@@ -94,6 +94,10 @@ val AppComponent = FC<Props> {
             onViewNonAmpConfiguration = {
                 nonAmpConfigForViewing = it
             }
+            onWriteProgramToCurrentAmpSlot = save@{ config, targetSlot ->
+                VoxVtxAmpConnection.VOX_AMP.value?.persistConfigurationToSlot(config, targetSlot)
+                VoxVtxAmpConnection.VOX_AMP.value?.selectUserProgramSlot(targetSlot)
+            }
             onClose = {
                 sidebarExplicitlyOpen = false
             }

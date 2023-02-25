@@ -39,6 +39,7 @@ external interface SidebarComponentProps : Props {
     var onSaveConfiguration: (ProgramSlot) -> Unit
     var onLoadConfiguration: (ProgramSlot) -> Unit
     var onViewNonAmpConfiguration: (SimulationConfiguration) -> Unit
+    var onWriteProgramToCurrentAmpSlot: (SimulationConfiguration, ProgramSlot) -> Unit
     var onClose: () -> Unit
 }
 
@@ -194,9 +195,6 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
                 span {
                     className = ClassName("sidebar-tree-entry__label")
                     +(config.programName ?: "<no name>")
-                    onClick = {
-
-                    }
                 }
 
                 div {
@@ -208,21 +206,25 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
                     }
                 }
 
+                val ampInteractPossible: Boolean = localAmpState != null && localAmpState is VtxAmpState.ProgramSlotSelected
                 div {
                     className = classes(
                         "sidebar-tree-entry-action",
-                        "disabled".takeUnless { localAmpState != null }
+                        "disabled".takeUnless { ampInteractPossible }
                     )
                     icon("arrow-up", "Write this program to the currently selected slot on the amp")
-                    onClick = {
+                    onClick = storeFileProgramToAmp@{
+                        val selectedSlot = (localAmpState as? VtxAmpState.ProgramSlotSelected)?.slot
+                            ?: return@storeFileProgramToAmp
 
+                        props.onWriteProgramToCurrentAmpSlot(config, selectedSlot)
                     }
                 }
 
                 div {
                     className = classes(
                         "sidebar-tree-entry-action",
-                        "disabled".takeUnless { localAmpState != null }
+                        "disabled".takeUnless { ampInteractPossible }
                     )
                     icon("arrow-down", "Write the current amp configuration to this slot.")
                     onClick = {
