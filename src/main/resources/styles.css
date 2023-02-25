@@ -161,7 +161,24 @@ body.during-global-drag * {
     z-index: 500;
 }
 
-@media(max-width: 2000px) {
+.container-xxl {
+    max-width: 960px;
+}
+
+@media(max-width: 1639px) {
+    .container-xxl {
+        margin-left: 24rem;
+        max-width: calc(100% - 24rem);
+    }
+}
+
+@media(min-width: 52rem) {
+    .sidebar-open, .sidebar-close {
+        display: none;
+    }
+}
+
+@media(max-width: 52rem) {
     .sidebar {
         left: -24rem;
         transition: ease-in 0.25s;
@@ -170,10 +187,10 @@ body.during-global-drag * {
     .sidebar.open {
         left: 0;
     }
-}
 
-@media(min-width: 2001px) {
-    .sidebar-open, .sidebar-close {
-        display: none;
+    .container-xxl {
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 100%;
     }
 }

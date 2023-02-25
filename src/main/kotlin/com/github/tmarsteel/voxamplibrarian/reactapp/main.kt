@@ -52,7 +52,7 @@ val AppComponent = FC<Props> {
         className = classes("topbar")
 
         div {
-            className = classes("container")
+            className = classes("container-xxl")
 
             div {
                 className = classes("row")
@@ -105,7 +105,7 @@ val AppComponent = FC<Props> {
     }
 
     div {
-        className = classes("container", "simulation-config")
+        className = classes("container-xxl", "simulation-config")
 
         SimulationConfigurationComponent {
             configuration = nonAmpConfigForViewing ?: ampState?.activeConfiguration ?: SimulationConfiguration.DEFAULT
