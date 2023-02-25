@@ -242,10 +242,13 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
                     logger.error("Failed to load VTXPROG file", ex)
                     val errorDetails = when (ex) {
                         is MessageParseException.InvalidMessage -> ": ${ex.message}"
-                        is MessageParseException.PrefixNotRecognized -> ": does not appear to be a VTXPROG file"
-                        else -> ""
+                        is MessageParseException.PrefixNotRecognized -> ": does not appear to be a VTXPROG file."
+                        else -> "; see console logs for details."
                     }
                     window.alert("Failed to load the file$errorDetails")
+                }
+                finally {
+                    hiddenFileInputRef.current?.value = ""
                 }
             }
         }
