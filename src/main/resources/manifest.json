@@ -38,6 +38,6 @@
   "launch_handler": {
     "client_mode": "focus-existing"
   },
-  "start_url": "",
+  "start_url": "/vox-amp-librarian",
   "theme_color": "#202020"
 }
