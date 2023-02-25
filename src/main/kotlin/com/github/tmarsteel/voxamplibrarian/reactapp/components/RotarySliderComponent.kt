@@ -6,8 +6,11 @@ import com.github.tmarsteel.voxamplibrarian.reactapp.GlobalMouseMoveAssist.regis
 import csstype.*
 import emotion.react.css
 import kotlinx.browser.window
-import react.*
+import react.FC
+import react.MutableRefObject
+import react.Props
 import react.dom.html.ReactHTML.div
+import react.useRef
 import kotlin.math.absoluteValue
 import kotlin.math.sign
 
@@ -32,7 +35,6 @@ private val logger = LoggerFactory["rotary-dial"]
 val RotarySliderComponent = FC<RotarySliderComponentProps> { props ->
     val dragSensitivityFactor: Double = (props.range.last - props.range.first).toDouble() / 300.0
     val currentDragStartScreenY: MutableRefObject<Int> = useRef(null)
-    var focusedThroughMouseEnter by useState(false)
 
     fun publishNewValue(delta: Int) {
         if (delta == 0) {
@@ -49,6 +51,7 @@ val RotarySliderComponent = FC<RotarySliderComponentProps> { props ->
             height = props.size
             touchAction = None.none
         }
+
         tabIndex = 0
         registerGlobalDragHandler(
             onDragStart = {
@@ -108,7 +111,7 @@ val RotarySliderComponent = FC<RotarySliderComponentProps> { props ->
         }
         div {
             css(ClassName("rotary-slider__knob")) {
-                val nDegrees = ROTATE_DEGREES_MIN + (props.value * (360 - CUTOUT_DEGREES) / (props.range.last - props.range.first))
+                val nDegrees = ROTATE_DEGREES_MIN + ((props.value - props.range.first) * (360 - CUTOUT_DEGREES) / (props.range.last - props.range.first))
                 transform = "rotate(${nDegrees}deg)".unsafeCast<Transform>()
             }
 
