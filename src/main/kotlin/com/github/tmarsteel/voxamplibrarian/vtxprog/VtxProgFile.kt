@@ -2,8 +2,9 @@ package com.github.tmarsteel.voxamplibrarian.vtxprog
 
 import com.github.tmarsteel.voxamplibrarian.BinaryInput
 import com.github.tmarsteel.voxamplibrarian.BinaryOutput
+import com.github.tmarsteel.voxamplibrarian.hex
 import com.github.tmarsteel.voxamplibrarian.protocol.*
-import com.github.tmarsteel.voxamplibrarian.requireNextByteEquals
+import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageParseException
 import com.github.tmarsteel.voxamplibrarian.toBoolean
 
 data class VtxProgFile(
@@ -68,11 +69,6 @@ data class VtxProgFile(
         output.write(0x00)
     }
 
-    private fun BinaryOutput.write(value: UShort) {
-        write((value.toInt() and 0xFF).toByte())
-        write((value.toInt() shr 8).toByte())
-    }
-
     companion object {
         private val PREFIX = byteArrayOf(
             0x56, 0x54, 0x58, 0x50, 0x52, 0x4F, 0x47, 0x31, 0x30, 0x30, 0x30, 0x20, 0x00, 0x00, 0x00, 0x00,
@@ -92,7 +88,7 @@ data class VtxProgFile(
             val programs = mutableListOf<Program>()
             while (input.bytesRemaining > 0) {
                 if (input.bytesRemaining < 0x3E) {
-                    throw IllegalArgumentException("The input file has an incorrect length, programs are always 0x3E bytes long")
+                    throw MessageParseException.InvalidMessage("The input file has an incorrect length, programs are always 0x3E bytes long (at offset ${input.position.hex()})")
                 }
 
                 programs.add(readProgramInVtxProgFormat(input))
@@ -111,7 +107,6 @@ data class VtxProgFile(
             val ampModel = AmpModel.readFrom(input)
             val gain = ZeroToTenDial.readFrom(input)
             val treble = ZeroToTenDial.readFrom(input)
-            requireNextByteEquals(input, 0x00)
             val middle = ZeroToTenDial.readFrom(input)
             val bass = ZeroToTenDial.readFrom(input)
             val volume = ZeroToTenDial.readFrom(input)
@@ -119,27 +114,24 @@ data class VtxProgFile(
             val resonance = ZeroToTenDial.readFrom(input)
             val brightCap = input.nextByte().toBoolean()
             val lowCut = input.nextByte().toBoolean()
-            requireNextByteEquals(input, 0x00)
             val midBoost = input.nextByte().toBoolean()
             val tubeBias = TubeBias.readFrom(input)
             val ampClass = AmpClass.readFrom(input)
             val pedal1Type = Slot1PedalType.ofProtocolValue(input.nextByte())
-            val pedal1Dial1 = TwoByteDial.readFrom(input)
+            val pedal1Dial1 = TwoByteDial(input.nextUShort())
             val pedal1Dial2 = input.nextByte()
-            input.skip(1)
             val pedal1Dial3 = input.nextByte()
             val pedal1Dial4 = input.nextByte()
             val pedal1Dial5 = input.nextByte()
             val pedal1Dial6 = input.nextByte()
             val pedal2Type = Slot2PedalType.ofProtocolValue(input.nextByte())
-            val pedal2Dial1 = TwoByteDial.readFrom(input)
-            requireNextByteEquals(input, 0x00)
+            val pedal2Dial1 = TwoByteDial(input.nextUShort())
             val pedal2Dial2 = input.nextByte()
             val pedal2Dial3 = input.nextByte()
             val pedal2Dial4 = input.nextByte()
             val pedal2Dial5 = input.nextByte()
             val pedal2Dial6 = input.nextByte()
-            input.skip(0x0A)
+            input.skip(0x08)
             val reverbPedalType = ReverbPedalType.ofProtocolValue(input.nextByte())
             val reverbPedalDial1 = ZeroToTenDial.readFrom(input)
             val reverbPedalDial2 = ZeroToTenDial.readFrom(input)
