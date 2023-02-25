@@ -57,8 +57,19 @@ private data class LoadedFile(
 
     fun withChangesSaved(asFilename: String): LoadedFile = copy(asFilename, configs, configs)
 
+    fun withConfigAtIndex(config: SimulationConfiguration, index: Int): LoadedFile {
+        val newConfigs = configs.toMutableList()
+        if (index > newConfigs.lastIndex) {
+            repeat(index - newConfigs.lastIndex) {
+                newConfigs.add(SimulationConfiguration.DEFAULT)
+            }
+        }
+        newConfigs[index] = config
+        return copy(configs = newConfigs)
+    }
+
     companion object {
-        val DEFAULT = LoadedFile("empty", SimulationConfiguration.DEFAULT.repeat(11))
+        val DEFAULT = LoadedFile(null, SimulationConfiguration.DEFAULT.repeat(11))
     }
 }
 
@@ -188,7 +199,7 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
             }
         }
 
-        for (config in currentFile.configs) {
+        currentFile.configs.forEachIndexed { configIndexInFile, config ->
             div {
                 className = classes("sidebar-tree-entry", "sidebar-tree-entry--level-1")
 
@@ -227,8 +238,9 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
                         "disabled".takeUnless { ampInteractPossible }
                     )
                     icon("arrow-down", "Write the current amp configuration to this slot.")
-                    onClick = {
-
+                    onClick = saveToFileSlot@{
+                        val localConfig = localAmpState?.activeConfiguration ?: return@saveToFileSlot
+                        currentFile = currentFile.withConfigAtIndex(localConfig, configIndexInFile)
                     }
                 }
             }
