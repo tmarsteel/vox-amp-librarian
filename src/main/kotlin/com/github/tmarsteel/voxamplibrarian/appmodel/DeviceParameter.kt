@@ -488,8 +488,8 @@ fun PedalDescriptor<*>.pedalSwitch(
 
         override fun getValueFrom(program: Program, parameter: DeviceParameter<Boolean>): Boolean {
             return when (val value = field.get(program.unsafeCast<MutableProgram>()).toInt()) {
-                0x00 -> true
-                0x01 -> false
+                0x00 -> false
+                0x01 -> true
                 else -> error("Binary parameter does not have binary value: $field = $value")
             }
         }
