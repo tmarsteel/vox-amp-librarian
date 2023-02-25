@@ -35,7 +35,9 @@
       "type": "image/png"
     }
   ],
-  "launch_handler": "focus-existing",
-  "start_url": "/vox-amp-librarian",
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
+  "start_url": "",
   "theme_color": "#202020"
 }
