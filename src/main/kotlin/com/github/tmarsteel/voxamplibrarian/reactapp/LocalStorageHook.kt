@@ -1,6 +1,8 @@
 package com.github.tmarsteel.voxamplibrarian.reactapp
 
 import kotlinx.browser.window
+import react.StateInstance
+import react.useState
 import kotlin.reflect.KProperty
 
 class LocalStorageHook<T>(
@@ -43,5 +45,38 @@ class LocalStorageHook<T>(
             serialize: (T) -> String = JSON::stringify,
             deserialize: (String) -> T = JSON::parse,
         ): LocalStorageHook<T> = LocalStorageHook(key, defaultValue, cacheValue, serialize, deserialize)
+    }
+}
+
+class StateAndLocalStorageHook<T : Any> private constructor(
+    private val stateInstance: StateInstance<T?>,
+    private val localStorageHook: LocalStorageHook<T>,
+) {
+    operator fun getValue(thisRef: Nothing?, property: KProperty<*>): T {
+        val fromState = stateInstance.getValue(thisRef, property)
+        if (fromState != null) {
+            return fromState
+        }
+
+        return localStorageHook.getValue(thisRef, property)
+    }
+
+    operator fun setValue(thisRef: Nothing?, property: KProperty<*>, value: T) {
+        stateInstance.setValue(thisRef, property, value)
+        localStorageHook.setValue(thisRef, property, value)
+    }
+
+    companion object {
+        fun <T : Any> useStateBackedByLocalStorage(
+            key: String,
+            defaultValue: T,
+            serialize: (T) -> String = JSON::stringify,
+            deserialize: (String) -> T = JSON::parse
+        ): StateAndLocalStorageHook<T> {
+            return StateAndLocalStorageHook(
+                useState(null),
+                LocalStorageHook(key, defaultValue, true, serialize, deserialize),
+            )
+        }
     }
 }
