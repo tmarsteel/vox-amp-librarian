@@ -149,7 +149,7 @@ body.during-global-drag * {
 
 .rotary-slider__knob .rotary-slider__marker {
     width: calc(50% - 0.05rem);
-    height: 11.11%;
+    height: 40%;
     border-right: 0.1rem solid black;
 }
 
