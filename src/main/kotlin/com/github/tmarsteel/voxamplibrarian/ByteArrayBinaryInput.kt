@@ -19,7 +19,8 @@ class ByteArrayBinaryInput(
         require(beginIndex in data.indices)
         require(endIndex in data.indices)
     }
-    private var position: Int = beginIndex
+    override var position: Int = beginIndex
+        private set
 
     override fun nextByte(): Byte {
         if (position > endIndex) {

@@ -29,7 +29,7 @@ internal fun requireNextByteEquals(data: BinaryInput, expected: Byte) {
     val actual = data.nextByte()
     if (actual != expected) {
         throw MessageParseException.InvalidMessage(
-            "Unexpected ${actual.hex()}, expected ${expected.hex()}"
+            "Unexpected ${actual.hex()}, expected ${expected.hex()} at offset ${(data.position - 1).hex()}"
         )
     }
 }
@@ -46,6 +46,7 @@ internal fun requireEOF(data: BinaryInput) {
 internal inline operator fun Uint8Array.get(index: Int): Int = asDynamic()[index]
 
 internal fun Byte.hex(): String = "0x" + toString(16).padStart(2, '0')
+internal fun Int.hex(): String = "0x" + toString(16).padStart(8, '0')
 
 internal fun Array<Int>.hex(): String = joinToString(separator = " ", transform = { it.toString(16).padStart(2, '0') })
 internal fun ByteArray.hex(): String = joinToString(separator = " ", transform = { it.toUByte().toString(16).padStart(2, '0') })

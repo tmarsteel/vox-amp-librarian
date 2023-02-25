@@ -35,6 +35,7 @@ interface BinaryInput {
         }
     }
 
+    val position: Int
     val bytesRemaining: Int
 
     fun seekToStart()

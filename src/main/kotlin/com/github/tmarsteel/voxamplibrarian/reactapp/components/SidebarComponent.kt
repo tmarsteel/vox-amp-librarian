@@ -1,11 +1,12 @@
 package com.github.tmarsteel.voxamplibrarian.reactapp.components
 
-import com.github.tmarsteel.voxamplibrarian.ArrayBufferBinaryInput
-import com.github.tmarsteel.voxamplibrarian.BinaryInput
+import com.github.tmarsteel.voxamplibrarian.BlobBinaryInput
 import com.github.tmarsteel.voxamplibrarian.appmodel.SimulationConfiguration
 import com.github.tmarsteel.voxamplibrarian.appmodel.VtxAmpState
 import com.github.tmarsteel.voxamplibrarian.appmodel.hardware_integration.toUiDataModel
+import com.github.tmarsteel.voxamplibrarian.logging.LoggerFactory
 import com.github.tmarsteel.voxamplibrarian.protocol.ProgramSlot
+import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageParseException
 import com.github.tmarsteel.voxamplibrarian.reactapp.classes
 import com.github.tmarsteel.voxamplibrarian.reactapp.icon
 import com.github.tmarsteel.voxamplibrarian.vtxprog.VtxProgFile
@@ -17,10 +18,7 @@ import emotion.react.css
 import kotlinx.browser.window
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.khronos.webgl.ArrayBuffer
 import org.w3c.dom.HTMLInputElement
-import org.w3c.files.File
-import org.w3c.files.FileReader
 import react.FC
 import react.Props
 import react.createRef
@@ -29,7 +27,6 @@ import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.input
 import react.dom.html.ReactHTML.span
 import react.useState
-import kotlin.coroutines.suspendCoroutine
 
 external interface SidebarComponentProps : Props {
     var ampConnected: Boolean
@@ -39,6 +36,8 @@ external interface SidebarComponentProps : Props {
     var onLoadConfiguration: (ProgramSlot) -> Unit
     var onClose: () -> Unit
 }
+
+private val logger = LoggerFactory["sidebar"]
 
 private data class LoadedFile(
     val filename: String,
@@ -232,11 +231,22 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
             }
 
             GlobalScope.launch {
-                val vtxprogFile = VtxProgFile.readFromInVtxProgFormat(file.readAllBytes())
-                currentFile = LoadedFile(
-                    file.name,
-                    vtxprogFile.programs.map { it.toUiDataModel() },
-                )
+                try {
+                    val vtxprogFile = VtxProgFile.readFromInVtxProgFormat(BlobBinaryInput(file))
+                    currentFile = LoadedFile(
+                        file.name,
+                        vtxprogFile.programs.map { it.toUiDataModel() },
+                    )
+                }
+                catch (ex: Throwable) {
+                    logger.error("Failed to load VTXPROG file", ex)
+                    val errorDetails = when (ex) {
+                        is MessageParseException.InvalidMessage -> ": ${ex.message}"
+                        is MessageParseException.PrefixNotRecognized -> ": does not appear to be a VTXPROG file"
+                        else -> ""
+                    }
+                    window.alert("Failed to load the file$errorDetails")
+                }
             }
         }
     }
@@ -249,21 +259,3 @@ private fun <T> T.repeat(times: Int): List<T> {
     }
     return list
 }
-
-private suspend fun File.readAllBytes(): BinaryInput {
-    val reader = FileReader()
-    return suspendCoroutine { readerDone ->
-        reader.onload = {
-            readerDone.resumeWith(Result.success(
-                ArrayBufferBinaryInput(reader.result as ArrayBuffer)
-            ))
-        }
-        reader.onerror = {
-            readerDone.resumeWith(Result.failure(reader.error as? Throwable ?: FileReaderErrorException(reader.error)))
-        }
-
-        reader.readAsArrayBuffer(this)
-    }
-}
-
-private class FileReaderErrorException(val error: Any) : RuntimeException()
