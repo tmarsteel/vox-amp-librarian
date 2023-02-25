@@ -58,6 +58,12 @@ interface Program : ProtocolSerializable {
             flags = flags or Program.FLAG_REVERB_PEDAL_ENABLED
         }
 
+        val (pedal2Dial1Value, pedal2Dial1Offset) = if (pedal2Dial1.semanticValue > 0x80u) {
+            Pair((pedal2Dial1.semanticValue - 0x80u).toUShort(), 0x20.toByte())
+        } else {
+            Pair(pedal2Dial1.semanticValue, 0x20.toByte())
+        }
+
         out.write(programName.encoded, 0x00, 0x7)
         out.write(0x00)
         out.write(programName.encoded, 0x07, 0x7)
@@ -83,13 +89,13 @@ interface Program : ProtocolSerializable {
         out.write(pedal1Type.protocolValue)
         out.write(pedal1Dial1)
         out.write(pedal1Dial2)
-        out.write(0x00)
+        out.write(pedal2Dial1Offset)
         out.write(pedal1Dial3)
         out.write(pedal1Dial4)
         out.write(pedal1Dial5)
         out.write(pedal1Dial6)
         out.write(pedal2Type.protocolValue)
-        out.write(pedal2Dial1.semanticValue)
+        out.write(pedal2Dial1Value)
         out.write(0x00)
         out.write(pedal2Dial2)
         out.write(pedal2Dial3)
