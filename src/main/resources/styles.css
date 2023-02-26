@@ -153,6 +153,31 @@ body.during-global-drag * {
     border-right: 0.1rem solid black;
 }
 
+.discrete-choices-container {
+    display: flex;
+    flex-direction: column;
+    height: 5.5rem;
+}
+
+.discrete-choice {
+    text-align: center;
+    width: 100%;
+    background: #E0E0E0;
+    cursor: pointer;
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+}
+
+.discrete-choice label {
+    width: 100%;
+    cursor: pointer;
+}
+
+.discrete-choice--checked {
+    background: #6596e2;
+}
+
 .topbar {
     border-bottom: 0.1rem solid #2a2a2a;
 }

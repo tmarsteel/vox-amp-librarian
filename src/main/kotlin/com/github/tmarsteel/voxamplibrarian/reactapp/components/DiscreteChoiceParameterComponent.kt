@@ -1,12 +1,15 @@
 package com.github.tmarsteel.voxamplibrarian.reactapp.components
 
 import com.github.tmarsteel.voxamplibrarian.appmodel.DiscreteChoiceParameter
+import com.github.tmarsteel.voxamplibrarian.reactapp.IdGenerator
+import com.github.tmarsteel.voxamplibrarian.reactapp.classes
 import com.github.tmarsteel.voxamplibrarian.reactapp.label
 import csstype.Display
+import csstype.None
 import csstype.TextAlign
 import csstype.pct
-import csstype.rem
 import emotion.react.css
+import org.w3c.dom.HTMLLabelElement
 import react.FC
 import react.Props
 import react.dom.html.InputType
@@ -22,35 +25,39 @@ external interface DiscreteChoiceParameterComponentProps : Props {
     var onValueChanged: (Any) -> Unit
 }
 
-private object IdGenerator {
-    private var counter: Int = 0
-    fun getUniqueId(): String = "${counter++}"
-}
-
 val DiscreteChoiceParameterComponent = FC<DiscreteChoiceParameterComponentProps> { props ->
     val radioId by useState(IdGenerator.getUniqueId())
-    props.descriptor.choices.forEachIndexed { choiceIndex, choice ->
-        div {
-            css {
-                display = Display.block
-                textAlign = TextAlign.center
-            }
-            input {
-                type = InputType.radio
-                name = "discrete-choice-parameter-$radioId"
-                id = "discrete-choice-parameter-$radioId-$choiceIndex"
-                value = "$choiceIndex"
-                checked = choice == props.value
-                onChange = {
-                    props.onValueChanged.unsafeCast<(Any) -> Unit>()(choice)
+    div {
+        className = classes("discrete-choices-container")
+        props.descriptor.choices.forEachIndexed { choiceIndex, choice ->
+            div {
+                className = classes(
+                    "discrete-choice",
+                    "discrete-choice--checked".takeIf { choice == props.value },
+                )
+                onClick = {
+                    val label = it.currentTarget.querySelector("label")!! as HTMLLabelElement
+                    label.click()
                 }
-            }
-            label {
-                css {
-                    marginLeft = 0.5.rem
+
+                input {
+                    css {
+                        display = None.none
+                    }
+                    type = InputType.radio
+                    name = "discrete-choice-parameter-$radioId"
+                    id = "discrete-choice-parameter-$radioId-$choiceIndex"
+                    value = "$choiceIndex"
+                    checked = choice == props.value
+                    onChange = {
+                        props.onValueChanged.unsafeCast<(Any) -> Unit>()(choice)
+                    }
                 }
-                htmlFor = "discrete-choice-parameter-$radioId-$choiceIndex"
-                +choice.toString()
+                label {
+                    htmlFor = "discrete-choice-parameter-$radioId-$choiceIndex"
+                    +choice.toString()
+                    onClick = { it.stopPropagation() }
+                }
             }
         }
     }
