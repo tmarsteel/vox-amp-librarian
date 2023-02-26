@@ -6,30 +6,12 @@ import com.github.tmarsteel.voxamplibrarian.protocol.*
 class EffectPedalTypeChangedMessage(
     val type: PedalType,
 ) : MessageToHost, MessageToAmp<EffectPedalTypeChangedMessage.Response> {
-    override fun createResponseHandler() = object : ResponseHandler<Response> {
-        private var ack: GenericAcknowledgement? = null
-        private val dialUpdates = mutableListOf<EffectDialTurnedMessage>()
-        override fun onMessage(payload: BinaryInput): ResponseHandler.MessageResult<Response> {
-            if (ack == null) {
-                ack = GenericAcknowledgement.parse(payload)
-                return ResponseHandler.MessageResult.MoreMessagesNeeded
-            }
-
-            dialUpdates.add(EffectDialTurnedMessage.parse(payload))
-            if (dialUpdates.size < type.slot.nDials) {
-                return ResponseHandler.MessageResult.MoreMessagesNeeded
-            }
-
-            return ResponseHandler.MessageResult.ResponseComplete(Response(
-                ack!!,
-                dialUpdates,
-            ))
+    override fun createResponseHandler() = ResponseHandler.coroutine {
+        val ack = GenericAcknowledgement.parse(receiveNext())
+        val dialUpdates = (0 until type.slot.nDials).map {
+            EffectDialTurnedMessage.parse(receiveNext())
         }
-
-        override fun cancel() {
-            ack = null
-            dialUpdates.clear()
-        }
+        Response(ack, dialUpdates)
     }
 
     override fun writeTo(out: BinaryOutput) {

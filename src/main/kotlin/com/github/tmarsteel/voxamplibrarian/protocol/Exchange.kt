@@ -15,18 +15,17 @@ interface Exchange<Response> {
 
         fun <R1, R2, RT> of(m1: MessageToAmp<R1>, m2: MessageToAmp<R2>, compose: (R1, R2) -> RT): Exchange<RT> {
             return ExchangeImpl(listOf(m1, m2)) {
-                ResponseHandler.compound(m1.createResponseHandler(), m2.createResponseHandler(), compose)
+                ResponseHandler.coroutine {
+                    compose(subProcess(m1.createResponseHandler()), subProcess(m2.createResponseHandler()))
+                }
             }
         }
 
         fun <R1, R2, R3, RT> of(m1: MessageToAmp<R1>, m2: MessageToAmp<R2>, m3: MessageToAmp<R3>, compose: (R1, R2, R3) -> RT): Exchange<RT> {
             return ExchangeImpl(listOf(m1, m2, m3)) {
-                ResponseHandler.compound(
-                    m1.createResponseHandler(),
-                    m2.createResponseHandler(),
-                    m3.createResponseHandler(),
-                    compose
-                )
+                ResponseHandler.coroutine {
+                    compose(subProcess(m1.createResponseHandler()), subProcess(m2.createResponseHandler()), subProcess(m3.createResponseHandler()))
+                }
             }
         }
     }
