@@ -87,6 +87,16 @@ val AppComponent = FC<Props> {
                 VoxVtxAmpConnection.VOX_AMP.value?.selectUserProgramSlot(it)
                 nonAmpConfigForViewing = null
             }
+            onLoadConfiguration = load@{ fromSlot ->
+                val localAmpState = ampState
+                val ampConnection = VoxVtxAmpConnection.VOX_AMP.value
+                if (localAmpState == null || ampConnection == null) {
+                    window.alert("Amplifier not connected")
+                    return@load
+                }
+
+                ampConnection.requestState(localAmpState.withActiveConfiguration(localAmpState.storedUserPrograms.getValue(fromSlot)))
+            }
             onSaveConfiguration = save@{ toSlot ->
                 val localAmpState = ampState ?: return@save
                 VoxVtxAmpConnection.VOX_AMP.value?.persistConfigurationToSlot(localAmpState.activeConfiguration, toSlot)
