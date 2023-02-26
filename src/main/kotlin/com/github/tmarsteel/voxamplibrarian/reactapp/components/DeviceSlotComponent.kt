@@ -18,7 +18,7 @@ private val DeviceSlotComponentImpl = FC<DeviceSlotComponentProps<*>> { props ->
     ReactHTML.div {
         className = ClassName("row")
         ReactHTML.div {
-            className = ClassName("col-12")
+            className = ClassName("col-12 mb-3")
             DeviceTypeSelectorComponent {
                 types = props.deviceTypes
                 value = props.configuration.descriptor
