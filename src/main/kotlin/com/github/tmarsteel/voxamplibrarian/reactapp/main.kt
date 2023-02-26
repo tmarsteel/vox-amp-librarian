@@ -95,8 +95,15 @@ val AppComponent = FC<Props> {
                 nonAmpConfigForViewing = it
             }
             onWriteConfigurationToAmpSlot = save@{ config, targetSlot ->
-                VoxVtxAmpConnection.VOX_AMP.value?.persistConfigurationToSlot(config, targetSlot)
-                VoxVtxAmpConnection.VOX_AMP.value?.selectUserProgramSlot(targetSlot)
+                val ampConnection = VoxVtxAmpConnection.VOX_AMP.value ?: return@save
+                val localAmpState = ampState ?: return@save
+                if (localAmpState is VtxAmpState.ProgramSlotSelected && localAmpState.slot == targetSlot && localAmpState.storedUserPrograms[localAmpState.slot] != localAmpState.activeConfiguration) {
+                    if (!window.confirm("You have unsaved changes for slot $targetSlot, continue?")) {
+                        return@save
+                    }
+                }
+
+                ampConnection.persistConfigurationToSlot(config, targetSlot)
             }
             onClose = {
                 sidebarExplicitlyOpen = false

@@ -49,7 +49,13 @@ class VoxVtxAmpConnection(
                             WriteUserProgramMessage(event.slot, event.config.toProtocolDataModel()),
                             PersistUserProgramMessage(event.slot)
                         ) { _, _ -> })
-                        previousState.withStoredUserProgram(event.slot, event.config)
+
+                        val stateWithStoredConfig = previousState.withStoredUserProgram(event.slot, event.config)
+                        if (previousState is VtxAmpState.ProgramSlotSelected && previousState.slot == event.slot) {
+                            stateWithStoredConfig.withActiveConfiguration(event.config)
+                        } else {
+                            stateWithStoredConfig
+                        }
                     }
                 }
             }
