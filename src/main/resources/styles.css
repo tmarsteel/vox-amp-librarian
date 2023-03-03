@@ -255,6 +255,8 @@ select {
     text-transform: uppercase;
     font-family: 'DM Mono', monospace;
     font-weight: 500;
+    overflow: hidden;
+    text-overflow: clip;
 }
 
 .topbar {
