@@ -247,7 +247,7 @@ body.during-global-drag * {
 select {
     background: var(--color-bg-highlight);
     border: 0.1rem solid var(--color-text-highlight);
-    border-radius: 0.5rem;
+    border-radius: 0.25rem;
     color: var(--color-text);
 }
 
