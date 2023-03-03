@@ -62,7 +62,7 @@ val DiscreteChoiceParameterComponent = FC<DiscreteChoiceParameterComponentProps>
         }
     }
     span {
-        css {
+        css(classes("parameter-label")) {
             textAlign = TextAlign.center
             display = Display.inlineBlock
             width = 100.pct

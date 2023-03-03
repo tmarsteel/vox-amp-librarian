@@ -1,6 +1,7 @@
 package com.github.tmarsteel.voxamplibrarian.reactapp.components
 
 import com.github.tmarsteel.voxamplibrarian.appmodel.*
+import com.github.tmarsteel.voxamplibrarian.reactapp.classes
 import com.github.tmarsteel.voxamplibrarian.reactapp.label
 import csstype.*
 import emotion.react.css
@@ -40,7 +41,7 @@ val ContinuousDialComponent = FC<ContinuousDialComponentProps> { props ->
             renderContinuousValue(props.value)
         }
         span {
-            css {
+            css(classes("parameter-label")) {
                 display = Display.block
                 textAlign = TextAlign.center
                 width = 100.pct

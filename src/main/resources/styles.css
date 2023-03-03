@@ -1,8 +1,40 @@
+@font-face {
+    font-family: 'DM Mono';
+    font-weight: 500;
+    src: url('fonts/DMMono-Medium.ttf') format('truetype');
+}
+
+html {
+    --color-bg: #F2F2F2;
+    --color-bg-highlight: #FFFFFF;
+    --color-option-unselected: #E0E0E0;
+    --color-selected--rgb: 101, 150, 226;
+    --color-text: #2a2a2a;
+    --color-text-highlight: #2a2a2a;
+}
+
+@media(prefers-color-scheme: dark) {
+    html {
+        --color-bg: #1a1715;
+        --color-bg-highlight: #000000;
+        --color-text: #885a00;
+        --color-text-highlight: #911400;
+        --color-selected--rgb: 145, 20, 0;
+        --color-text-on-selected: #bd7c01;
+        --color-option-unselected: #000;
+    }
+}
+
+*:not(input):not(select) {
+    color: var(--color-text);
+}
+
 html, body {
     width: 100%;
     margin: 0;
     padding: 0;
     font-size: 14px;
+    background: var(--color-bg);
 }
 
 .sidebar {
@@ -12,8 +44,8 @@ html, body {
     height: 100vh;
     width: 24rem;
     box-sizing: border-box;
-    border-right: 0.1rem solid #2a2a2a;
-    background: white;
+    border-right: 0.1rem solid var(--color-text);
+    background: var(--color-bg);
     z-index: 1000;
 }
 
@@ -50,12 +82,12 @@ html, body {
 }
 
 .sidebar-tree-entry--active {
-    background: #6596e2;
+    background: rgb(var(--color-selected--rgb));
     font-weight: bold;
 }
 
 .sidebar-tree-entry--clickable:not(.sidebar-tree-entry--active):hover {
-    background: #6596e250;
+    background: rgba(var(--color-selected--rgb), 0.31);
 }
 
 .sidebar-tree-entry__label {
@@ -90,12 +122,12 @@ html, body {
     position: absolute;
     left: 0;
     bottom: 0;
-    border-top: 0.1rem solid #2a2a2a;
+    border-top: 0.1rem solid var(--color-text);
     width: 100%;
     height: 4rem;
     padding: 1rem;
     box-sizing: border-box;
-    background: #ffffff;
+    background: var(--color-bg);
 }
 
 .connectivity-indicator {
@@ -125,7 +157,7 @@ body.during-global-drag * {
 }
 
 .rotary-slider:focus .rotary-slider__knob {
-    box-shadow: #6596e2 0 0 0.5rem, inset #6596e2 0 0 0.5rem;
+    box-shadow: rgb(var(--color-selected--rgb)) 0 0 0.5rem, inset rgb(var(--color-selected--rgb)) 0 0 0.5rem;
 }
 
 .rotary-slider__marker-container {
@@ -134,23 +166,26 @@ body.during-global-drag * {
 }
 
 .rotary-slider__marker {
-    width: calc(50% - 0.05rem);
+    box-sizing: content-box;
+    border-right: 0.2rem solid var(--color-text-highlight);
+    width: calc(50% - 0.1rem);
     height: 10%;
-    border-right: 0.1rem solid black;
 }
 
 .rotary-slider__knob {
     width: 80%;
     height: 80%;
     margin: -90% 10% 10% 10%;
-    border: 0.1rem solid black;
+    border: 0.1rem solid var(--color-text);
     border-radius: 50%;
+    background: var(--color-bg-highlight);
 }
 
 .rotary-slider__knob .rotary-slider__marker {
-    width: calc(50% - 0.05rem);
+    box-sizing: content-box;
+    width: calc(50% - 0.1rem);
     height: 40%;
-    border-right: 0.1rem solid black;
+    border-right: 0.2rem solid var(--color-text-highlight);
 }
 
 .discrete-choices-container {
@@ -162,7 +197,7 @@ body.during-global-drag * {
 .discrete-choice {
     text-align: center;
     width: 100%;
-    background: #E0E0E0;
+    background: var(--color-option-unselected);
     cursor: pointer;
     flex-grow: 1;
     display: flex;
@@ -172,14 +207,51 @@ body.during-global-drag * {
 .discrete-choice label {
     width: 100%;
     cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
 }
 
 .discrete-choice--checked {
-    background: #6596e2;
+    background: rgb(var(--color-selected--rgb));
+}
+
+.discrete-choice--checked label {
+    color: var(--color-text-on-selected);
+}
+
+.boolean-parameter input[type="checkbox"] {
+    cursor: pointer;
+}
+
+.boolean-parameter__checkbox-display {
+    border: 0.2rem solid var(--color-text);
+    border-radius: 0.75rem;
+    background: var(--color-bg-highlight);
+}
+
+.boolean-parameter:has(input:hover) .boolean-parameter__checkbox-display,
+.boolean-parameter:has(input:focus) .boolean-parameter__checkbox-display {
+    box-shadow: rgb(var(--color-selected--rgb)) 0 0 0.5rem;
+}
+
+.boolean-parameter__checkbox-display .bi {
+    font-size: 3rem;
+    line-height: 3.5rem;
+    visibility: hidden;
+}
+
+.boolean-parameter__checkbox-display--checked .bi {
+    visibility: visible;
+}
+
+.parameter-label {
+    text-transform: uppercase;
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
 }
 
 .topbar {
-    border-bottom: 0.1rem solid #2a2a2a;
+    border-bottom: 0.1rem solid var(--color-text);
 }
 
 .simulation-config {
