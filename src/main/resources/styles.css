@@ -244,6 +244,13 @@ body.during-global-drag * {
     visibility: visible;
 }
 
+select {
+    background: var(--color-bg-highlight);
+    border: 0.1rem solid var(--color-text-highlight);
+    border-radius: 0.5rem;
+    color: var(--color-text);
+}
+
 .parameter-label {
     text-transform: uppercase;
     font-family: 'DM Mono', monospace;
