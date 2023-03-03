@@ -50,11 +50,13 @@ val ContinuousDialComponent = FC<ContinuousDialComponentProps> { props ->
     }
 }
 
+private val decimalSeparator: String = (1.5).asDynamic().toLocaleString().substring(1, 2)
+
 private fun ChildrenBuilder.renderContinuousValue(value: Continuous<*>) {
     val text = when(value) {
-        is UnitlessSingleDecimalPrecision -> (if (value.intValue < 0) "-" else "") + (value.intValue.absoluteValue / 10).toString() + "," + (value.intValue.absoluteValue % 10).toString()
+        is UnitlessSingleDecimalPrecision -> (if (value.intValue < 0) "-" else "") + (value.intValue.absoluteValue / 10).asDynamic().toLocaleString() + decimalSeparator + (value.intValue.absoluteValue % 10).toString()
         is Duration -> "${value.milliseconds} ms"
-        is Frequency -> (if (value.millihertz < 0) "-" else "") + (value.millihertz.absoluteValue / 1000).toString() + "," + (value.millihertz.absoluteValue % 1000).toString().padStart(3, '0') + " Hz"
+        is Frequency -> (if (value.millihertz < 0) "-" else "") + (value.millihertz.absoluteValue / 1000).asDynamic().toLocaleString() + decimalSeparator + (value.millihertz.absoluteValue % 1000).toString().padStart(3, '0') + " Hz"
     }
     ReactHTML.span {
         +text
