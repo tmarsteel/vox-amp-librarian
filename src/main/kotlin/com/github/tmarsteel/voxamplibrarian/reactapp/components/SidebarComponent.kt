@@ -252,12 +252,22 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
                 }
             }
         }
-    }
 
-    div {
-        className = ClassName("sidebar__bottom")
+        div {
+            className = classes("sidebar-tree-entry", "sidebar-tree-entry--level-0")
+            icon("bug", "Developer Settings")
 
-        LogLevelComponent {}
+            span {
+                className = classes("sidebar-tree-entry__label")
+                +"Developer Settings"
+            }
+        }
+
+        div {
+            className = classes("sidebar-tree-entry", "sidebar-tree-entry--level-1")
+
+            LogLevelComponent {}
+        }
     }
 
     input {

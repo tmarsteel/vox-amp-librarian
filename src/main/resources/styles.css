@@ -42,6 +42,7 @@ html, body {
     left: 0;
     top: 0;
     height: 100vh;
+    height: 100lvh;
     width: 24rem;
     box-sizing: border-box;
     border-right: 0.1rem solid var(--color-text);
@@ -57,11 +58,11 @@ html, body {
 .sidebar__inner {
     clear: both;
     width: 100%;
-    height: 100%;
+    height: calc(100% - 2rem);
     box-sizing: border-box;
     padding: 0rem 0 1rem 1rem;
+    overflow: auto;
     overflow-x: hidden;
-    overflow-y: auto;
 }
 
 .sidebar-tree-entry {
@@ -94,6 +95,7 @@ html, body {
     display: inline-block;
     flex-grow: 1;
     align-self: center;
+    margin-left: .5em;
 }
 
 .sidebar-tree-entry-action {
@@ -118,24 +120,11 @@ html, body {
     margin: 0 auto;
 }
 
-.sidebar__bottom {
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    border-top: 0.1rem solid var(--color-text);
-    width: 100%;
-    height: 4rem;
-    padding: 1rem;
-    box-sizing: border-box;
-    background: var(--color-bg);
-}
-
 .connectivity-indicator {
     width: 1rem;
     height: 1rem;
     border-radius: 50%;
     display: inline-block;
-    margin-right: 0.4rem;
 }
 .connectivity-indicator-active {
     background: radial-gradient(circle at center, #00e200 0, transparent 0.75rem, transparent 100%);
