@@ -123,6 +123,7 @@ fun startDownload(data: Blob, filename: String) {
     val blobUrl = URL.createObjectURL(data)
     downloadTriggerLink.download = filename
     downloadTriggerLink.href = blobUrl
+    downloadTriggerLink.type = "application/octet-stream"
     downloadTriggerLink.click()
 
     window.setTimeout({
