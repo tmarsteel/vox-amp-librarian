@@ -212,7 +212,7 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
 
                 span {
                     className = ClassName("sidebar-tree-entry__label")
-                    +(config.programName ?: "<no name>")
+                    +(config.programName?.takeUnless { it.isBlank() } ?: "<no name>")
                 }
 
                 div {
