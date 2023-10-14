@@ -6,10 +6,13 @@ import com.github.tmarsteel.voxamplibrarian.appmodel.SimulationConfiguration
 import com.github.tmarsteel.voxamplibrarian.appmodel.VtxAmpState
 import com.github.tmarsteel.voxamplibrarian.appmodel.hardware_integration.toProtocolDataModel
 import com.github.tmarsteel.voxamplibrarian.appmodel.hardware_integration.toUiDataModel
+import com.github.tmarsteel.voxamplibrarian.kibibytes
 import com.github.tmarsteel.voxamplibrarian.logging.LoggerFactory
 import com.github.tmarsteel.voxamplibrarian.protocol.ProgramSlot
 import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageParseException
 import com.github.tmarsteel.voxamplibrarian.reactapp.classes
+import com.github.tmarsteel.voxamplibrarian.reactapp.components.sidebar.ProgramSlotComponent
+import com.github.tmarsteel.voxamplibrarian.reactapp.components.sidebar.ProgramSlotLocation
 import com.github.tmarsteel.voxamplibrarian.reactapp.icon
 import com.github.tmarsteel.voxamplibrarian.startDownload
 import com.github.tmarsteel.voxamplibrarian.vtxprog.VtxProgFile
@@ -26,6 +29,7 @@ import react.FC
 import react.Props
 import react.createRef
 import react.dom.html.InputType
+import react.dom.html.ReactHTML.button
 import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.input
 import react.dom.html.ReactHTML.span
@@ -102,50 +106,23 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
             }
         }
 
-        for (programSlot in ProgramSlot.values()) {
-            div {
-                className = classes(
-                    "sidebar-tree-entry",
-                    "sidebar-tree-entry--level-1",
-                    "sidebar-tree-entry--clickable".takeIf { props.ampConnected },
-                    "sidebar-tree-entry--active".takeIf { props.ampConnected && localAmpState != null && localAmpState is VtxAmpState.ProgramSlotSelected && localAmpState.slot == programSlot }
-                )
+        div {
+            className = classes("sidebar__slots")
 
-                span {
-                    className = ClassName("sidebar-tree-entry__label")
-                    +"${programSlot.name}: ${localAmpState?.storedUserPrograms?.get(programSlot)?.programName ?: "<empty>"}"
-                    onClick = {
-                        if (props.vtxAmpState != null) {
-                            props.onProgramSlotSelected(programSlot)
-                        }
-                    }
-                }
-
-                div {
-                    className = classes(
-                        "sidebar-tree-entry-action",
-                        "disabled".takeIf { localAmpState == null },
-                    )
-
-                    icon("upload", "Load this program")
-                    onClick = {
-                        if (localAmpState != null) {
-                            props.onLoadConfiguration(programSlot)
-                        }
-                    }
-                }
-                div {
-                    className = classes(
-                        "sidebar-tree-entry-action",
-                        "disabled".takeIf { localAmpState == null },
-                    )
-
-                    icon("download", "Save the current configuration to this place")
-                    onClick = {
-                        if (localAmpState != null) {
-                            props.onSaveConfiguration(programSlot)
-                        }
-                    }
+            for (programSlot in ProgramSlot.values()) {
+                ProgramSlotComponent {
+                    programName = localAmpState?.storedUserPrograms?.get(programSlot)?.programName
+                    location = ProgramSlotLocation.Amplifier(programSlot)
+                    onViewProgram = ({
+                        props.onLoadConfiguration(programSlot)
+                    }).takeIf { localAmpState != null }
+                    onSaveToThisLocation = ({
+                        props.onSaveConfiguration(programSlot)
+                    }).takeIf { localAmpState != null }
+                    isActive = props.ampConnected && localAmpState != null && localAmpState is VtxAmpState.ProgramSlotSelected && localAmpState.slot == programSlot
+                    onActivated = ({
+                        props.onProgramSlotSelected(programSlot)
+                    }).takeIf { localAmpState != null }
                 }
             }
         }
@@ -157,10 +134,18 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
                 className = classes("sidebar-tree-entry__label")
                 +(currentFile.filename ?: "<no filename>")
             }
+        }
 
-            div {
-                className = classes("sidebar-tree-entry-action")
+        div {
+            css(ClassName("actions")) {
+                marginBottom = 1.rem
+            }
+
+            button {
                 icon("folder2-open", "load a file")
+                +"Load file"
+                title = "Load a file that contains programs"
+
                 onClick = loadFile@{
                     if (currentFile.hasUnsavedChanges() && !window.confirm("You have unsaved changes, continue?")) {
                         return@loadFile
@@ -169,9 +154,11 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
                 }
             }
 
-            div {
-                className = classes("sidebar-tree-entry-action")
-                icon("download", "export configurations")
+            button {
+                icon("download", "export")
+                +"Export programs"
+                title = "Export these programs as a file"
+
                 onClick = {
                     val newVtxProgFile = VtxProgFile(currentFile.configs.map { it.toProtocolDataModel() })
                     val blob = writeToBlob { binaryOut ->
@@ -187,12 +174,11 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
                 }
             }
 
-            div {
-                className = classes(
-                    "sidebar-tree-entry-action",
-                    "disabled".takeUnless { localAmpState != null }
-                )
-                icon("arrow-up", "Configure amplifier with the first ${ProgramSlot.values().size} programs")
+            button {
+                icon("arrow-up", "Configure amplifier")
+                +"Apply all to Amp"
+                title = "Configure amplifier with the first ${ProgramSlot.values().size} programs"
+
                 onClick = {
                     currentFile.configs
                         .take(ProgramSlot.values().size)
@@ -206,49 +192,23 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
             }
         }
 
-        currentFile.configs.forEachIndexed { configIndexInFile, config ->
-            div {
-                className = classes("sidebar-tree-entry", "sidebar-tree-entry--level-1")
+        val ampInteractPossible: Boolean = localAmpState != null && localAmpState is VtxAmpState.ProgramSlotSelected
+        div {
+            className = classes("sidebar__slots")
 
-                span {
-                    className = ClassName("sidebar-tree-entry__label")
-                    +(config.programName?.takeUnless { it.isBlank() } ?: "<no name>")
-                }
-
-                div {
-                    className = classes("sidebar-tree-entry-action")
-
-                    icon("eye", "View this configuration")
-                    onClick = {
+            currentFile.configs.forEachIndexed { configIndexInFile, config ->
+                ProgramSlotComponent {
+                    location = ProgramSlotLocation.File(currentFile.filename, configIndexInFile)
+                    programName = config.programName
+                    onViewProgram = {
                         props.onViewNonAmpConfiguration(config)
                     }
-                }
-
-                val ampInteractPossible: Boolean = localAmpState != null && localAmpState is VtxAmpState.ProgramSlotSelected
-                div {
-                    className = classes(
-                        "sidebar-tree-entry-action",
-                        "disabled".takeUnless { ampInteractPossible }
-                    )
-                    icon("arrow-up", "Write this program to the currently selected slot on the amp")
-                    onClick = storeFileProgramToAmp@{
-                        val selectedSlot = (localAmpState as? VtxAmpState.ProgramSlotSelected)?.slot
-                            ?: return@storeFileProgramToAmp
-
-                        props.onWriteConfigurationToAmpSlot(config, selectedSlot)
-                    }
-                }
-
-                div {
-                    className = classes(
-                        "sidebar-tree-entry-action",
-                        "disabled".takeUnless { ampInteractPossible }
-                    )
-                    icon("arrow-down", "Write the current amp configuration to this slot.")
-                    onClick = saveToFileSlot@{
-                        val localConfig = localAmpState?.activeConfiguration ?: return@saveToFileSlot
-                        currentFile = currentFile.withConfigAtIndex(localConfig, configIndexInFile)
-                    }
+                    onSaveIntoSelectedAmpSlot = (storeFileProgramToAmp@{
+                        // TODO
+                    }).takeIf { ampInteractPossible }
+                    onSaveToThisLocation = (saveToFileSlot@{
+                        // TODO
+                    }).takeIf { ampInteractPossible }
                 }
             }
         }
@@ -280,8 +240,8 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
         multiple = false
         onChange = fileSelected@{
             val file = it.target.files!!.item(0)!!
-            if (file.size.toLong() > 1024L * 10L) {
-                window.alert("This file is too big to possible be a VTXPROG file.")
+            if (file.size.toLong() > 10.kibibytes) {
+                window.alert("This file is too big to possibly be a VTXPROG file.")
                 return@fileSelected
             }
 

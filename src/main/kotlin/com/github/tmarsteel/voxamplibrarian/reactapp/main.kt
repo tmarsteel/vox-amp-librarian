@@ -19,9 +19,13 @@ import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
-import react.*
+import react.FC
+import react.Fragment
+import react.Props
+import react.create
 import react.dom.client.createRoot
 import react.dom.html.ReactHTML.div
+import react.useState
 
 private val logger = LoggerFactory["main"]
 
@@ -52,7 +56,7 @@ val AppComponent = FC<Props> {
         className = classes("topbar")
 
         div {
-            className = classes("container-xxl")
+            className = classes("container-xxl-fluid")
 
             div {
                 className = classes("row")
@@ -122,7 +126,7 @@ val AppComponent = FC<Props> {
     }
 
     div {
-        className = classes("container-xxl", "simulation-config")
+        className = classes("container-xxl-fluid", "simulation-config")
 
         SimulationConfigurationComponent {
             configuration = nonAmpConfigForViewing ?: ampState?.activeConfiguration ?: SimulationConfiguration.DEFAULT
