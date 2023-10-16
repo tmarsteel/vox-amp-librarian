@@ -16,6 +16,7 @@ import com.github.tmarsteel.voxamplibrarian.protocol.ProgramSlot
 import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageParseException
 import com.github.tmarsteel.voxamplibrarian.reactapp.StateAndLocalStorageHook.Companion.useStateBackedByLocalStorage
 import com.github.tmarsteel.voxamplibrarian.reactapp.classes
+import com.github.tmarsteel.voxamplibrarian.reactapp.components.sidebar.AddProgramSlotComponent
 import com.github.tmarsteel.voxamplibrarian.reactapp.components.sidebar.ProgramSlotComponent
 import com.github.tmarsteel.voxamplibrarian.reactapp.components.sidebar.ProgramSlotLocation
 import com.github.tmarsteel.voxamplibrarian.reactapp.icon
@@ -117,6 +118,10 @@ private data class ConfigurationGroup(
         }
         newConfigs[index] = config
         return copy(configs = newConfigs)
+    }
+
+    fun withAdditionalConfig(config: SimulationConfiguration): ConfigurationGroup {
+        return copy(configs = configs + config)
     }
 
     companion object {
@@ -299,6 +304,14 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
                             persistedState.selectedGroup.withConfigAtIndex(localConfig, configIndexInGroup)
                         )
                     }).takeIf { ampInteractPossible }
+                }
+            }
+
+            AddProgramSlotComponent {
+                onAddSlot = {
+                    persistedState = persistedState.withGroup(
+                        persistedState.selectedGroup.withAdditionalConfig(SimulationConfiguration.DEFAULT)
+                    )
                 }
             }
         }

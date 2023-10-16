@@ -132,6 +132,16 @@ html, body {
     margin-top: 2rem;
 }
 
+.program-slot:has(> i.bi:only-child) {
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    height: 7.65rem;
+}
+.program-slot > i.bi:only-child {
+    font-size: 2.5rem;
+}
+
 .actions {
     display: flex;
     flex-direction: row;
