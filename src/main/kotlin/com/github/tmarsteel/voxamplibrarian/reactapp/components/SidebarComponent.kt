@@ -142,8 +142,8 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
             }
 
             button {
-                icon("folder2-open", "load a file")
-                +"Load file"
+                icon("folder", "load a file")
+                +"Load .VTXPROG"
                 title = "Load a file that contains programs"
 
                 onClick = loadFile@{
@@ -155,9 +155,9 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
             }
 
             button {
-                icon("download", "export")
-                +"Export programs"
-                title = "Export these programs as a file"
+                icon("save2", "save as file")
+                +"Save .VTXPROG"
+                title = "Save these programs as a file"
 
                 onClick = {
                     val newVtxProgFile = VtxProgFile(currentFile.configs.map { it.toProtocolDataModel() })
