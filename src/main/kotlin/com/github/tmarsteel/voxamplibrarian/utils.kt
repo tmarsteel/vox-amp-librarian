@@ -112,8 +112,8 @@ fun useEffectCoroutine(block: suspend () -> Unit) {
 
 val Int.bytes: Long get() = toLong()
 val Int.kibibytes: Long get() = bytes * 1024L
-val Int.mibibytes: Long get() = mibibytes * 1024L
-val Int.gibibytes: Long get() = gibibytes * 1024L
+val Int.mibibytes: Long get() = kibibytes * 1024L
+val Int.gibibytes: Long get() = mibibytes * 1024L
 
 fun startDownload(data: Blob, filename: String) {
     val downloadTriggerLink: HTMLAnchorElement = window.document.getElementById("download-trigger-link") as HTMLAnchorElement?

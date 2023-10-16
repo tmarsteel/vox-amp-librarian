@@ -73,59 +73,13 @@ html, body {
     overflow-x: hidden;
 }
 
-.sidebar-tree-entry {
-    width: 100%;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    height: 4rem;
+.sidebar__section-heading {
+    font-size: 1.25em;
+    margin: 0.75rem 0;
 }
 
-.sidebar-tree-entry--level-1 {
-    padding-left: 1.5rem;
-}
-
-.sidebar-tree-entry--clickable {
-    cursor: pointer;
-}
-
-.sidebar-tree-entry--active {
-    background: rgb(var(--color-selected--rgb));
-    font-weight: bold;
-}
-
-.sidebar-tree-entry--clickable:not(.sidebar-tree-entry--active):hover {
-    background: rgba(var(--color-selected--rgb), 0.31);
-}
-
-.sidebar-tree-entry__label {
-    display: inline-block;
-    flex-grow: 1;
-    align-self: center;
-    margin-left: .5em;
-}
-
-.sidebar-tree-entry-action {
-    height: 100%;
-    aspect-ratio: 0.7;
-    flex-grow: 0;
-    display: flex;
-    align-items: center;
-}
-
-.sidebar-tree-entry-action:not(.disabled) {
-    cursor: pointer;
-}
-
-.sidebar-tree-entry-action.disabled {
-    color: #ccc;
-}
-
-.sidebar-tree-entry-action .bi {
-    display: inline-block;
-    font-size: 1.5rem;
-    margin: 0 auto;
+.sidebar__section-heading:not(:first-child) {
+    margin-top: 1.75rem;
 }
 
 .sidebar__slots {
@@ -215,16 +169,18 @@ button > i.bi {
 }
 
 .connectivity-indicator {
-    width: 1rem;
-    height: 1rem;
+    height: 1em;
+    aspect-ratio: 1;
     border-radius: 50%;
     display: inline-block;
+    margin-right: 0.5em;
+    transform: translateY(0.15em);
 }
 .connectivity-indicator-active {
-    background: radial-gradient(circle at center, #00e200 0, transparent 0.75rem, transparent 100%);
+    background: radial-gradient(circle at center, #00e200 0, transparent 75%, transparent 100%);
 }
 .connectivity-indicator-inactive {
-    background: radial-gradient(circle at center, #e20000 0, transparent 0.75rem, transparent 100%);
+    background: radial-gradient(circle at center, #e20000 0, transparent 75%, transparent 100%);
 }
 
 body.during-global-drag * {

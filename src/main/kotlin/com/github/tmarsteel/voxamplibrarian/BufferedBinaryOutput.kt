@@ -31,5 +31,16 @@ class BufferedBinaryOutput(
         return ByteArrayBinaryInput(buffer.copyOfRange(0, writePosition))
     }
 
+    /**
+     * @see [String.parseHexStream]
+     */
+    fun getAsHexStream(): String {
+        val builder = StringBuilder(writePosition * 2)
+        for (i in 0 until writePosition) {
+            builder.append(buffer[i].toString(16).padStart(2, '0'))
+        }
+        return builder.toString()
+    }
+
     private val remaining: Int = buffer.size - writePosition
 }

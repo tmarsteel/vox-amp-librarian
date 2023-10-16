@@ -1,13 +1,10 @@
 package com.github.tmarsteel.voxamplibrarian.reactapp
 
 import com.github.tmarsteel.voxamplibrarian.BufferedBinaryOutput
-import com.github.tmarsteel.voxamplibrarian.ByteArrayBinaryInput
 import com.github.tmarsteel.voxamplibrarian.appmodel.SimulationConfiguration
 import com.github.tmarsteel.voxamplibrarian.appmodel.VtxAmpState
 import com.github.tmarsteel.voxamplibrarian.appmodel.hardware_integration.VoxVtxAmpConnection
 import com.github.tmarsteel.voxamplibrarian.logging.LoggerFactory
-import com.github.tmarsteel.voxamplibrarian.parseHexStream
-import com.github.tmarsteel.voxamplibrarian.protocol.TwoByteDial
 import com.github.tmarsteel.voxamplibrarian.reactapp.components.SidebarComponent
 import com.github.tmarsteel.voxamplibrarian.reactapp.components.SimulationConfigurationComponent
 import com.github.tmarsteel.voxamplibrarian.useEffectCoroutine
@@ -150,16 +147,13 @@ val AppComponent = FC<Props> {
 }
 
 fun main() {
-    window.asDynamic().bullshitEncoder = bse@ { semantic: Int ->
-        val out = BufferedBinaryOutput()
-        TwoByteDial(semantic.toUShort()).writeTo(out)
-        val input = out.copyToInput()
-        return@bse input.nextByte().toString(16).padStart(2, '0') + " " + input.nextByte().toString(16).padStart(2, '0')
-    }
-    window.asDynamic().bullshitDecoder = bsd@ { protocol: String ->
-        val input = ByteArrayBinaryInput(protocol.parseHexStream())
-        return@bsd TwoByteDial.readFrom(input).semanticValue.toInt()
-    }
+    val buffer = BufferedBinaryOutput()
+    buffer.write(2)
+    buffer.write(24)
+    buffer.write(25)
+    buffer.write(26)
+    buffer.write(27)
+    console.log(buffer.getAsHexStream())
 
     val rootElement = document.getElementById("root") ?: error("Couldn't find root container!")
     createRoot(rootElement).render(Fragment.create {

@@ -2,14 +2,19 @@ package com.github.tmarsteel.voxamplibrarian.reactapp.components
 
 import com.github.tmarsteel.voxamplibrarian.BlobBinaryInput
 import com.github.tmarsteel.voxamplibrarian.BlobBinaryOutput.Companion.writeToBlob
+import com.github.tmarsteel.voxamplibrarian.BufferedBinaryOutput
+import com.github.tmarsteel.voxamplibrarian.ByteArrayBinaryInput
 import com.github.tmarsteel.voxamplibrarian.appmodel.SimulationConfiguration
 import com.github.tmarsteel.voxamplibrarian.appmodel.VtxAmpState
 import com.github.tmarsteel.voxamplibrarian.appmodel.hardware_integration.toProtocolDataModel
 import com.github.tmarsteel.voxamplibrarian.appmodel.hardware_integration.toUiDataModel
-import com.github.tmarsteel.voxamplibrarian.kibibytes
 import com.github.tmarsteel.voxamplibrarian.logging.LoggerFactory
+import com.github.tmarsteel.voxamplibrarian.mibibytes
+import com.github.tmarsteel.voxamplibrarian.parseHexStream
+import com.github.tmarsteel.voxamplibrarian.protocol.Program
 import com.github.tmarsteel.voxamplibrarian.protocol.ProgramSlot
 import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageParseException
+import com.github.tmarsteel.voxamplibrarian.reactapp.StateAndLocalStorageHook.Companion.useStateBackedByLocalStorage
 import com.github.tmarsteel.voxamplibrarian.reactapp.classes
 import com.github.tmarsteel.voxamplibrarian.reactapp.components.sidebar.ProgramSlotComponent
 import com.github.tmarsteel.voxamplibrarian.reactapp.components.sidebar.ProgramSlotLocation
@@ -24,16 +29,29 @@ import emotion.react.css
 import kotlinx.browser.window
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.Json
 import org.w3c.dom.HTMLInputElement
+import org.w3c.dom.HTMLSelectElement
 import react.FC
 import react.Props
 import react.createRef
+import react.dom.events.ChangeEvent
 import react.dom.html.InputType
 import react.dom.html.ReactHTML.button
 import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.input
+import react.dom.html.ReactHTML.option
+import react.dom.html.ReactHTML.select
 import react.dom.html.ReactHTML.span
-import react.useState
 import kotlin.js.Date
 
 external interface SidebarComponentProps : Props {
@@ -49,19 +67,48 @@ external interface SidebarComponentProps : Props {
 
 private val logger = LoggerFactory["sidebar"]
 
-private data class LoadedFile(
-    val filename: String?,
-    val configs: List<SimulationConfiguration>,
-    /** for change detection */
-    val originalConfigs: List<SimulationConfiguration> = configs,
+@Serializable
+private data class PersistedState(
+    val configGroups: List<ConfigurationGroup>,
+    val selectedGroupUid: String,
 ) {
-    fun hasUnsavedChanges(): Boolean {
-        return configs.zip(originalConfigs).any { (currentConfig, originalConfig) -> currentConfig != originalConfig }
+    init {
+        require(configGroups.any { it.uid == selectedGroupUid })
     }
 
-    fun withChangesSaved(asFilename: String): LoadedFile = copy(asFilename, configs, configs)
+    val selectedGroup: ConfigurationGroup by lazy {
+        configGroups.find { it.uid == selectedGroupUid }!!
+    }
 
-    fun withConfigAtIndex(config: SimulationConfiguration, index: Int): LoadedFile {
+    fun withGroup(newGroup: ConfigurationGroup): PersistedState {
+        return copy(configGroups = configGroups.filter { it.uid != newGroup.uid } + listOf(newGroup))
+    }
+
+    fun withSelectedGroup(uid: String) = copy(selectedGroupUid = uid)
+
+    companion object {
+        fun createBlank(): PersistedState {
+            val singleGroup = ConfigurationGroup.createBlank()
+            return PersistedState(listOf(singleGroup), singleGroup.uid)
+        }
+    }
+}
+
+@Serializable
+private data class ConfigurationGroup(
+    val uid: String,
+    val name: String?,
+    @Serializable
+    val configs: List<@Serializable(SimulationConfigAsHexStreamSerializer::class) SimulationConfiguration>,
+) {
+    fun withFirstConfigs(configs: List<SimulationConfiguration>): ConfigurationGroup {
+        val newConfigs = ArrayList(this.configs)
+        newConfigs.ensureCapacity(configs.size)
+        configs.forEachIndexed { i, newConfig -> newConfigs[i] = newConfig }
+        return copy(configs = newConfigs)
+    }
+
+    fun withConfigAtIndex(config: SimulationConfiguration, index: Int): ConfigurationGroup {
         val newConfigs = configs.toMutableList()
         if (index > newConfigs.lastIndex) {
             repeat(index - newConfigs.lastIndex) {
@@ -73,13 +120,32 @@ private data class LoadedFile(
     }
 
     companion object {
-        val DEFAULT = LoadedFile(null, SimulationConfiguration.DEFAULT.repeat(11))
+        fun createBlank(): ConfigurationGroup {
+            return ConfigurationGroup(
+                window.asDynamic().crypto.randomUUID(),
+                null,
+                SimulationConfiguration.DEFAULT.repeat(11)
+            )
+        }
+
+        fun fromVtxProgFile(file: VtxProgFile, filename: String): ConfigurationGroup {
+            val name = filename.removeSuffix(".vtxprog").removeSuffix(".VTXPROG")
+            return ConfigurationGroup.createBlank().copy(
+                name = name,
+                configs = file.programs.map { it.toUiDataModel() },
+            )
+        }
     }
 }
 
 val SidebarComponent = FC<SidebarComponentProps> { props ->
     val localAmpState = props.vtxAmpState?.takeIf { props.ampConnected }
-    var currentFile: LoadedFile by useState(LoadedFile.DEFAULT)
+    var persistedState by useStateBackedByLocalStorage(
+        "sidebar-state",
+        PersistedState.createBlank(),
+        { Json.encodeToString(it) },
+        { Json.decodeFromString(it) },
+    )
     val hiddenFileInputRef = createRef<HTMLInputElement>()
 
     icon("x", "close side menu") {
@@ -94,14 +160,13 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
         className = classes("sidebar__inner")
 
         div {
-            className = classes("sidebar-tree-entry", "sidebar-tree-entry--level-0")
+            className = classes("sidebar__section-heading")
 
             ConnectivityIndicatorComponent {
                 isActive = props.ampConnected
             }
 
             span {
-                className = classes("sidebar-tree-entry__label")
                 +"VT20X/40X/100X Amplifier (${if (!props.ampConnected) "not " else ""}connected)"
             }
         }
@@ -128,11 +193,19 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
         }
 
         div {
-            className = classes("sidebar-tree-entry", "sidebar-tree-entry--level-0")
-            icon("file-earmark", "Currently loaded file")
-            span {
-                className = classes("sidebar-tree-entry__label")
-                +(currentFile.filename ?: "<no filename>")
+            className = classes("sidebar__section-heading")
+            icon("file-earmark-binary", "Current saved preset")
+            select {
+                value = persistedState.selectedGroupUid
+                onChange = { e: ChangeEvent<HTMLSelectElement> ->
+                    persistedState = persistedState.withSelectedGroup(e.target.value)
+                }
+                for (group in persistedState.configGroups.sortedBy { it.name }) {
+                    option {
+                        value = group.uid
+                        +(group.name ?: "<no name>")
+                    }
+                }
             }
         }
 
@@ -142,35 +215,31 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
             }
 
             button {
-                icon("folder", "load a file")
-                +"Load .VTXPROG"
-                title = "Load a file that contains programs"
+                icon("folder")
+                +"Import File"
+                title = "Import a .VTXPROG file from VOX ToneStudio"
 
                 onClick = loadFile@{
-                    if (currentFile.hasUnsavedChanges() && !window.confirm("You have unsaved changes, continue?")) {
-                        return@loadFile
-                    }
                     hiddenFileInputRef.current!!.click()
                 }
             }
 
             button {
-                icon("save2", "save as file")
-                +"Save .VTXPROG"
-                title = "Save these programs as a file"
+                icon("save2")
+                +"Export as File"
+                title = "Export these programs as a .VTXPROG file, compatible with VOX ToneStudio"
 
                 onClick = {
-                    val newVtxProgFile = VtxProgFile(currentFile.configs.map { it.toProtocolDataModel() })
+                    val newVtxProgFile = VtxProgFile(persistedState.selectedGroup.configs.map { it.toProtocolDataModel() })
                     val blob = writeToBlob { binaryOut ->
                         newVtxProgFile.writeToInVtxProgFormat(binaryOut)
                     }
 
-                    val filename = currentFile.filename ?: run {
+                    val filename = (persistedState.selectedGroup.name ?: run {
                         val now = Date()
-                        "unknown-${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}.vtxporg"
-                    }
+                        "unknown-${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}"
+                    }) + ".vtxporg"
                     startDownload(blob, filename)
-                    currentFile = currentFile.withChangesSaved(filename)
                 }
             }
 
@@ -181,7 +250,7 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
 
                 disabled = !props.ampConnected || props.vtxAmpState == null
                 onClick = {
-                    currentFile.configs
+                    persistedState.selectedGroup.configs
                         .take(ProgramSlot.values().size)
                         .zip(ProgramSlot.values())
                         .forEach { (config, slot) ->
@@ -199,11 +268,12 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
 
                 disabled = !props.ampConnected || props.vtxAmpState == null
                 onClick = {
-                    currentFile = props.vtxAmpState!!.storedUserPrograms.entries
+                    val ampConfigs = props.vtxAmpState!!.storedUserPrograms.entries
                         .sortedBy { (slot, _) -> slot }
-                        .foldIndexed(currentFile) { index, fileCarry, (_, config) ->
-                            fileCarry.withConfigAtIndex(config, index)
-                        }
+                        .map { (_, config) -> config }
+                    persistedState = persistedState.withGroup(
+                        persistedState.selectedGroup.withFirstConfigs(ampConfigs)
+                    )
                 }
             }
         }
@@ -212,9 +282,9 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
         div {
             className = classes("sidebar__slots")
 
-            currentFile.configs.forEachIndexed { configIndexInFile, config ->
+            persistedState.selectedGroup.configs.forEachIndexed { configIndexInFile, config ->
                 ProgramSlotComponent {
-                    location = ProgramSlotLocation.File(currentFile.filename, configIndexInFile)
+                    location = ProgramSlotLocation.File(persistedState.selectedGroup.name, configIndexInFile)
                     programName = config.programName
                     onViewProgram = {
                         props.onViewNonAmpConfiguration(config)
@@ -230,20 +300,15 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
         }
 
         div {
-            className = classes("sidebar-tree-entry", "sidebar-tree-entry--level-0")
-            icon("bug", "Developer Settings")
+            className = classes("sidebar__section-heading")
 
             span {
-                className = classes("sidebar-tree-entry__label")
+                icon("bug", "Developer Settings")
                 +"Developer Settings"
             }
         }
 
-        div {
-            className = classes("sidebar-tree-entry", "sidebar-tree-entry--level-1")
-
-            LogLevelComponent {}
-        }
+        LogLevelComponent {}
     }
 
     input {
@@ -256,18 +321,16 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
         multiple = false
         onChange = fileSelected@{
             val file = it.target.files!!.item(0)!!
-            if (file.size.toLong() > 10.kibibytes) {
-                window.alert("This file is too big to possibly be a VTXPROG file.")
+            if (file.size.toLong() > 1.mibibytes) {
+                window.alert("This file is too big, max 1 MiB")
                 return@fileSelected
             }
 
             GlobalScope.launch {
                 try {
                     val vtxprogFile = VtxProgFile.readFromInVtxProgFormat(BlobBinaryInput(file))
-                    currentFile = LoadedFile(
-                        file.name,
-                        vtxprogFile.programs.map { it.toUiDataModel() },
-                    )
+                    val newGroup = ConfigurationGroup.fromVtxProgFile(vtxprogFile, file.name)
+                    persistedState = persistedState.withGroup(newGroup).withSelectedGroup(newGroup.uid)
                 }
                 catch (ex: Throwable) {
                     logger.error("Failed to load VTXPROG file", ex)
@@ -292,4 +355,23 @@ private fun <T> T.repeat(times: Int): List<T> {
         list.add(this)
     }
     return list
+}
+
+private class SimulationConfigAsHexStreamSerializer : KSerializer<SimulationConfiguration> {
+    override fun deserialize(decoder: Decoder): SimulationConfiguration {
+        val input = ByteArrayBinaryInput(decoder.decodeString().parseHexStream())
+        return Program.readFrom(input).toUiDataModel()
+    }
+
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor(
+        SimulationConfiguration::class.simpleName ?: "kotlin.String",
+        PrimitiveKind.STRING
+    )
+
+    override fun serialize(encoder: Encoder, value: SimulationConfiguration) {
+        val buffer = BufferedBinaryOutput()
+        value.toProtocolDataModel().writeTo(buffer)
+        val hexStream = buffer.getAsHexStream()
+        encoder.encodeString(hexStream)
+    }
 }
