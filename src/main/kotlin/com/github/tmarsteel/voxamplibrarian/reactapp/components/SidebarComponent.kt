@@ -179,6 +179,7 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
                 +"Apply all to Amp"
                 title = "Configure amplifier with the first ${ProgramSlot.values().size} programs"
 
+                disabled = !props.ampConnected || props.vtxAmpState == null
                 onClick = {
                     currentFile.configs
                         .take(ProgramSlot.values().size)
@@ -188,6 +189,21 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
                         }
 
                     props.onProgramSlotSelected(ProgramSlot.A1)
+                }
+            }
+
+            button {
+                icon("arrow-down", "Save amplifier config")
+                +"Save all from Amp"
+                title = "Copies all the programs from the amplifier to this file"
+
+                disabled = !props.ampConnected || props.vtxAmpState == null
+                onClick = {
+                    currentFile = props.vtxAmpState!!.storedUserPrograms.entries
+                        .sortedBy { (slot, _) -> slot }
+                        .foldIndexed(currentFile) { index, fileCarry, (_, config) ->
+                            fileCarry.withConfigAtIndex(config, index)
+                        }
                 }
             }
         }
