@@ -8,10 +8,11 @@ html {
     --color-bg: #F2F2F2;
     --color-bg-highlight: #FFFFFF;
     --color-bg-contrast: #FFFFFF;
+    --color-accent: #6596E2;
     --color-option-unselected: #E0E0E0;
-    --color-selected--rgb: 101, 150, 226;
+    --color-selected--rgb: 101, 150, 226; /* == accent color */
     --color-text: #2a2a2a;
-    --color-text-highlight: #2a2a2a;
+    --color-text-highlight: var(--color-accent);
 
     --sidebar-width: 43.5rem;
     --color-bg-primary-action: var(--color-text-highlight);
@@ -27,6 +28,7 @@ span, a, label, i.bi {
         --color-bg: #1a1715;
         --color-bg-highlight: #000000;
         --color-bg-contrast: #282320;
+        --color-accent: #911400;
         --color-text: #885a00;
         --color-text-highlight: #911400;
         --color-selected--rgb: 145, 20, 0;
@@ -155,8 +157,8 @@ button {
 }
 
 button:not(:disabled):hover {
-    background-color: var(--color-text-highlight);
-    border-color: var(--color-text-highlight)
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
 }
 
 button:disabled {
