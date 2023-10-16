@@ -217,7 +217,7 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
             button {
                 icon("folder")
                 +"Import File"
-                title = "Import a .VTXPROG file from VOX ToneStudio"
+                title = "Import a .VTXPROG file from VOX TomeRoom"
 
                 onClick = loadFile@{
                     hiddenFileInputRef.current!!.click()
@@ -227,7 +227,7 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
             button {
                 icon("save2")
                 +"Export as File"
-                title = "Export these programs as a .VTXPROG file, compatible with VOX ToneStudio"
+                title = "Export these programs as a .VTXPROG file, compatible with VOX ToneRoom"
 
                 onClick = {
                     val newVtxProgFile = VtxProgFile(persistedState.selectedGroup.configs.map { it.toProtocolDataModel() })
@@ -282,18 +282,22 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
         div {
             className = classes("sidebar__slots")
 
-            persistedState.selectedGroup.configs.forEachIndexed { configIndexInFile, config ->
+            persistedState.selectedGroup.configs.forEachIndexed { configIndexInGroup, config ->
                 ProgramSlotComponent {
-                    location = ProgramSlotLocation.File(persistedState.selectedGroup.name, configIndexInFile)
+                    location = ProgramSlotLocation.File(persistedState.selectedGroup.name, configIndexInGroup)
                     programName = config.programName
                     onViewProgram = {
                         props.onViewNonAmpConfiguration(config)
                     }
                     onSaveIntoSelectedAmpSlot = (storeFileProgramToAmp@{
-                        // TODO
+                        val selectedSlot = (localAmpState as VtxAmpState.ProgramSlotSelected).slot
+                        props.onWriteConfigurationToAmpSlot(config, selectedSlot)
                     }).takeIf { ampInteractPossible }
                     onSaveToThisLocation = (saveToFileSlot@{
-                        // TODO
+                        val localConfig = localAmpState?.activeConfiguration ?: return@saveToFileSlot
+                        persistedState = persistedState.withGroup(
+                            persistedState.selectedGroup.withConfigAtIndex(localConfig, configIndexInGroup)
+                        )
                     }).takeIf { ampInteractPossible }
                 }
             }

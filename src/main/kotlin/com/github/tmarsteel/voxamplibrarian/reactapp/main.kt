@@ -1,6 +1,5 @@
 package com.github.tmarsteel.voxamplibrarian.reactapp
 
-import com.github.tmarsteel.voxamplibrarian.BufferedBinaryOutput
 import com.github.tmarsteel.voxamplibrarian.appmodel.SimulationConfiguration
 import com.github.tmarsteel.voxamplibrarian.appmodel.VtxAmpState
 import com.github.tmarsteel.voxamplibrarian.appmodel.hardware_integration.VoxVtxAmpConnection
@@ -147,14 +146,6 @@ val AppComponent = FC<Props> {
 }
 
 fun main() {
-    val buffer = BufferedBinaryOutput()
-    buffer.write(2)
-    buffer.write(24)
-    buffer.write(25)
-    buffer.write(26)
-    buffer.write(27)
-    console.log(buffer.getAsHexStream())
-
     val rootElement = document.getElementById("root") ?: error("Couldn't find root container!")
     createRoot(rootElement).render(Fragment.create {
         AppComponent {

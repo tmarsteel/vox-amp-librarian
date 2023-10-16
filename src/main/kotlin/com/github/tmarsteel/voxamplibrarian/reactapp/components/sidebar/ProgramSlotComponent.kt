@@ -17,7 +17,7 @@ external interface ProgramSlotComponentProps : Props {
     var onActivated: (() -> Unit)?
     var onSaveIntoSelectedAmpSlot: (() -> Unit)?
 
-    // TODO: implement
+    // TODO: implement, needs HW
     var isActive: Boolean
 }
 

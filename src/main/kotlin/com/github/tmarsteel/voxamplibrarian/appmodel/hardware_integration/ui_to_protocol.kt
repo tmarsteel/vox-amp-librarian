@@ -1,9 +1,32 @@
 package com.github.tmarsteel.voxamplibrarian.appmodel.hardware_integration
 
-import com.github.tmarsteel.voxamplibrarian.appmodel.*
+import com.github.tmarsteel.voxamplibrarian.appmodel.AmplifierDescriptor
+import com.github.tmarsteel.voxamplibrarian.appmodel.DeviceConfiguration
+import com.github.tmarsteel.voxamplibrarian.appmodel.DeviceDescriptor
+import com.github.tmarsteel.voxamplibrarian.appmodel.DeviceParameter
+import com.github.tmarsteel.voxamplibrarian.appmodel.ReverbPedalDescriptor
+import com.github.tmarsteel.voxamplibrarian.appmodel.SimulationConfiguration
+import com.github.tmarsteel.voxamplibrarian.appmodel.SlotOnePedalDescriptor
+import com.github.tmarsteel.voxamplibrarian.appmodel.SlotTwoPedalDescriptor
+import com.github.tmarsteel.voxamplibrarian.appmodel.VtxAmpState
 import com.github.tmarsteel.voxamplibrarian.logging.LoggerFactory
-import com.github.tmarsteel.voxamplibrarian.protocol.*
-import com.github.tmarsteel.voxamplibrarian.protocol.message.*
+import com.github.tmarsteel.voxamplibrarian.protocol.AmpClass
+import com.github.tmarsteel.voxamplibrarian.protocol.AmpModel
+import com.github.tmarsteel.voxamplibrarian.protocol.Program
+import com.github.tmarsteel.voxamplibrarian.protocol.ProgramImpl
+import com.github.tmarsteel.voxamplibrarian.protocol.ProgramName
+import com.github.tmarsteel.voxamplibrarian.protocol.ReverbPedalType
+import com.github.tmarsteel.voxamplibrarian.protocol.Slot1PedalType
+import com.github.tmarsteel.voxamplibrarian.protocol.Slot2PedalType
+import com.github.tmarsteel.voxamplibrarian.protocol.TubeBias
+import com.github.tmarsteel.voxamplibrarian.protocol.TwoByteDial
+import com.github.tmarsteel.voxamplibrarian.protocol.VoxVtxAmplifierClient
+import com.github.tmarsteel.voxamplibrarian.protocol.ZeroToTenDial
+import com.github.tmarsteel.voxamplibrarian.protocol.message.EffectPedalTypeChangedMessage
+import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageToAmp
+import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageToHost
+import com.github.tmarsteel.voxamplibrarian.protocol.message.ProgramSlotChangedMessage
+import com.github.tmarsteel.voxamplibrarian.protocol.message.WriteUserProgramMessage
 
 private val logger = LoggerFactory["host-to-amp-diff"]
 
@@ -141,7 +164,7 @@ private fun diff(old: VtxAmpState, new: VtxAmpState): AmpStateUpdate {
                 ))
             }
         }
-        else -> TODO()
+        else -> TODO("switching operation mode is not supported")
     }
 }
 
