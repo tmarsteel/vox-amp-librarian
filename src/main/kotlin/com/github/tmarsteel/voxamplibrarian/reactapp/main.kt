@@ -3,6 +3,7 @@ package com.github.tmarsteel.voxamplibrarian.reactapp
 import com.github.tmarsteel.voxamplibrarian.appmodel.SimulationConfiguration
 import com.github.tmarsteel.voxamplibrarian.appmodel.VtxAmpState
 import com.github.tmarsteel.voxamplibrarian.appmodel.hardware_integration.VoxVtxAmpConnection
+import com.github.tmarsteel.voxamplibrarian.installPolyfills
 import com.github.tmarsteel.voxamplibrarian.logging.LoggerFactory
 import com.github.tmarsteel.voxamplibrarian.reactapp.components.SidebarComponent
 import com.github.tmarsteel.voxamplibrarian.reactapp.components.SimulationConfigurationComponent
@@ -15,13 +16,9 @@ import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
-import react.FC
-import react.Fragment
-import react.Props
-import react.create
+import react.*
 import react.dom.client.createRoot
 import react.dom.html.ReactHTML.div
-import react.useState
 
 private val logger = LoggerFactory["main"]
 
@@ -146,6 +143,7 @@ val AppComponent = FC<Props> {
 }
 
 fun main() {
+    installPolyfills()
     val rootElement = document.getElementById("root") ?: error("Couldn't find root container!")
     createRoot(rootElement).render(Fragment.create {
         AppComponent {
