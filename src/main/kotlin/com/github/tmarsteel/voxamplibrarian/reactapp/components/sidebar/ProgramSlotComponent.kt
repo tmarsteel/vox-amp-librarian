@@ -36,10 +36,14 @@ val ProgramSlotComponent = FC<ProgramSlotComponentProps> { props ->
         div {
             className = classes("program-slot__title")
 
+            val displayName = props.programName?.takeUnless { it.isBlank() }
             span {
-                className = classes("program-slot__name")
+                className = classes(
+                    "program-slot__name",
+                    "empty".takeIf { displayName == null },
+                )
 
-                +(props.programName ?: "<no name>")
+                +(displayName ?: "<no name>")
             }
 
             div {

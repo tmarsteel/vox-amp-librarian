@@ -156,6 +156,9 @@ html, body {
 .program-slot__name {
     font-size: 1.3em;
 }
+.program-slot__name.empty {
+    font-style: italic;
+}
 
 .program-slot > .actions {
     margin-top: 2rem;
