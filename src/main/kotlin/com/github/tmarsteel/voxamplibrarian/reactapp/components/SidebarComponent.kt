@@ -126,16 +126,23 @@ private data class ConfigurationGroup(
         return copy(configs = newConfigs)
     }
 
+    fun withoutConfigAtIndex(index: Int): ConfigurationGroup {
+        val newConfigs = configs.toMutableList()
+        newConfigs.removeAt(index)
+        return copy(configs = newConfigs)
+    }
+
     fun withAdditionalConfig(config: SimulationConfiguration): ConfigurationGroup {
         return copy(configs = configs + config)
     }
 
     companion object {
+        const val MIN_CONFIGS_IN_GROUP = 11
         fun createBlank(): ConfigurationGroup {
             return ConfigurationGroup(
                 window.asDynamic().crypto.randomUUID(),
                 null,
-                SimulationConfiguration.DEFAULT.repeat(11)
+                SimulationConfiguration.DEFAULT.repeat(MIN_CONFIGS_IN_GROUP)
             )
         }
 
@@ -348,6 +355,11 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
                             persistedState.selectedGroup.withConfigAtIndex(localConfig, configIndexInGroup)
                         )
                     }).takeIf { ampInteractPossible }
+                    onDelete = ({
+                        persistedState = persistedState.withGroup(
+                            persistedState.selectedGroup.withoutConfigAtIndex(configIndexInGroup)
+                        )
+                    }).takeIf { persistedState.selectedGroup.configs.size > 1 }
                 }
             }
 

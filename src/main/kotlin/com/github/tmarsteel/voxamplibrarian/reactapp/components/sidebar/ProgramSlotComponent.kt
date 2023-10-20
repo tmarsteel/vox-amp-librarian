@@ -16,6 +16,7 @@ external interface ProgramSlotComponentProps : Props {
     var onSaveToThisLocation: (() -> Unit)?
     var onActivated: (() -> Unit)?
     var onSaveIntoSelectedAmpSlot: (() -> Unit)?
+    var onDelete: (() -> Unit)?
     var isActive: Boolean
 }
 
@@ -70,7 +71,7 @@ val ProgramSlotComponent = FC<ProgramSlotComponentProps> { props ->
 
             props.onViewProgram?.let { callback ->
                 button {
-                    icon("eye", "Loads the settings of this program into the view")
+                    icon("eye")
                     span {
                         +"View & Edit"
                     }
@@ -81,7 +82,7 @@ val ProgramSlotComponent = FC<ProgramSlotComponentProps> { props ->
 
             props.onSaveToThisLocation?.let { callback ->
                 button {
-                    icon("download", "Saves the settings in the view into this location")
+                    icon("download")
                     span {
                         +"Save here"
                     }
@@ -92,12 +93,23 @@ val ProgramSlotComponent = FC<ProgramSlotComponentProps> { props ->
 
             props.onSaveIntoSelectedAmpSlot?.let { callback ->
                 button {
-                    icon("upload", "Writes this program to the selected slot on the amp")
+                    icon("upload",)
                     span {
                         +"Save to Amp slot"
                     }
                     title = "Writes this program to the selected slot on the amp"
-                    onClick = { event -> event.preventDefault(); callback() }
+                    onClick = { event -> event.stopPropagation(); callback() }
+                }
+            }
+
+            props.onDelete?.let { callback ->
+                button {
+                    icon("trash")
+                    span {
+                        +"Delete"
+                    }
+                    title = "Delete this program from the saved preset"
+                    onClick = { event -> event.stopPropagation(); callback() }
                 }
             }
         }
