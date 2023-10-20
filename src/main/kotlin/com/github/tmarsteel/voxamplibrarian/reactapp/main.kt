@@ -119,22 +119,26 @@ val AppComponent = FC<Props> {
     }
 
     div {
-        className = classes("container-xxl-fluid", "simulation-config")
+        className = classes("simulation-config")
 
-        SimulationConfigurationComponent {
-            configuration = nonAmpConfigForViewing ?: ampState?.activeConfiguration ?: SimulationConfiguration.DEFAULT
-            onConfigurationChanged = configChanged@{ newConfig ->
-                if (nonAmpConfigForViewing != null) {
-                    return@configChanged
-                }
+        div {
+            className = classes("container-xxl-fluid")
 
-                ampState?.let { oldState ->
-                    val newState = oldState.withActiveConfiguration(newConfig)
-                    val ampConnection = VoxVtxAmpConnection.VOX_AMP.value
-                    if (ampConnection == null) {
-                        ampState = newState
-                    } else {
-                        ampConnection.requestState(newState)
+            SimulationConfigurationComponent {
+                configuration = nonAmpConfigForViewing ?: ampState?.activeConfiguration ?: SimulationConfiguration.DEFAULT
+                onConfigurationChanged = configChanged@{ newConfig ->
+                    if (nonAmpConfigForViewing != null) {
+                        return@configChanged
+                    }
+
+                    ampState?.let { oldState ->
+                        val newState = oldState.withActiveConfiguration(newConfig)
+                        val ampConnection = VoxVtxAmpConnection.VOX_AMP.value
+                        if (ampConnection == null) {
+                            ampState = newState
+                        } else {
+                            ampConnection.requestState(newState)
+                        }
                     }
                 }
             }

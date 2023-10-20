@@ -1,16 +1,12 @@
 package com.github.tmarsteel.voxamplibrarian.reactapp.components
 
-import com.github.tmarsteel.voxamplibrarian.BlobBinaryInput
+import com.github.tmarsteel.voxamplibrarian.*
 import com.github.tmarsteel.voxamplibrarian.BlobBinaryOutput.Companion.writeToBlob
-import com.github.tmarsteel.voxamplibrarian.BufferedBinaryOutput
-import com.github.tmarsteel.voxamplibrarian.ByteArrayBinaryInput
 import com.github.tmarsteel.voxamplibrarian.appmodel.SimulationConfiguration
 import com.github.tmarsteel.voxamplibrarian.appmodel.VtxAmpState
 import com.github.tmarsteel.voxamplibrarian.appmodel.hardware_integration.toProtocolDataModel
 import com.github.tmarsteel.voxamplibrarian.appmodel.hardware_integration.toUiDataModel
 import com.github.tmarsteel.voxamplibrarian.logging.LoggerFactory
-import com.github.tmarsteel.voxamplibrarian.mibibytes
-import com.github.tmarsteel.voxamplibrarian.parseHexStream
 import com.github.tmarsteel.voxamplibrarian.protocol.Program
 import com.github.tmarsteel.voxamplibrarian.protocol.ProgramSlot
 import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageParseException
@@ -20,7 +16,6 @@ import com.github.tmarsteel.voxamplibrarian.reactapp.components.sidebar.AddProgr
 import com.github.tmarsteel.voxamplibrarian.reactapp.components.sidebar.ProgramSlotComponent
 import com.github.tmarsteel.voxamplibrarian.reactapp.components.sidebar.ProgramSlotLocation
 import com.github.tmarsteel.voxamplibrarian.reactapp.icon
-import com.github.tmarsteel.voxamplibrarian.startDownload
 import com.github.tmarsteel.voxamplibrarian.vtxprog.VtxProgFile
 import csstype.ClassName
 import csstype.Cursor
@@ -318,9 +313,9 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
 
         div {
             className = classes("sidebar__section-heading")
+            icon("bug", "Developer Settings")
 
             span {
-                icon("bug", "Developer Settings")
                 +"Developer Settings"
             }
         }
