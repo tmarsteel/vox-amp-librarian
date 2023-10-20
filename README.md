@@ -4,14 +4,8 @@ This application aims to replace Vox ToneRoom, motivated by the fact that file i
 Android 12 and they don't maintain that app anymore.  
 You can use it directly in your browser: [Open Application](https://tmarsteel.github.io/vox-amp-librarian/)
 
-<picture>
-  <source srcset="https://github.com/tmarsteel/vox-amp-librarian/blob/main/doc/screenshot_desktop_mixed_schemes.png?raw=true">
-  <img src="https://github.com/tmarsteel/vox-amp-librarian/blob/doc/doc/screenshot_desktop_mixed_schemes.png?raw=true" alt="Desktop screenshot" />
-</picture>
-<picture>
-  <source srcset="https://github.com/tmarsteel/vox-amp-librarian/blob/main/doc/screenshot_mobile_mixed_schemes.png?raw=true">
-  <img src="https://github.com/tmarsteel/vox-amp-librarian/blob/doc/doc/screenshot_mobile_mixed_schemes.png?raw=true" alt="Mobile screenshot" style="max-width:35%;"/>
-</picture>
+<img src="https://github.com/tmarsteel/vox-amp-librarian/blob/main/doc/screenshot_desktop_mixed_schemes.png?raw=true" alt="Desktop screenshot" />
+<img src="https://github.com/tmarsteel/vox-amp-librarian/blob/main/doc/screenshot_mobile_mixed_schemes.png?raw=true" alt="Mobile screenshot" width="35%" />
 
 ## Features
 
