@@ -80,7 +80,18 @@ private data class PersistedState(
         return copy(configGroups = configGroups.filter { it.uid != newGroup.uid } + listOf(newGroup))
     }
 
-    fun withSelectedGroup(uid: String) = copy(selectedGroupUid = uid)
+    fun withoutSelectedGroup(): PersistedState {
+        val newGroups = configGroups.toMutableList()
+        newGroups.retainAll { it.uid != selectedGroupUid }
+        if (newGroups.isEmpty()) {
+            newGroups.add(ConfigurationGroup.createBlank())
+        }
+
+        return copy(
+            configGroups = newGroups,
+            selectedGroupUid = newGroups.first().uid,
+        )
+    }
 
     companion object {
         fun createBlank(): PersistedState {
@@ -198,13 +209,43 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
             select {
                 value = persistedState.selectedGroupUid
                 onChange = { e: ChangeEvent<HTMLSelectElement> ->
-                    persistedState = persistedState.withSelectedGroup(e.target.value)
+                    persistedState = persistedState.copy(selectedGroupUid = e.target.value)
                 }
                 for (group in persistedState.configGroups.sortedBy { it.name }) {
                     option {
                         value = group.uid
                         +(group.name ?: "<no name>")
                     }
+                }
+            }
+
+            button {
+                icon("pencil")
+                title = "Rename"
+                onClick = {
+                    val newName = window.prompt("New name for the saved preset", persistedState.selectedGroup.name ?: "")
+                    persistedState = persistedState.withGroup(persistedState.selectedGroup.copy(name = newName))
+                }
+            }
+
+            button {
+                icon("trash")
+                title = "Delete this saved preset"
+                onClick = deleteGroup@{
+                    if (!window.confirm("Remove the saved preset ${persistedState.selectedGroup.name ?: "<no name>"}")) {
+                        return@deleteGroup
+                    }
+
+                    persistedState = persistedState.withoutSelectedGroup()
+                }
+            }
+
+            button {
+                icon("plus")
+                title = "Add new saved preset"
+                onClick = {
+                    val newGroup = ConfigurationGroup.createBlank()
+                    persistedState = persistedState.withGroup(newGroup).copy(selectedGroupUid = newGroup.uid)
                 }
             }
         }
@@ -350,7 +391,7 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
                 try {
                     val vtxprogFile = VtxProgFile.readFromInVtxProgFormat(BlobBinaryInput(file))
                     val newGroup = ConfigurationGroup.fromVtxProgFile(vtxprogFile, file.name)
-                    persistedState = persistedState.withGroup(newGroup).withSelectedGroup(newGroup.uid)
+                    persistedState = persistedState.withGroup(newGroup).copy(selectedGroupUid = newGroup.uid)
                 }
                 catch (ex: Throwable) {
                     logger.error("Failed to load VTXPROG file", ex)

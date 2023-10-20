@@ -105,6 +105,11 @@ html, body {
     margin-top: 1.75rem;
 }
 
+.sidebar__section-heading button {
+    margin-left: 0.5em;
+    font-size: 1em;
+}
+
 .sidebar__slots {
     display: grid;
     justify-items: stretch;
@@ -136,7 +141,6 @@ html, body {
 }
 
 .program-slot__location {
-    font-size: 0.8em;
     float: right;
     align-self: center;
     padding: 0.2em 0.3em;
@@ -196,7 +200,7 @@ html, body {
 }
 
 button {
-    font-size: 0.85rem;
+    font-size: 0.85em;
     color: var(--color-text-on-selected);
     text-transform: uppercase;
 
