@@ -48,25 +48,13 @@ val AppComponent = FC<Props> {
     div {
         className = classes("topbar")
 
-        div {
-            className = classes("container-xxl-fluid")
-
-            div {
-                className = classes("row")
-
-                div {
-                    className = classes("col-12")
-
-                    icon("list", "open menu") {
-                        css(ClassName("sidebar-open")) {
-                            fontSize = 2.rem
-                            cursor = Cursor.pointer
-                        }
-                        onClick = {
-                            sidebarExplicitlyOpen = !sidebarExplicitlyOpen
-                        }
-                    }
-                }
+        icon("list", "open menu") {
+            css(ClassName("sidebar-open")) {
+                fontSize = 2.rem
+                cursor = Cursor.pointer
+            }
+            onClick = {
+                sidebarExplicitlyOpen = !sidebarExplicitlyOpen
             }
         }
     }
