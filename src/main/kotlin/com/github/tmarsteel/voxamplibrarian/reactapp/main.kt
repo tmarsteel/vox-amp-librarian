@@ -5,8 +5,8 @@ import com.github.tmarsteel.voxamplibrarian.appmodel.VtxAmpState
 import com.github.tmarsteel.voxamplibrarian.appmodel.hardware_integration.VoxVtxAmpConnection
 import com.github.tmarsteel.voxamplibrarian.installPolyfills
 import com.github.tmarsteel.voxamplibrarian.logging.LoggerFactory
-import com.github.tmarsteel.voxamplibrarian.reactapp.components.SidebarComponent
 import com.github.tmarsteel.voxamplibrarian.reactapp.components.SimulationConfigurationComponent
+import com.github.tmarsteel.voxamplibrarian.reactapp.components.sidebar.SidebarComponent
 import com.github.tmarsteel.voxamplibrarian.useEffectCoroutine
 import csstype.ClassName
 import csstype.Cursor

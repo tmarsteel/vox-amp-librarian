@@ -1,4 +1,4 @@
-package com.github.tmarsteel.voxamplibrarian.reactapp.components
+package com.github.tmarsteel.voxamplibrarian.reactapp.components.sidebar
 
 import com.github.tmarsteel.voxamplibrarian.*
 import com.github.tmarsteel.voxamplibrarian.BlobBinaryOutput.Companion.writeToBlob
@@ -12,9 +12,8 @@ import com.github.tmarsteel.voxamplibrarian.protocol.ProgramSlot
 import com.github.tmarsteel.voxamplibrarian.protocol.message.MessageParseException
 import com.github.tmarsteel.voxamplibrarian.reactapp.StateAndLocalStorageHook.Companion.useStateBackedByLocalStorage
 import com.github.tmarsteel.voxamplibrarian.reactapp.classes
-import com.github.tmarsteel.voxamplibrarian.reactapp.components.sidebar.AddProgramSlotComponent
-import com.github.tmarsteel.voxamplibrarian.reactapp.components.sidebar.ProgramSlotComponent
-import com.github.tmarsteel.voxamplibrarian.reactapp.components.sidebar.ProgramSlotLocation
+import com.github.tmarsteel.voxamplibrarian.reactapp.components.ConnectivityIndicatorComponent
+import com.github.tmarsteel.voxamplibrarian.reactapp.components.LogLevelComponent
 import com.github.tmarsteel.voxamplibrarian.reactapp.icon
 import com.github.tmarsteel.voxamplibrarian.vtxprog.VtxProgFile
 import csstype.ClassName
@@ -148,7 +147,7 @@ private data class ConfigurationGroup(
 
         fun fromVtxProgFile(file: VtxProgFile, filename: String): ConfigurationGroup {
             val name = filename.removeSuffix(".vtxprog").removeSuffix(".VTXPROG")
-            return ConfigurationGroup.createBlank().copy(
+            return createBlank().copy(
                 name = name,
                 configs = file.programs.map { it.toUiDataModel() },
             )
