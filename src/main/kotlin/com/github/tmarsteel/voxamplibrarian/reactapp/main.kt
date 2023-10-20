@@ -1,13 +1,10 @@
 package com.github.tmarsteel.voxamplibrarian.reactapp
 
-import com.github.tmarsteel.voxamplibrarian.BufferedBinaryOutput
-import com.github.tmarsteel.voxamplibrarian.ByteArrayBinaryInput
 import com.github.tmarsteel.voxamplibrarian.appmodel.SimulationConfiguration
 import com.github.tmarsteel.voxamplibrarian.appmodel.VtxAmpState
 import com.github.tmarsteel.voxamplibrarian.appmodel.hardware_integration.VoxVtxAmpConnection
+import com.github.tmarsteel.voxamplibrarian.installPolyfills
 import com.github.tmarsteel.voxamplibrarian.logging.LoggerFactory
-import com.github.tmarsteel.voxamplibrarian.parseHexStream
-import com.github.tmarsteel.voxamplibrarian.protocol.TwoByteDial
 import com.github.tmarsteel.voxamplibrarian.reactapp.components.SidebarComponent
 import com.github.tmarsteel.voxamplibrarian.reactapp.components.SimulationConfigurationComponent
 import com.github.tmarsteel.voxamplibrarian.useEffectCoroutine
@@ -52,7 +49,7 @@ val AppComponent = FC<Props> {
         className = classes("topbar")
 
         div {
-            className = classes("container-xxl")
+            className = classes("container-xxl-fluid")
 
             div {
                 className = classes("row")
@@ -122,22 +119,26 @@ val AppComponent = FC<Props> {
     }
 
     div {
-        className = classes("container-xxl", "simulation-config")
+        className = classes("simulation-config")
 
-        SimulationConfigurationComponent {
-            configuration = nonAmpConfigForViewing ?: ampState?.activeConfiguration ?: SimulationConfiguration.DEFAULT
-            onConfigurationChanged = configChanged@{ newConfig ->
-                if (nonAmpConfigForViewing != null) {
-                    return@configChanged
-                }
+        div {
+            className = classes("container-xxl-fluid")
 
-                ampState?.let { oldState ->
-                    val newState = oldState.withActiveConfiguration(newConfig)
-                    val ampConnection = VoxVtxAmpConnection.VOX_AMP.value
-                    if (ampConnection == null) {
-                        ampState = newState
-                    } else {
-                        ampConnection.requestState(newState)
+            SimulationConfigurationComponent {
+                configuration = nonAmpConfigForViewing ?: ampState?.activeConfiguration ?: SimulationConfiguration.DEFAULT
+                onConfigurationChanged = configChanged@{ newConfig ->
+                    if (nonAmpConfigForViewing != null) {
+                        return@configChanged
+                    }
+
+                    ampState?.let { oldState ->
+                        val newState = oldState.withActiveConfiguration(newConfig)
+                        val ampConnection = VoxVtxAmpConnection.VOX_AMP.value
+                        if (ampConnection == null) {
+                            ampState = newState
+                        } else {
+                            ampConnection.requestState(newState)
+                        }
                     }
                 }
             }
@@ -146,17 +147,7 @@ val AppComponent = FC<Props> {
 }
 
 fun main() {
-    window.asDynamic().bullshitEncoder = bse@ { semantic: Int ->
-        val out = BufferedBinaryOutput()
-        TwoByteDial(semantic.toUShort()).writeTo(out)
-        val input = out.copyToInput()
-        return@bse input.nextByte().toString(16).padStart(2, '0') + " " + input.nextByte().toString(16).padStart(2, '0')
-    }
-    window.asDynamic().bullshitDecoder = bsd@ { protocol: String ->
-        val input = ByteArrayBinaryInput(protocol.parseHexStream())
-        return@bsd TwoByteDial.readFrom(input).semanticValue.toInt()
-    }
-
+    installPolyfills()
     val rootElement = document.getElementById("root") ?: error("Couldn't find root container!")
     createRoot(rootElement).render(Fragment.create {
         AppComponent {

@@ -9,6 +9,7 @@ import csstype.rem
 import emotion.react.css
 import react.FC
 import react.Props
+import react.dom.html.ReactHTML.button
 import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.h2
 import react.dom.html.ReactHTML.h3
@@ -41,15 +42,19 @@ val SimulationConfigurationComponent = FC<SimulationConfigurationComponentProps>
                         }
                         maxLength = 16
                     }
-                    icon("check-circle-fill", "apply") {
-                        css {
-                            fontSize = 1.5.rem
-                        }
-                        onClick = {
-                            editName = false
-                            props.onConfigurationChanged(props.configuration.copy(
-                                programName = programNameInEdit ?: ""
-                            ))
+                    button {
+                        icon("check-circle-fill", "apply") {
+                            css {
+                                fontSize = 1.5.rem
+                            }
+                            onClick = {
+                                editName = false
+                                props.onConfigurationChanged(
+                                    props.configuration.copy(
+                                        programName = programNameInEdit ?: ""
+                                    )
+                                )
+                            }
                         }
                     }
                 } else {
@@ -60,10 +65,8 @@ val SimulationConfigurationComponent = FC<SimulationConfigurationComponentProps>
                         }
                         +programName
                         +" "
-                        icon("pencil-fill", "Edit name") {
-                            css {
-                                fontSize = 60.pct
-                            }
+                        button {
+                            icon("pencil-fill", "Edit name")
                         }
                         onClick = {
                             editName = true
