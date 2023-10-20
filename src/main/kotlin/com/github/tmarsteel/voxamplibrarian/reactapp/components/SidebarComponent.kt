@@ -220,7 +220,7 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
             }
 
             button {
-                icon("pencil")
+                icon("pencil-fill")
                 title = "Rename"
                 onClick = {
                     val newName = window.prompt("New name for the saved preset", persistedState.selectedGroup.name ?: "")
