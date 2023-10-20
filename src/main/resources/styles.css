@@ -69,8 +69,8 @@ html, body {
 }
 
 .sidebar {
-    height: calc(100vh - 10rem);
-    height: calc(100lvh - 10rem);
+    height: 100vh;
+    height: 100lvh;
     width: var(--sidebar-width);
     max-width: 100vw;
     box-sizing: content-box;
