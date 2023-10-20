@@ -23,6 +23,9 @@ private const val ROTATE_DEGREES_MIN: Int = -180 + (CUTOUT_DEGREES / 2)
 /** the amount of degrees to rotate from top-center to get to the max-point, with respect to the cutout */
 private const val ROTATE_DEGREES_MAX: Int = -ROTATE_DEGREES_MIN
 
+/** size of the drag range of the know in pixels (at 72dpi, density independent) */
+private const val SENSITIVITY: Double = 300.0
+
 external interface RotarySliderComponentProps : Props {
     var range: IntRange
     var value: Int
@@ -33,7 +36,7 @@ external interface RotarySliderComponentProps : Props {
 private val logger = LoggerFactory["rotary-dial"]
 
 val RotarySliderComponent = FC<RotarySliderComponentProps> { props ->
-    val dragSensitivityFactor: Double = (props.range.last - props.range.first).toDouble() / 300.0
+    val dragSensitivityFactor: Double = (props.range.last - props.range.first).toDouble() / SENSITIVITY / window.devicePixelRatio
     val currentDragStartScreenY: MutableRefObject<Int> = useRef(null)
 
     fun publishNewValue(delta: Int) {
