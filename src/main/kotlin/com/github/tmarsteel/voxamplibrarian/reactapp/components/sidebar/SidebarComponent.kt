@@ -157,7 +157,7 @@ private data class ConfigurationGroup(
 
 val SidebarComponent = FC<SidebarComponentProps> { props ->
     val localAmpState = props.vtxAmpState?.takeIf { props.ampConnected }
-    var persistedState by useStateBackedByLocalStorage(
+    var sidebarState by useStateBackedByLocalStorage(
         "sidebar-state",
         PersistedState.createBlank(),
         { Json.encodeToString(it) },
@@ -213,11 +213,11 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
             className = classes("sidebar__section-heading")
             icon("file-earmark-binary", "Current saved preset")
             select {
-                value = persistedState.selectedGroupUid
+                value = sidebarState.selectedGroupUid
                 onChange = { e: ChangeEvent<HTMLSelectElement> ->
-                    persistedState = persistedState.copy(selectedGroupUid = e.target.value)
+                    sidebarState = sidebarState.copy(selectedGroupUid = e.target.value)
                 }
-                for (group in persistedState.configGroups.sortedBy { it.name }) {
+                for (group in sidebarState.configGroups.sortedBy { it.name }) {
                     option {
                         value = group.uid
                         +(group.name ?: "<no name>")
@@ -229,8 +229,8 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
                 icon("pencil-fill")
                 title = "Rename"
                 onClick = {
-                    val newName = window.prompt("New name for the saved preset", persistedState.selectedGroup.name ?: "")
-                    persistedState = persistedState.withGroup(persistedState.selectedGroup.copy(name = newName))
+                    val newName = window.prompt("New name for the saved preset", sidebarState.selectedGroup.name ?: "")
+                    sidebarState = sidebarState.withGroup(sidebarState.selectedGroup.copy(name = newName))
                 }
             }
 
@@ -238,11 +238,11 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
                 icon("trash")
                 title = "Delete this saved preset"
                 onClick = deleteGroup@{
-                    if (!window.confirm("Remove the saved preset ${persistedState.selectedGroup.name ?: "<no name>"}")) {
+                    if (!window.confirm("Remove the saved preset ${sidebarState.selectedGroup.name ?: "<no name>"}")) {
                         return@deleteGroup
                     }
 
-                    persistedState = persistedState.withoutSelectedGroup()
+                    sidebarState = sidebarState.withoutSelectedGroup()
                 }
             }
 
@@ -251,7 +251,7 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
                 title = "Add new saved preset"
                 onClick = {
                     val newGroup = ConfigurationGroup.createBlank()
-                    persistedState = persistedState.withGroup(newGroup).copy(selectedGroupUid = newGroup.uid)
+                    sidebarState = sidebarState.withGroup(newGroup).copy(selectedGroupUid = newGroup.uid)
                 }
             }
         }
@@ -281,12 +281,12 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
                 title = "Export these programs as a .VTXPROG file, compatible with VOX ToneRoom"
 
                 onClick = {
-                    val newVtxProgFile = VtxProgFile(persistedState.selectedGroup.configs.map { it.toProtocolDataModel() })
+                    val newVtxProgFile = VtxProgFile(sidebarState.selectedGroup.configs.map { it.toProtocolDataModel() })
                     val blob = writeToBlob { binaryOut ->
                         newVtxProgFile.writeToInVtxProgFormat(binaryOut)
                     }
 
-                    val filename = (persistedState.selectedGroup.name ?: run {
+                    val filename = (sidebarState.selectedGroup.name ?: run {
                         val now = Date()
                         "unknown-${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}"
                     }) + ".vtxporg"
@@ -303,7 +303,7 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
 
                 disabled = !props.ampConnected || props.vtxAmpState == null
                 onClick = {
-                    persistedState.selectedGroup.configs
+                    sidebarState.selectedGroup.configs
                         .take(ProgramSlot.values().size)
                         .zip(ProgramSlot.values())
                         .forEach { (config, slot) ->
@@ -326,8 +326,8 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
                     val ampConfigs = props.vtxAmpState!!.storedUserPrograms.entries
                         .sortedBy { (slot, _) -> slot }
                         .map { (_, config) -> config }
-                    persistedState = persistedState.withGroup(
-                        persistedState.selectedGroup.withFirstConfigs(ampConfigs)
+                    sidebarState = sidebarState.withGroup(
+                        sidebarState.selectedGroup.withFirstConfigs(ampConfigs)
                     )
                 }
             }
@@ -337,9 +337,9 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
         div {
             className = classes("sidebar__slots")
 
-            persistedState.selectedGroup.configs.forEachIndexed { configIndexInGroup, config ->
+            sidebarState.selectedGroup.configs.forEachIndexed { configIndexInGroup, config ->
                 ProgramSlotComponent {
-                    location = ProgramSlotLocation.File(persistedState.selectedGroup.name, configIndexInGroup)
+                    location = ProgramSlotLocation.File(sidebarState.selectedGroup.name, configIndexInGroup)
                     programName = config.programName
                     onViewProgram = {
                         props.onViewNonAmpConfiguration(config)
@@ -350,22 +350,22 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
                     }).takeIf { ampInteractPossible }
                     onSaveToThisLocation = (saveToFileSlot@{
                         val localConfig = localAmpState?.activeConfiguration ?: return@saveToFileSlot
-                        persistedState = persistedState.withGroup(
-                            persistedState.selectedGroup.withConfigAtIndex(localConfig, configIndexInGroup)
+                        sidebarState = sidebarState.withGroup(
+                            sidebarState.selectedGroup.withConfigAtIndex(localConfig, configIndexInGroup)
                         )
                     }).takeIf { ampInteractPossible }
                     onDelete = ({
-                        persistedState = persistedState.withGroup(
-                            persistedState.selectedGroup.withoutConfigAtIndex(configIndexInGroup)
+                        sidebarState = sidebarState.withGroup(
+                            sidebarState.selectedGroup.withoutConfigAtIndex(configIndexInGroup)
                         )
-                    }).takeIf { persistedState.selectedGroup.configs.size > 1 }
+                    }).takeIf { sidebarState.selectedGroup.configs.size > 1 }
                 }
             }
 
             AddProgramSlotComponent {
                 onAddSlot = {
-                    persistedState = persistedState.withGroup(
-                        persistedState.selectedGroup.withAdditionalConfig(SimulationConfiguration.DEFAULT)
+                    sidebarState = sidebarState.withGroup(
+                        sidebarState.selectedGroup.withAdditionalConfig(SimulationConfiguration.DEFAULT)
                     )
                 }
             }
@@ -402,7 +402,7 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
                 try {
                     val vtxprogFile = VtxProgFile.readFromInVtxProgFormat(BlobBinaryInput(file))
                     val newGroup = ConfigurationGroup.fromVtxProgFile(vtxprogFile, file.name)
-                    persistedState = persistedState.withGroup(newGroup).copy(selectedGroupUid = newGroup.uid)
+                    sidebarState = sidebarState.withGroup(newGroup).copy(selectedGroupUid = newGroup.uid)
                 }
                 catch (ex: Throwable) {
                     logger.error("Failed to load VTXPROG file", ex)
