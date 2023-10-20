@@ -106,16 +106,16 @@ html, body {
 }
 
 .sidebar__slots {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
+    display: grid;
+    justify-items: stretch;
+    align-items: start;
     gap: 1rem;
-    align-items: flex-start;
-    justify-content: flex-start;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
 }
 
 .sidebar__slots > .program-slot {
-    flex-grow: 1;
+    width: auto;
+    align-self: stretch;
 }
 
 .program-slot {
@@ -163,12 +163,15 @@ html, body {
 
 .program-slot:has(> i.bi:only-child) {
     display: flex;
-    align-content: center;
     justify-content: center;
-    height: 7.65rem;
 }
 .program-slot > i.bi:only-child {
     font-size: 2.5rem;
+    height: 1em;
+    align-self: center;
+}
+.program-slot > i.bi:only-child::before {
+    vertical-align: 0.135em;
 }
 
 .program-slot.active .program-slot__location {
