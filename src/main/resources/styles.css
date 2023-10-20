@@ -376,24 +376,42 @@ select {
 }
 
 .container-xxl-fluid {
-    max-width: 960px;
+    max-width: 1300px;
     margin-left: 2rem;
 }
 
-@media(min-width: 1590px) {
+@media(min-width: 1200px) and (max-width: 1920px) {
+    html {
+        --sidebar-width: 25rem;
+    }
+}
+
+@media(max-width: 1920px) {
+    .simulation-config {
+        flex-shrink: 1;
+        flex-wrap: nowrap;
+    }
+
+    .container-xxl-fluid {
+        max-width: calc(100vw - var(--sidebar-width) - 10rem);
+    }
+}
+
+@media(min-width: 1200px) {
     .sidebar-open, .sidebar-close {
         display: none;
     }
 }
 
-@media(max-width: 1589px) {
+/* bootstrap xl is >= 1200px */
+@media(max-width: 1199px) {
     .topbar {
         display: block;
     }
     .container-xxl-fluid {
         margin-left: 0.5rem;
         width: 100%;
-        max-width: 960px;
+        max-width: none;
     }
 
     .sidebar {
