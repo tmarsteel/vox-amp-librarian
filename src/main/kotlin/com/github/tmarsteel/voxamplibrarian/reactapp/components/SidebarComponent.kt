@@ -216,7 +216,9 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
 
             button {
                 icon("folder")
-                +"Import File"
+                span {
+                    +"Import File"
+                }
                 title = "Import a .VTXPROG file from VOX TomeRoom"
 
                 onClick = loadFile@{
@@ -226,7 +228,9 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
 
             button {
                 icon("save2")
-                +"Export as File"
+                span {
+                    +"Export as File"
+                }
                 title = "Export these programs as a .VTXPROG file, compatible with VOX ToneRoom"
 
                 onClick = {
@@ -245,7 +249,9 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
 
             button {
                 icon("arrow-up", "Configure amplifier")
-                +"Apply all to Amp"
+                span {
+                    +"Apply all to Amp"
+                }
                 title = "Configure amplifier with the first ${ProgramSlot.values().size} programs"
 
                 disabled = !props.ampConnected || props.vtxAmpState == null
@@ -263,7 +269,9 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
 
             button {
                 icon("arrow-down", "Save amplifier config")
-                +"Save all from Amp"
+                span {
+                    +"Save all from Amp"
+                }
                 title = "Copies all the programs from the amplifier to this file"
 
                 disabled = !props.ampConnected || props.vtxAmpState == null

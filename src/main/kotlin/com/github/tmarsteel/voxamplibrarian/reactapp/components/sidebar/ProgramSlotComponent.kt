@@ -71,7 +71,9 @@ val ProgramSlotComponent = FC<ProgramSlotComponentProps> { props ->
             props.onViewProgram?.let { callback ->
                 button {
                     icon("eye", "Loads the settings of this program into the view")
-                    +"View & Edit"
+                    span {
+                        +"View & Edit"
+                    }
                     title="Loads the settings of this program into the view"
                     onClick = { event -> event.stopPropagation(); callback() }
                 }
@@ -80,7 +82,9 @@ val ProgramSlotComponent = FC<ProgramSlotComponentProps> { props ->
             props.onSaveToThisLocation?.let { callback ->
                 button {
                     icon("download", "Saves the settings in the view into this location")
-                    +"Save here"
+                    span {
+                        +"Save here"
+                    }
                     title="Saves the settings in the view into this location"
                     onClick = { event -> event.stopPropagation(); callback() }
                 }
@@ -89,7 +93,9 @@ val ProgramSlotComponent = FC<ProgramSlotComponentProps> { props ->
             props.onSaveIntoSelectedAmpSlot?.let { callback ->
                 button {
                     icon("upload", "Writes this program to the selected slot on the amp")
-                    +"Save to Amp slot"
+                    span {
+                        +"Save to Amp slot"
+                    }
                     title = "Writes this program to the selected slot on the amp"
                     onClick = { event -> event.preventDefault(); callback() }
                 }

@@ -216,7 +216,7 @@ button:disabled {
     border-color: rgba(var(--color-text-on-selected--rgb), 0.6);
 }
 
-button > i.bi {
+button > i.bi:not(:only-child) {
     margin-right: 0.5em;
 }
 
