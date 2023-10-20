@@ -215,9 +215,12 @@ button {
     padding: 0.15rem 0.6rem;
 }
 
-button:not(:disabled):hover {
+button:not(:disabled):hover,
+button:not(:disabled):hover i.bi,
+button:not(:disabled):hover span {
     background-color: var(--color-accent);
     border-color: var(--color-accent);
+    color: var(--color-text-on-selected);
 }
 
 button:disabled {
