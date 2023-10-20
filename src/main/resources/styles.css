@@ -97,6 +97,11 @@ html, body {
     margin: 0.75rem 0;
 }
 
+.sidebar__section-heading select {
+    width: calc(100% - 15rem);
+    text-overflow: ellipsis;
+}
+
 .sidebar__section-heading > i.bi:first-child {
     margin-right: 0.5em;
 }
