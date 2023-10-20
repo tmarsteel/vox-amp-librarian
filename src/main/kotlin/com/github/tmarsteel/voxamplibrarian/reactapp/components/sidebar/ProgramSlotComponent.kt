@@ -16,8 +16,6 @@ external interface ProgramSlotComponentProps : Props {
     var onSaveToThisLocation: (() -> Unit)?
     var onActivated: (() -> Unit)?
     var onSaveIntoSelectedAmpSlot: (() -> Unit)?
-
-    // TODO: implement, needs HW
     var isActive: Boolean
 }
 
@@ -30,7 +28,8 @@ val ProgramSlotComponent = FC<ProgramSlotComponentProps> { props ->
     div {
         className = classes(
             "program-slot",
-            "activatable".takeIf { props.onActivated != null }
+            "activatable".takeIf { props.onActivated != null },
+            "active".takeIf { props.isActive },
         )
         onClick = { props.onActivated?.invoke() }
 

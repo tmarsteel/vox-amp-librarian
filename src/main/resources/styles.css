@@ -11,7 +11,10 @@ html {
     --color-accent: #6596E2;
     --color-option-unselected: #E0E0E0;
     --color-selected--rgb: 101, 150, 226; /* == accent color */
+    --color-text-on-selected: var(--color-text);
+    --color-text-on-selected--rgb: var(--color-text--rgb);
     --color-text: #2a2a2a;
+    --color-text--rgb: 42, 42, 42;
     --color-text-highlight: var(--color-accent);
 
     --sidebar-width: 43.5rem;
@@ -136,6 +139,14 @@ html, body {
     font-size: 0.8em;
     float: right;
     align-self: center;
+    padding: 0.2em 0.3em;
+    border-radius: 0.2em;
+}
+
+.program-slot__location,
+.program-slot__location span,
+.program-slot__location i {
+    color: var(--color-text-on-selected);
 }
 
 .program-slot__location .bi {
@@ -158,6 +169,11 @@ html, body {
 }
 .program-slot > i.bi:only-child {
     font-size: 2.5rem;
+}
+
+.program-slot.active .program-slot__location {
+    background: rgb(var(--color-selected--rgb));
+
 }
 
 .actions {
@@ -219,6 +235,8 @@ button > i.bi {
     overflow: auto;
     overflow-x: hidden;
     flex-grow: 1;
+    z-index: 500;
+    padding-top: 1rem;
 }
 
 body.during-global-drag * {
@@ -339,10 +357,6 @@ select {
     text-overflow: clip;
 }
 
-.simulation-config {
-    z-index: 500;
-}
-
 .container-xxl-fluid {
     max-width: 960px;
     margin-left: 2rem;
@@ -375,9 +389,5 @@ select {
 
     .sidebar.open {
         left: 0;
-    }
-
-    .simulation-config {
-
     }
 }
