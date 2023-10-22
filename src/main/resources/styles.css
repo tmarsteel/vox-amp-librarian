@@ -383,13 +383,13 @@ select {
     margin-left: 2rem;
 }
 
-@media(min-width: 1200px) and (max-width: 1920px) {
+@media(min-width: 1200px) and (max-width: 1919px) {
     html {
         --sidebar-width: 25rem;
     }
 }
 
-@media(max-width: 1920px) {
+@media(max-width: 1919px) {
     .simulation-config {
         flex-shrink: 1;
         flex-wrap: nowrap;
