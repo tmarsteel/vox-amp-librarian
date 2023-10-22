@@ -110,7 +110,13 @@ private data class ConfigurationGroup(
     fun withFirstConfigs(configs: List<SimulationConfiguration>): ConfigurationGroup {
         val newConfigs = ArrayList(this.configs)
         newConfigs.ensureCapacity(configs.size)
-        configs.forEachIndexed { i, newConfig -> newConfigs[i] = newConfig }
+        configs.forEachIndexed { i, newConfig ->
+            if (newConfigs.lastIndex < i) {
+                newConfigs.add(newConfig)
+            } else {
+                newConfigs[i] = newConfig
+            }
+        }
         return copy(configs = newConfigs)
     }
 
