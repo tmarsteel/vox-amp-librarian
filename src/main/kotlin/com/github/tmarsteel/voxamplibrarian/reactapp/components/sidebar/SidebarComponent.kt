@@ -295,7 +295,7 @@ val SidebarComponent = FC<SidebarComponentProps> { props ->
                     val filename = (sidebarState.selectedGroup.name ?: run {
                         val now = Date()
                         "unknown-${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}"
-                    }) + ".vtxporg"
+                    }) + ".vtxprog"
                     startDownload(blob, filename)
                 }
             }
