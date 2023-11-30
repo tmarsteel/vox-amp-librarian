@@ -419,7 +419,7 @@ select {
 
     .container-xxl-fluid {
         margin-left: 0.5rem;
-        width: 100%;
+        margin-right: 0.5rem;
         max-width: none;
     }
 
