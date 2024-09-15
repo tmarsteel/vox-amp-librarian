@@ -1,6 +1,6 @@
 plugins {
-    kotlin("js") version "1.9.25"
-    kotlin("plugin.serialization") version "1.9.25"
+    kotlin("js") version "1.7.10"
+    kotlin("plugin.serialization") version "1.7.10"
     id("io.kotest.multiplatform") version "5.5.4"
 }
 
@@ -20,7 +20,7 @@ kotlin {
                 }
             }
             commonWebpackConfig {
-
+                cssSupport.enabled = true
             }
         }
         binaries.executable()
